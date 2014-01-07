@@ -23,6 +23,7 @@
    (quote
     ("-dMaxBitmap=2147483647" "-dSAFER" "-dNOPAUSE" "-sDEVICE=png16m" "-dTextAlphaBits=4" "-dBATCH" "-dGraphicsAlphaBits=4" "-dQUIET")))
  '(doc-view-resolution 300)
+ '(el-get-byte-compile nil)
  '(fci-rule-color "#383838")
  '(global-hl-line-mode t)
  '(helm-mode 1)
@@ -41,7 +42,7 @@
  '(org-habit-graph-column 46)
  '(org-modules
    (quote
-    (org-bbdb org-bibtex org-docview org-gnus org-info org-jsinfo org-habit org-irc org-mew org-mhe org-rmail org-vm org-wl org-w3m)))
+    (org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m)))
  '(org-support-shift-select (quote always))
  '(org-toodledo-password "czd8Vbj0aKoH")
  '(org-toodledo-preserve-drawers t)

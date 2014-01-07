@@ -61,14 +61,10 @@
 (dolist (p '(;;ack-and-a-half
              auto-complete
              cperl-mode
-             creole                ; for elnode
-             dash                  ; for elnode
-             db                    ; for elnode
              dired+
              dired-details
              dired-single
              ;;expand-region       ; prelude
-             fakir                 ; for elnode
              ;;gh                  ; required by gist
              ;;gist                ; prelude
              ;;guru-mode           ; prelude
@@ -81,7 +77,6 @@
              ;;magithub            ; prelude
              ;;melpa               ; prelude
              minimap
-             noflet                ; for elnode
              ;;nyan-mode
              org
              org-cua-dwim
@@ -98,10 +93,8 @@
              ;;python              ; prelude auto
              ;;rainbow-delimiters  ; required by prelude-lisp
              ;;rainbow-mode        ; prelude
-             s                     ; for elnode
              smex
              ;;volatile-highlights ; prelude
-             web                   ; for elnode
              ;;workgroups
              ;;zenburn-theme       ; prelude
              ))
@@ -129,22 +122,7 @@
 
 ;; set local recipes
 (setq el-get-sources
-      '((:name arduino-mode
-               :description "Emacs major mode for editing Arduino sketches."
-               :type git
-               :url "git://github.com/bookest/arduino-mode.git"
-               :features arduino-mode)
-        (:name ahk-mode
-               :description "Major mode for editing AutoHotKey scripts for X/GNU Emacs"
-               :type git
-               :url "https://github.com/emacsmirror/ahk-mode.git"
-               :features ahk-mode)
-        (:name elnode
-               :description ""
-               :type elpa
-               :url "http://marmalade-repo.org/packages/elnode"
-               :features elnode)
-        (:name evernote-mode
+      '((:name evernote-mode
                :description ""
                :type git
                :url "https://github.com/jeffkowalski/evernote-mode.git"
@@ -167,11 +145,11 @@
 (setq my:el-get-packages
       '(el-get				; el-get is self-hosting
         arduino-mode
-        ;; ahk-mode
         elnode
         evernote-mode
         ;; org-ehtml ; FIXME - re-enable this, maybe, once dependencies are fixed.  Use local copy (below) for now.
         ;; org-toodledo
+        nyan-mode
         ))
 
 (el-get 'sync my:el-get-packages)
