@@ -3,7 +3,18 @@
 ;;; Code:
 ;;;
 
-(cua-mode)  ;; set this first, just in case anything below fails
+
+;; ----------------------------------------------------------- [ workarounds ]
+
+;; workaround bug in elnode.el@1295 dangling call to make-network-process
+;; remove when https://github.com/nicferrier/elnode/pull/82 is accepted
+(defvar buf "*elnode bug*")
+(defvar host "*")
+(defvar port 9999)
+(defvar service-mappings nil)
+(defvar ancilliarys nil)
+(defvar request-handler nil)
+(defvar defer-mode nil)
 
 
 ;; ----------------------------------------------------------- [ shell / eshell ]
