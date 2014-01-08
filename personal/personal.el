@@ -16,7 +16,6 @@
 (defvar request-handler nil)
 (defvar defer-mode nil)
 
-
 ;; ----------------------------------------------------------- [ shell / eshell ]
 
 (add-hook 'emacs-startup-hook
@@ -899,6 +898,16 @@
 ;; ----------------------------------------------------------- [ experimental ]
 
 (setq enable-recursive-minibuffers t)
+
+
+;; ----------------------------------------------------------- [ workarounds ]
+
+;; workaround bug in elnode.el@1295 dangling call to make-network-process
+;; remove when https://github.com/nicferrier/elnode/pull/82 is accepted
+(delete-process "*elnode-webserver-proc*")
+(when (and buf (get-buffer buf) (buffer-name (get-buffer buf)))
+  (kill-buffer buf))
+
 
 (provide 'personal)
 ;;; personal.el ends here
