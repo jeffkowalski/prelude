@@ -4,18 +4,6 @@
 ;;;
 
 
-;; ----------------------------------------------------------- [ workarounds ]
-
-;; workaround bug in elnode.el@1295 dangling call to make-network-process
-;; remove when https://github.com/nicferrier/elnode/pull/82 is accepted
-(defvar buf "*elnode bug*")
-(defvar host "*")
-(defvar port 9999)
-(defvar service-mappings nil)
-(defvar ancilliarys nil)
-(defvar request-handler nil)
-(defvar defer-mode nil)
-
 ;; ----------------------------------------------------------- [ shell / eshell ]
 
 (add-hook 'emacs-startup-hook
@@ -133,19 +121,23 @@
 ;; set local recipes
 (setq el-get-sources
       '((:name evernote-mode
-               :description ""
+               :description "Functions for editing Evernote notes directly from Emacs"
                :type git
                :url "https://github.com/jeffkowalski/evernote-mode.git"
                :features evernote-mode)
+        (:name web-server
+               :description "web server running Emacs Lisp handlers"
+               :type git
+               :url "https://github.com/eschulte/emacs-web-server.git"
+               :features web-server)
         (:name org-ehtml
                :description "Export Org-mode files as editable web pages"
                :type git
-               :url "https://github.com/eschulte/org-ehtml.git"
-               ;; :type elpa
-               ;; :url "http://marmalade-repo.org/packages/org-ehtml"
-               :features org-ehtml)
+               :url "https://github.com/jeffkowalski/org-ehtml.git"
+               :depends web-server
+               :load-path "src")
         (:name org-toodledo
-               :description "Toodledo integration for Emacs Org mode [source: github]"
+               :description "Toodledo integration for Emacs Org mode"
                :type git
                :url "https://github.com/jeffkowalski/org-toodledo.git"
                :features org-toodledo)
@@ -155,9 +147,9 @@
 (setq my:el-get-packages
       '(el-get				; el-get is self-hosting
         arduino-mode
-        elnode
         evernote-mode
-        ;; org-ehtml ; FIXME - re-enable this, maybe, once dependencies are fixed.  Use local copy (below) for now.
+        web-server
+        org-ehtml
         ;; org-toodledo
         nyan-mode
         ))
@@ -443,7 +435,6 @@
                                   (name . "^\\*Shell Command Output\\*$")
                                   (name . "^\\*Evernote-Client-Output\\*$")
                                   (name . "^\\*compilation\\*$")))
-                     ("elnode" (name . "^\\*.*elnode.*\\*$"))
                      ("helm" (or (mode . helm-mode)
                                  (name . "^\\*helm[- ]")
                                  (name . "^\\*Debug Helm Log\\*$")))
@@ -659,19 +650,18 @@
 
 ;; ----------------------------------------------------------- [ org-ehtml ]
 
-;; FIXME - use repository version instead of my locally hacked one
-(add-to-list 'load-path "/home/jeff/Dropbox/workspace/org-ehtml/src/")
-(require 'org-ehtml "org-ehtml.el")
-
-;; Configure the server
+(require 'org-ehtml)
 (setq
  org-ehtml-everything-editable t
  org-ehtml-allow-agenda t
- org-ehtml-docroot "~/Dropbox/workspace/org")
+ org-ehtml-docroot (expand-file-name "~/Dropbox/workspace/org"))
 
-;; Start the server only on carbon computer
 (when (string= system-name "carbon")
-  (elnode-start 'org-ehtml-handler :port 3333 :host "192.168.1.147"))
+  (mapc (lambda (server)
+          (if (= 3333 (port server))
+              (ws-stop server)))
+        ws-servers)
+  (ws-start org-ehtml-handler 3333))
 
 
 ;; ----------------------------------------------------------- [ evernote ]
@@ -898,15 +888,6 @@
 ;; ----------------------------------------------------------- [ experimental ]
 
 (setq enable-recursive-minibuffers t)
-
-
-;; ----------------------------------------------------------- [ workarounds ]
-
-;; workaround bug in elnode.el@1295 dangling call to make-network-process
-;; remove when https://github.com/nicferrier/elnode/pull/82 is accepted
-(delete-process "*elnode-webserver-proc*")
-(when (and buf (get-buffer buf) (buffer-name (get-buffer buf)))
-  (kill-buffer buf))
 
 
 (provide 'personal)
