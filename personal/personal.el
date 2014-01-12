@@ -557,7 +557,10 @@
 
 (require 'org-protocol)
 (setq org-capture-templates
-      (quote (("t" "todo" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
+      (quote (("b" "entry.html" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
+               "* TODO [#C] %:description\nSCHEDULED: %t\n%:initial\n"
+               :immediate-finish t)
+              ("t" "todo" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
                "* TODO [#C] %?\n")
               ("w" "org-protocol" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
                "* TODO [#C] %:description\nSCHEDULED: %t\n%:link\n%:initial\n")
@@ -656,12 +659,28 @@
  org-ehtml-allow-agenda t
  org-ehtml-docroot (expand-file-name "~/Dropbox/workspace/org"))
 
-(when (string= system-name "carbon")
+(defun jeff/capture-handler (request)
+  "Handle REQUEST objects meant for 'org-capture'.
+GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
+  (with-slots (process headers) request
+    (let ((path (cdr (assoc :GET headers))))
+      (if (string-match "/capture:?/\\(.*\\)" path)
+          (progn
+            (org-protocol-capture (match-string 1 path))
+            (ws-response-header process 200))
+        (ws-send-404 process)))))
+
+(setq jeff/org-ehtml-handler
+  '(((:GET  . "/capture") . jeff/capture-handler)
+    ((:GET  . ".*") . org-ehtml-file-handler)
+    ((:POST . ".*") . org-ehtml-edit-handler)))
+
+(when t
   (mapc (lambda (server)
           (if (= 3333 (port server))
               (ws-stop server)))
         ws-servers)
-  (ws-start org-ehtml-handler 3333))
+  (ws-start jeff/org-ehtml-handler 3333))
 
 
 ;; ----------------------------------------------------------- [ evernote ]
