@@ -100,6 +100,7 @@
     (package-install p)))
 
 (defalias 'perl-mode 'cperl-mode)
+(define-key package-menu-mode-map "o" 'delete-other-windows)
 
 
 ;; ----------------------------------------------------------- [ el-get ]
