@@ -38,7 +38,9 @@
 (require 'prelude-helm)
 
 ;; FIXME - this is referenced from smartparens, and used to be in cua-base, but is no longer there
-(defun cua-replace-region ()
+;; https://github.com/Fuco1/smartparens/issues/271
+(unless (fboundp 'cua-replace-region)
+  (defun cua-replace-region ()
   "Replace the active region with the character you type."
   (interactive)
   (let ((not-empty (and cua-delete-selection (cua-delete-region))))
@@ -47,7 +49,7 @@
 	     (and overwrite-mode
 		  not-empty
 		  (not (eq this-original-command 'self-insert-command)))))
-	(cua--fallback)))))
+	(cua--fallback))))))
 
 
 ;; ----------------------------------------------------------- [ packages ]
@@ -74,7 +76,6 @@
              ;;magit               ; prelude
              ;;magithub            ; prelude
              ;;melpa               ; prelude
-             minimap
              ;;nyan-mode
              org
              org-cua-dwim
@@ -92,6 +93,7 @@
              ;;rainbow-delimiters  ; required by prelude-lisp
              ;;rainbow-mode        ; prelude
              smex
+             sublimity
              ;;volatile-highlights ; prelude
              ;;workgroups
              ;;zenburn-theme       ; prelude
@@ -284,18 +286,6 @@
   (setq ac-sources (append ac-sources '(ac-source-dictionary))))
 (ac-config-default)
 (ac-flyspell-workaround)
-
-
-;; ----------------------------------------------------------- [ minimap ]
-
-(require 'minimap)
-(defun minimap-toggle ()
-  "Toggle minimap for current buffer."
-  (interactive)
-  (if (null minimap-bufname)
-      (minimap-create)
-    (minimap-kill)))
-(global-set-key (kbd "C-S-=") 'minimap-toggle)
 
 
 ;; ----------------------------------------------------------- [ tramp ]
