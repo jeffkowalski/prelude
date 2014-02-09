@@ -481,6 +481,22 @@
           (lambda () (remove-text-properties
                       (point-min) (point-max) '(mouse-face t))))
 
+(defun my-org-mode-ask-effort ()
+  "Ask for an effort estimate when clocking in."
+  (unless (org-entry-get (point) "Effort")
+    (let ((effort
+           (completing-read
+            "Effort: "
+            (org-entry-get-multivalued-property (point) "Effort"))))
+      (unless (equal effort "")
+        (org-set-property "Effort" effort)))))
+
+(add-hook 'org-clock-in-prepare-hook
+          'my-org-mode-ask-effort)
+
+(setq org-log-into-drawer t)
+(setq org-clock-into-drawer t)
+
 (defun my-org-cmp-tag (a b)
   "Compare the non-context tags of A and B."
   (let ((ta (car (get-text-property 1 'tags a)))
@@ -551,6 +567,13 @@
       (quote (("b" "entry.html" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
                "* TODO [#C] %:description\nSCHEDULED: %t\n%:initial\n"
                :immediate-finish t)
+              ("s" "sacha" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
+               "* TODO [#C] %^{Task}    %^g
+SCHEDULED: %^t
+%?
+:PROPERTIES:
+:Effort: %^{effort|1:00|0:05|0:15|0:30|2:00|4:00}
+:END:")
               ("t" "todo" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
                "* TODO [#C] %?\n")
               ("w" "org-protocol" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
