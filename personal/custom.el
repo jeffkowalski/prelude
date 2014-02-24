@@ -13,6 +13,8 @@
  '(anything-command-map-prefix-key "<f1>")
  '(auto-save-default nil)
  '(auto-save-list-file-prefix nil)
+ '(blink-cursor-mode t)
+ '(column-number-mode t)
  '(cua-keep-region-after-copy nil)
  '(cua-mode t nil (cua-base))
  '(custom-safe-themes
@@ -20,6 +22,7 @@
     ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "be7eadb2971d1057396c20e2eebaa08ec4bfd1efe9382c12917c6fe24352b7c1" "374e79a81930979e673b8e0869e135fb2450b18c6474ca145f104e0c6f003267" "baed08a10ff9393ce578c3ea3e8fd4f8c86e595463a882c55f3bd617df7e5a45" "54d1bcf3fcf758af4812f98eb53b5d767f897442753e1aa468cfeb221f8734f9" "7acc0466fce1bc967ce1561c8c4fdcbf4358b4ae692577562a3ed747c109f9d7" default)))
  '(delete-active-region (quote kill))
  '(delete-selection-mode t)
+ '(display-time-mode t)
  '(doc-view-ghostscript-options
    (quote
     ("-dMaxBitmap=2147483647" "-dSAFER" "-dNOPAUSE" "-sDEVICE=png16m" "-dTextAlphaBits=4" "-dBATCH" "-dGraphicsAlphaBits=4" "-dQUIET")))
@@ -52,6 +55,7 @@
  '(password-cache-expiry 900)
  '(show-paren-mode t)
  '(show-trailing-whitespace t)
+ '(size-indication-mode t)
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
