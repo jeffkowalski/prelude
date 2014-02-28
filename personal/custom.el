@@ -44,6 +44,7 @@
  '(org-babel-load-languages (quote ((sh . t))))
  '(org-habit-following-days 1)
  '(org-habit-graph-column 46)
+ '(org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
  '(org-modules
    (quote
     (org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m)))
