@@ -71,6 +71,7 @@
              http-post-simple
              ;;helm                ; prelude
              ;;helm-projectile     ; prelude
+             helm-swoop
              htmlize               ; for org-ehtml
              ;;logito              ; required by gh
              ;;magit               ; prelude
@@ -897,6 +898,7 @@ GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
 (global-set-key (kbd "<M-left>")        'windmove-left)
 (global-set-key (kbd "<M-right>")       'windmove-right)
 ;; (global-set-key (kbd "M-x")             'helm-M-x)
+(global-set-key (kbd "M-i")             'helm-swoop)
 
 (define-key isearch-mode-map (kbd "<f3>") 'isearch-repeat-forward)
 (define-key isearch-mode-map (kbd "C-f")  'isearch-repeat-forward)
