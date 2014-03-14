@@ -42,6 +42,7 @@
  '(minimap-window-location (quote right))
  '(org-agenda-window-setup (quote current-window))
  '(org-babel-load-languages (quote ((sh . t))))
+ '(org-enforce-todo-dependencies t)
  '(org-habit-following-days 1)
  '(org-habit-graph-column 46)
  '(org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
