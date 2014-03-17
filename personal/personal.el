@@ -213,6 +213,10 @@
 
 ;;(global-set-key (kbd "C-k")             'kill-line-or-region)
 
+(defun kill-to-end-of-buffer ()
+  (interactive)
+  "Kills all text from point to end of buffer."
+  (kill-region (point) (point-max)))
 
 ;; ----------------------------------------------------------- [ adornments ]
 
