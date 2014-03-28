@@ -241,9 +241,9 @@
 (require 'undo-tree)
 (global-undo-tree-mode)
 (global-unset-key (kbd "C-z"))
-(global-unset-key (kbd "C-y"))
 (global-set-key (kbd "C-z") 'undo-tree-undo)
-(global-set-key (kbd "C-y") 'undo-tree-redo)
+;(global-unset-key (kbd "C-y"))
+;(global-set-key (kbd "C-y") 'undo-tree-redo)
 
 
 ;; ----------------------------------------------------------- [ dired ]
