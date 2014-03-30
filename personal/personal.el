@@ -233,7 +233,7 @@
 (mapc (lambda (hook)
         (add-hook hook (lambda ()
                          (setq show-trailing-whitespace nil))))
-      '(eshell-mode-hook))
+      '(eshell-mode-hook term-mode-hook))
 
 
 ;; ----------------------------------------------------------- [ undo-tree ]
