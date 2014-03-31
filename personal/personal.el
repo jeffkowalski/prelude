@@ -73,6 +73,7 @@
              ;;helm-projectile     ; prelude
              helm-swoop
              htmlize               ; for org-ehtml
+             image+
              ;;logito              ; required by gh
              ;;magit               ; prelude
              ;;magithub            ; prelude
@@ -244,6 +245,21 @@
 (global-set-key (kbd "C-z") 'undo-tree-undo)
 ;(global-unset-key (kbd "C-y"))
 ;(global-set-key (kbd "C-y") 'undo-tree-redo)
+
+
+;; ----------------------------------------------------------- [ image+ ]
+
+(require 'image+)
+(imagex-global-sticky-mode)
+(imagex-auto-adjust-mode)
+(let ((map imagex-sticky-mode-map))
+  (define-key map "+" 'imagex-sticky-zoom-in)
+  (define-key map "-" 'imagex-sticky-zoom-out)
+  (define-key map "l" 'imagex-sticky-rotate-left)
+  (define-key map "r" 'imagex-sticky-rotate-right)
+  (define-key map "m" 'imagex-sticky-maximize)
+  (define-key map "o" 'imagex-sticky-restore-original)
+  (define-key map "\C-x\C-s" 'imagex-sticky-save-image))
 
 
 ;; ----------------------------------------------------------- [ dired ]
