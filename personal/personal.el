@@ -141,11 +141,6 @@
                :url "https://github.com/jeffkowalski/org-ehtml.git"
                :depends web-server
                :load-path "src")
-        (:name org-toodledo
-               :description "Toodledo integration for Emacs Org mode"
-               :type git
-               :url "https://github.com/jeffkowalski/org-toodledo.git"
-               :features org-toodledo)
         ))
 
 ;; now set our own packages
@@ -155,7 +150,6 @@
         evernote-mode
         web-server
         org-ehtml
-        ;; org-toodledo
         nyan-mode
         ))
 
