@@ -35,8 +35,6 @@
 (add-hook 'makefile-mode-hook
           (lambda ()  (remove-hook 'before-save-hook 'whitespace-cleanup t)))
 
-(require 'prelude-helm)
-
 ;; FIXME - this is referenced from smartparens, and used to be in cua-base, but is no longer there
 ;; https://github.com/Fuco1/smartparens/issues/271
 (unless (fboundp 'cua-replace-region)
@@ -59,7 +57,6 @@
 
 ;; install the missing packages
 (dolist (p '(;;ack-and-a-half
-             auto-complete
              cperl-mode
              dired+
              dired-details
@@ -83,7 +80,6 @@
              org-cua-dwim
              ;;paredit             ; required by prelude-lisp
              ;;pcache              ; required by gh
-             ;;popup               ; required by auto-complete
              ;;prelude-emacs-lisp  ; prelude auto
              ;;prelude-js          ; prelude auto
              ;;prelude-lisp        ; required by prelude-emacs-lisp
@@ -290,17 +286,18 @@
                   dired-omit-files (concat dired-omit-files "\\."))))
 
 
-;; ----------------------------------------------------------- [ auto-complete ]
+;; ----------------------------------------------------------- [ company ]
 
-;;(add-to-list 'ac-user-dictionary-files "/etc/dictionaries-common/words")
-(require 'auto-complete-config)
-(add-to-list 'ac-dictionary-directories "~/.emacs.dict")
-(setq ac-comphist-file (expand-file-name "ac-comphist.dat" prelude-savefile-dir))
-(defun ac-common-setup ()
-  "Add ac-source-dictionary to ac-sources of all buffer."
-  (setq ac-sources (append ac-sources '(ac-source-dictionary))))
-(ac-config-default)
-(ac-flyspell-workaround)
+(setq company-echo-delay 0)
+(setq company-auto-complete nil)
+(add-to-list 'company-backends 'company-dabbrev t)
+(add-to-list 'company-backends 'company-ispell t)
+(add-to-list 'company-backends 'company-files t)
+
+
+(defun my-pcomplete-capf ()
+  (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
+(add-hook 'org-mode-hook #'my-pcomplete-capf)
 
 
 ;; ----------------------------------------------------------- [ tramp ]
@@ -647,37 +644,6 @@ SCHEDULED: %^t
 
 (require 'org-cua-dwim)
 (org-cua-dwim-activate)
-
-
-;; ----------------------------------------------------------- [ org-toodledo ]
-
-(when nil
-  (require 'org-toodledo)
-
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (local-unset-key "\C-o")
-              (local-set-key "\C-od" 'org-toodledo-mark-task-deleted)
-              (local-set-key "\C-os" 'org-toodledo-sync)))
-  (add-hook 'org-agenda-mode-hook
-            (lambda ()
-              (local-unset-key "\C-o")
-              (local-set-key "\C-od" 'org-toodledo-agenda-mark-task-deleted)))
-
-  (defun sync-toodledo nil
-    "Synchronize toodledo"
-    (interactive)
-    (save-excursion
-      (let ((file (concat org-directory "toodledo.org")))
-        (if (bufferp file)
-            (set-buffer file)
-          (org-check-agenda-file file)
-          (set-buffer (org-get-agenda-file-buffer file))))
-      (org-toodledo-sync)
-      (save-buffer)))
-
-  (global-set-key (kbd "<f9>") 'sync-toodledo)
-  )
 
 
 ;; ----------------------------------------------------------- [ org-ehtml ]
