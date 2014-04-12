@@ -37,6 +37,8 @@
 
 ;; FIXME - this is referenced from smartparens, and used to be in cua-base, but is no longer there
 ;; https://github.com/Fuco1/smartparens/issues/271
+(eval-when-compile
+  (require 'cua-base))
 (unless (fboundp 'cua-replace-region)
   (defun cua-replace-region ()
   "Replace the active region with the character you type."
@@ -119,6 +121,10 @@
 ;; now either el-get is `require'd already, or have been `load'ed by the
 ;; el-get installer.
 
+(eval-when-compile
+  (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+  (require 'el-get))
+
 ;; set local recipes
 (setq el-get-sources
       '((:name evernote-mode
@@ -140,17 +146,16 @@
         ))
 
 ;; now set our own packages
-(setq my:el-get-packages
-      '(el-get				; el-get is self-hosting
-        arduino-mode
-        evernote-mode
-        web-server
-        org-ehtml
-        nyan-mode
-        ))
-
-(el-get 'sync my:el-get-packages)
-
+(let ((el-get-packages
+       '(el-get				; el-get is self-hosting
+         arduino-mode
+         evernote-mode
+         web-server
+         org-ehtml
+         nyan-mode
+         wanderlust
+         )))
+  (el-get 'sync el-get-packages))
 
 ;; ----------------------------------------------------------- [ automodes ]
 
@@ -205,13 +210,12 @@
 ;;(global-set-key (kbd "C-k")             'kill-line-or-region)
 
 (defun kill-to-end-of-buffer ()
+  "Kill all text from point to end of buffer."
   (interactive)
-  "Kills all text from point to end of buffer."
   (kill-region (point) (point-max)))
 
 ;; ----------------------------------------------------------- [ adornments ]
 
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
 (setq frame-title-format '(buffer-file-name "emacs - %f %*" ("%b %*")))
 (setq icon-title-format '(buffer-file-name "emacs - %f %*" ("%b %*")))
 (display-time)
@@ -254,6 +258,11 @@
 
 ;; ----------------------------------------------------------- [ dired ]
 
+(eval-when-compile
+  (require 'dired)
+  (require 'dired-details)
+  (require 'dired-x))
+
 (autoload 'dired-single-buffer "dired-single" "" t)
 (autoload 'dired-single-buffer-mouse "dired-single" "" t)
 
@@ -288,14 +297,31 @@
 
 ;; ----------------------------------------------------------- [ company ]
 
+(eval-when-compile
+  (require 'company))
+
+(require 'color)
+(let ((bg (face-attribute 'default :background)))
+  (custom-set-faces
+   `(company-tooltip ((t (:inherit default :background ,(color-lighten-name bg 10)))))
+   `(company-scrollbar-bg ((t (:background ,(color-lighten-name bg 10)))))
+   `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 10)))))
+   `(company-tooltip-selection ((t (:inherit font-lock-function-name-face :background ,(color-lighten-name bg 5)))))
+   `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
+
+(setq company-idle-delay 0)
+(setq company-tooltip-limit 20)
+(setq company-minimum-prefix-length 2)
 (setq company-echo-delay 0)
-(setq company-auto-complete nil)
+(setq company-auto-complete t)
+
 (add-to-list 'company-backends 'company-dabbrev t)
 (add-to-list 'company-backends 'company-ispell t)
 (add-to-list 'company-backends 'company-files t)
-
+(add-to-list 'company-transformers 'company-sort-by-occurrence)
 
 (defun my-pcomplete-capf ()
+  "Org-mode completions."
   (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
 (add-hook 'org-mode-hook #'my-pcomplete-capf)
 
@@ -319,6 +345,9 @@
 
 
 ;; ----------------------------------------------------------- [ ido ]
+
+(eval-when-compile
+  (require 'ido))
 
 (defun ido-disable-line-trucation ()
   "Locally disable 'truncate-lines'."
@@ -344,54 +373,12 @@
             (define-key ido-completion-map (kbd "<down>") 'ido-next-match)))
 
 
-;; ----------------------------------------------------------- [ wanderlust ]
-
-(autoload 'wl "wl" "Wanderlust" t)
-(autoload 'wl-other-frame "wl" "Wanderlust on new frame." t)
-(autoload 'wl-draft "wl-draft" "Write draft with Wanderlust." t)
-
-;; IMAP
-(setq elmo-imap4-default-server "imap.gmail.com")
-(setq elmo-imap4-default-user "jeff.kowalski@gmail.com")
-(setq elmo-imap4-default-authenticate-type 'clear)
-(setq elmo-imap4-default-port '993)
-(setq elmo-imap4-default-stream-type 'ssl)
-
-(setq elmo-imap4-use-modified-utf7 t)
-
-;; SMTP
-(setq wl-smtp-connection-type 'starttls)
-(setq wl-smtp-posting-port 587)
-(setq wl-smtp-authenticate-type "plain")
-(setq wl-smtp-posting-user "jeff.kowalski")
-(setq wl-smtp-posting-server "smtp.gmail.com")
-(setq wl-local-domain "gmail.com")
-
-(setq wl-default-folder "%inbox")
-(setq wl-default-spec "%")
-(setq wl-draft-folder "%[Gmail]/Drafts") ; Gmail IMAP
-(setq wl-trash-folder "%[Gmail]/Trash")
-
-(setq wl-folder-check-async t)
-
-(setq elmo-imap4-use-modified-utf7 t)
-
-(autoload 'wl-user-agent-compose "wl-draft" nil t)
-(if (boundp 'mail-user-agent)
-    (setq mail-user-agent 'wl-user-agent))
-(if (fboundp 'define-mail-user-agent)
-    (define-mail-user-agent
-      'wl-user-agent
-      'wl-user-agent-compose
-      'wl-draft-send
-      'wl-draft-kill
-      'mail-send-hook))
-
-
 ;; ----------------------------------------------------------- [ ibuffer ]
 
 ;; *Nice* buffer switching
-(require 'ibuffer)
+(eval-when-compile
+  (require 'ibuffer)
+  (require 'ibuf-ext))
 
 (add-hook 'ibuffer-mode-hook
           (lambda ()
@@ -467,6 +454,12 @@
   (setq ad-return-value (nreverse ad-return-value)))
 
 ;; ----------------------------------------------------------- [ org-mode ]
+
+(eval-when-compile
+  (require 'org)
+  (require 'org-mobile)
+  (require 'org-clock)
+  (require 'org-capture))
 
 (setq org-directory "~/Dropbox/workspace/org/")
 (setq org-mobile-directory "~/Dropbox/mobileorg/")
@@ -648,7 +641,9 @@ SCHEDULED: %^t
 
 ;; ----------------------------------------------------------- [ org-ehtml ]
 
-(require 'org-ehtml)
+(eval-when-compile
+  (require 'org-ehtml))
+
 (setq
  org-ehtml-everything-editable t
  org-ehtml-allow-agenda t
