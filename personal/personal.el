@@ -153,7 +153,6 @@
          web-server
          org-ehtml
          nyan-mode
-         wanderlust
          )))
   (el-get 'sync el-get-packages))
 
