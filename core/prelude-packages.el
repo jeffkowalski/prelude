@@ -48,6 +48,7 @@
     anzu
     browse-kill-ring
     dash
+    diff-hl
     diminish
     easy-kill
     elisp-slime-nav
