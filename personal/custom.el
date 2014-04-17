@@ -9,14 +9,13 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(ad-redefinition-action (quote accept))
- '(ahk-syntax-directory "c:/Program Files (x86)/AutoHotkey/Extras/Editors/Syntax/")
- '(ansi-color-names-vector
-   [solarized-bg red green yellow blue magenta cyan solarized-fg])
  '(anything-command-map-prefix-key "<f1>")
  '(auto-save-default nil)
  '(auto-save-list-file-prefix nil)
  '(blink-cursor-mode t)
  '(column-number-mode t)
+ '(company-auto-complete t)
+ '(company-idle-delay 0)
  '(cua-keep-region-after-copy nil)
  '(cua-mode t nil (cua-base))
  '(custom-safe-themes
@@ -52,10 +51,6 @@
    (quote
     (org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m)))
  '(org-support-shift-select (quote always))
- '(org-toodledo-password "czd8Vbj0aKoH")
- '(org-toodledo-preserve-drawers t)
- '(org-toodledo-sync-on-save "yes")
- '(org-toodledo-userid "td45445ecf93551")
  '(password-cache-expiry 900)
  '(show-paren-mode t)
  '(show-trailing-whitespace t)
