@@ -201,23 +201,6 @@ The body of the advice is in BODY."
 (volatile-highlights-mode t)
 (diminish 'volatile-highlights-mode)
 
-;; note - this should be after volatile-highlights is required
-;; add the ability to copy and cut the current line, without marking it
-(defadvice kill-ring-save (before smart-copy activate compile)
-  "When called interactively with no active region, copy a single line instead."
-  (interactive
-   (if mark-active (list (region-beginning) (region-end))
-     (message "Copied line")
-     (list (line-beginning-position)
-           (line-end-position)))))
-
-(defadvice kill-region (before smart-cut activate compile)
-  "When called interactively with no active region, kill a single line instead."
-  (interactive
-   (if mark-active (list (region-beginning) (region-end))
-     (list (line-beginning-position)
-           (line-beginning-position 2)))))
-
 ;; tramp, for sudo access
 (require 'tramp)
 ;; keep in mind known issues with zsh - see emacs wiki
@@ -373,6 +356,28 @@ indent yanked text (with prefix arg don't indent)."
 
 (setq semanticdb-default-save-directory
       (expand-file-name "semanticdb" prelude-savefile-dir))
+
+;; Compilation from Emacs
+(defun prelude-colorize-compilation-buffer ()
+  "Colorize a compilation mode buffer."
+  (interactive)
+  ;; we don't want to mess with child modes such as grep-mode, ack, ag, etc
+  (when (eq major-mode 'compilation-mode)
+    (let ((inhibit-read-only t))
+      (ansi-color-apply-on-region (point-min) (point-max)))))
+
+(require 'compile)
+(setq compilation-ask-about-save nil  ; Just save before compiling
+      compilation-always-kill t       ; Just kill old compile processes before
+                                      ; starting the new one
+      compilation-scroll-output 'first-error ; Automatically scroll to first
+                                             ; error
+      )
+
+;; Colorize output of Compilation Mode, see
+;; http://stackoverflow.com/a/3072831/355252
+(require 'ansi-color)
+(add-hook 'compilation-filter-hook #'prelude-colorize-compilation-buffer)
 
 ;; enable Prelude's keybindings
 (prelude-global-mode t)
