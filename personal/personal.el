@@ -874,6 +874,9 @@ GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
 (global-set-key (kbd "M-x")             'helm-M-x)
 (global-set-key (kbd "C-x b")           'helm-buffers-list)
 
+(global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
+(global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
+
 ;; fix prelude behavior on terminals that send ^[O{ABCD} for arrows
 (defvar ALT-O-map (make-sparse-keymap) "ALT-O keymap.")
 (define-key prelude-mode-map (kbd "M-O") ALT-O-map)
