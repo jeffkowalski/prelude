@@ -12,6 +12,7 @@
  '(anything-command-map-prefix-key "<f1>")
  '(auto-save-default nil)
  '(auto-save-list-file-prefix nil)
+ '(aw-scope (quote frame))
  '(blink-cursor-mode t)
  '(column-number-mode t)
  '(company-auto-complete t)
