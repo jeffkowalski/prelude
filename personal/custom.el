@@ -16,7 +16,7 @@
  '(blink-cursor-mode t)
  '(column-number-mode t)
  '(company-auto-complete t)
- '(company-idle-delay 0)
+ '(company-idle-delay 0.5)
  '(cua-keep-region-after-copy nil)
  '(cua-mode t nil (cua-base))
  '(custom-safe-themes
