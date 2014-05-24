@@ -886,6 +886,14 @@ GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
 
 (setq enable-recursive-minibuffers t)
 
+;; FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
+;;        behavior on paste
+(defadvice cua-paste (before clobber-region
+                                 (&optional arg))
+  "Delete the region before pasting."
+  (when (region-active-p) (delete-region (region-beginning) (region-end)))
+  )
+(ad-activate 'cua-paste)
 
 (provide 'personal)
 ;;; personal.el ends here
