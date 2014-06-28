@@ -143,6 +143,11 @@
                :url "https://github.com/jeffkowalski/org-ehtml.git"
                :depends web-server
                :load-path "src")
+        (:name nyan-mode
+               :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
+               :type git
+               :url "https://github.com/jeffkowalski/nyan-mode.git"
+               :features nyan-mode)
         ))
 
 ;; now set our own packages
