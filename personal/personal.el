@@ -61,7 +61,6 @@
 (dolist (p '(;;ack-and-a-half
              cperl-mode
              dired+
-             dired-details
              dired-single
              ;;expand-region       ; prelude
              ;;gh                  ; required by gist
@@ -264,8 +263,7 @@
 
 (eval-when-compile
   (require 'dired)
-  (require 'dired-details)
-  (require 'dired-x))
+  (require 'dired+))
 
 (autoload 'dired-single-buffer "dired-single" "" t)
 (autoload 'dired-single-buffer-mouse "dired-single" "" t)
@@ -285,11 +283,6 @@
             ;; Auto-refresh dired on file change
             (auto-revert-mode)
             (setq-default auto-revert-interval 1)
-
-            ;; Hide dired file permissions
-            (require 'dired-details)
-            (dired-details-install)
-            (setq dired-details-hidden-string "")
 
             ;; Hide dired current directory (.)
             (require 'dired+)
