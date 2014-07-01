@@ -652,7 +652,9 @@ GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
           (if (= 3333 (port server))
               (ws-stop server)))
         ws-servers)
-  (ws-start jeff/org-ehtml-handler 3333))
+  (condition-case-unless-debug nil
+      (ws-start jeff/org-ehtml-handler 3333)
+    (error (message "Failed to create web server"))))
 
 
 ;; ----------------------------------------------------------- [ evernote ]
