@@ -59,6 +59,7 @@
 
 ;; install the missing packages
 (dolist (p '(;;ack-and-a-half
+             cmake-mode
              cperl-mode
              dired+
              dired-single
