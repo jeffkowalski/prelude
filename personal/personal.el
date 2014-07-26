@@ -260,6 +260,12 @@
   (define-key map "\C-x\C-s" 'imagex-sticky-save-image))
 
 
+;; ----------------------------------------------------------- [ cmake-mode ]
+
+(add-hook 'cmake-mode-hook
+          #'(lambda () (setq cmake-tab-width 4)))
+
+
 ;; ----------------------------------------------------------- [ dired ]
 
 (eval-when-compile
@@ -874,6 +880,7 @@ GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
 (global-set-key (kbd "C-x C-f")         'helm-find-files)
 (global-set-key (kbd "M-x")             'helm-M-x)
 (global-set-key (kbd "C-x b")           'helm-buffers-list)
+(global-set-key (kbd "C-M-g")           'helm-do-grep)
 
 (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
 (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
