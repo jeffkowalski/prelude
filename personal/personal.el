@@ -227,6 +227,7 @@
 (blink-cursor-mode)
 (setq redisplay-dont-pause t)
 (scroll-bar-mode -1)
+(horizontal-scroll-bar-mode -1)
 
 ;; hide trailing whitespaces in some programming modes:
 (mapc (lambda (hook)
