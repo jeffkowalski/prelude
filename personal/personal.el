@@ -94,6 +94,7 @@
              ;;rainbow-mode        ; prelude
              smex
              sublimity
+             use-package
              ;;volatile-highlights ; prelude
              ;;workgroups
              ;;zenburn-theme       ; prelude
@@ -361,6 +362,13 @@
             (setq ido-enable-flex-matching t)
             (define-key ido-completion-map (kbd "<up>")   'ido-prev-match)
             (define-key ido-completion-map (kbd "<down>") 'ido-next-match)))
+
+
+;; ----------------------------------------------------------- [ magit ]
+
+(require 'use-package)
+(use-package magit
+  :init (setq magit-diff-options '("--ignore-all-space"))) ; ignore whitespace
 
 
 ;; ----------------------------------------------------------- [ ibuffer ]
