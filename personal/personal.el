@@ -78,6 +78,7 @@
              ;;magithub            ; prelude
              ;;melpa               ; prelude
              ;;nyan-mode
+             multi-term
              org
              org-cua-dwim
              ;;paredit             ; required by prelude-lisp
@@ -235,6 +236,11 @@
         (add-hook hook (lambda ()
                          (setq show-trailing-whitespace nil))))
       '(eshell-mode-hook term-mode-hook))
+
+
+;; ----------------------------------------------------------- [ multi-term ]
+
+(require 'multi-term)
 
 
 ;; ----------------------------------------------------------- [ undo-tree ]
@@ -428,6 +434,7 @@
                                  (name . "^\\*Debug Helm Log\\*$")))
                      ("shell" (or (name . "^\\*shell\\*$")
                                   (name . "^\\*ansi-term\\*$")
+                                  (name . "^\\*terminal<\d+>\\*$")
                                   (name . "^\\*eshell\\*$")))
                      ("evernote" (or (mode . evernote-browsing-mode)))
                      ("emacs source" (or (mode . emacs-lisp-mode)
@@ -890,6 +897,10 @@ GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
 (global-set-key (kbd "M-x")             'helm-M-x)
 (global-set-key (kbd "C-x b")           'helm-buffers-list)
 (global-set-key (kbd "C-M-g")           'helm-do-grep)
+
+(global-unset-key (kbd "C-c t"))
+(global-set-key (kbd "C-c t")           'multi-term-dedicated-toggle)
+(define-key prelude-mode-map (kbd "C-c t") 'multi-term-dedicated-toggle)
 
 (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
 (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
