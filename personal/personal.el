@@ -857,16 +857,11 @@ GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
 
 (define-key special-event-map [delete-frame] 'save-buffers-kill-terminal)
 (global-set-key (kbd "<M-f4>")          'save-buffers-kill-terminal)
-;; (global-set-key (kbd "C-o")             'find-file)
-;; (global-set-key (kbd "C-f")             'isearch-forward)
-;; (global-set-key (kbd "<f3>")            'isearch-repeat-forward)
 (global-set-key (kbd "<f4>")            'next-error)
 (global-set-key (kbd "<f5>")            'recompile)
 (global-set-key (kbd "<f7>")            'goto-line)
 (global-set-key (kbd "<f10>")           'eval-last-sexp)
-;; (global-set-key (kbd "C-s")             'save-buffer)
 (global-set-key (kbd "C-w")             'kill-buffer-and-window)
-;; (global-set-key (kbd "C-l")             'goto-line)
 (global-set-key (kbd "RET")             'newline-and-indent)
 (global-set-key (kbd "C-S-a")           'mark-whole-buffer)
 (global-set-key (kbd "<C-next>")        'scroll-other-window)
@@ -879,8 +874,8 @@ GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
 (global-set-key (kbd "<M-down>")        'windmove-down)
 (global-set-key (kbd "<M-left>")        'windmove-left)
 (global-set-key (kbd "<M-right>")       'windmove-right)
-;; (global-set-key (kbd "M-x")             'helm-M-x)
-(global-set-key (kbd "M-i")             'helm-swoop)
+
+(global-set-key (kbd "M-z")             'zap-up-to-char)
 
 (define-key isearch-mode-map (kbd "<f3>") 'isearch-repeat-forward)
 (define-key isearch-mode-map (kbd "C-f")  'isearch-repeat-forward)
@@ -893,6 +888,7 @@ GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
 (define-key ALT-F-map "o"               'find-file)
 (define-key ALT-F-map "c"               'kill-current-buffer)
 
+(global-set-key (kbd "M-i")             'helm-swoop)
 (global-set-key (kbd "C-x C-f")         'helm-find-files)
 (global-set-key (kbd "M-x")             'helm-M-x)
 (global-set-key (kbd "C-x b")           'helm-buffers-list)
@@ -916,11 +912,9 @@ GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
 
 ;; FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
 ;;        behavior on paste
-(defadvice cua-paste (before clobber-region
-                                 (&optional arg))
+(defadvice cua-paste (before clobber-region (&optional arg))
   "Delete the region before pasting."
-  (when (region-active-p) (delete-region (region-beginning) (region-end)))
-  )
+  (when (region-active-p) (delete-region (region-beginning) (region-end))))
 (ad-activate 'cua-paste)
 
 (provide 'personal)
