@@ -912,10 +912,48 @@ GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
 
 ;; FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
 ;;        behavior on paste
+;;
 (defadvice cua-paste (before clobber-region (&optional arg))
   "Delete the region before pasting."
   (when (region-active-p) (delete-region (region-beginning) (region-end))))
 (ad-activate 'cua-paste)
+
+;; FIXME: workaround problem in
+;;        select-frame-set-input-focus(#<frame *Minibuf-1* * 0x6a44268>)
+;;        helm-frame-or-window-configuration(restore)
+;;        helm-cleanup()
+;;        ...
+;;        helm-internal(...)
+;;        ...
+;;
+;;        which throws error "progn: Not an in-range integer, float, or cons of integers"
+;;
+(defun select-frame-set-input-focus (frame &optional norecord)
+  "Select FRAME, raise it, and set input focus, if possible.
+If `mouse-autoselect-window' is non-nil, also move mouse pointer
+to FRAME's selected window.  Otherwise, if `focus-follows-mouse'
+is non-nil, move mouse cursor to FRAME.
+
+Optional argument NORECORD means to neither change the order of
+recently selected windows nor the buffer list."
+  (select-frame frame norecord)
+  (raise-frame frame)
+
+  ;; Ensure, if possible, that FRAME gets input focus.
+  ;; (when (memq (window-system frame) '(x w32 ns))
+  ;;    (x-focus-frame frame))
+
+  ;; Move mouse cursor if necessary.
+  (cond
+   (mouse-autoselect-window
+    (let ((edges (window-inside-edges (frame-selected-window frame))))
+      ;; Move mouse cursor into FRAME's selected window to avoid that
+      ;; Emacs mouse-autoselects another window.
+      (set-mouse-position frame (nth 2 edges) (nth 1 edges))))
+   (focus-follows-mouse
+    ;; Move mouse cursor into FRAME to avoid that another frame gets
+    ;; selected by the window manager.
+    (set-mouse-position frame (1- (frame-width frame)) 0))))
 
 (provide 'personal)
 ;;; personal.el ends here
