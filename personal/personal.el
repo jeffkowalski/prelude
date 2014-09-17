@@ -636,6 +636,18 @@ SCHEDULED: %^t
 (require 'org-agenda)
 (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)
 
+(defun jeff/org-add-ids-to-headlines-in-file ()
+  "Add ID properties to all headlines in the current file which
+do not already have one."
+  (interactive)
+  (org-map-entries 'org-id-get-create))
+
+(add-hook 'org-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
+(add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create)
+
+
 (add-hook 'org-agenda-mode-hook
           (lambda ()
             (whitespace-mode -1)) t)
