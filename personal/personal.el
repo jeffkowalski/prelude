@@ -642,9 +642,9 @@ do not already have one."
   (interactive)
   (org-map-entries 'org-id-get-create))
 
-(add-hook 'org-mode-hook
-          (lambda ()
-            (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
+;; (add-hook 'org-mode-hook
+;;           (lambda ()
+;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
 (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create)
 
 
