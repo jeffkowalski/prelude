@@ -666,6 +666,55 @@ do not already have one."
  org-ehtml-allow-agenda t
  org-ehtml-docroot (expand-file-name "~/Dropbox/workspace/org"))
 
+(defun pre-adjust-agenda-for-html nil
+  "Adjust agenda buffer before htmlize.
+Adds a link overlay to be intercepted by post-adjust-agenda-for-html."
+  (goto-char (point-min))
+  (let (marker id)
+    (while (not (eobp))
+      (cond
+       ((setq marker (or (get-text-property (point) 'org-hd-marker)
+                         (get-text-property (point) 'org-marker)))
+        (when (and (setq id (org-id-get marker))
+                   (let ((case-fold-search nil))
+                     (re-search-forward (get-text-property (point) 'org-not-done-regexp)
+                                        (point-at-eol) t)))
+          (htmlize-make-link-overlay (match-beginning 0) (match-end 0) (concat "todo:" id)))
+        ))
+      (beginning-of-line 2))))
+(add-hook 'htmlize-before-hook #'pre-adjust-agenda-for-html)
+
+(defun post-adjust-agenda-for-html nil
+  "Adjust agenda buffer after htmlize.
+Intercept link overlay from pre-adjust-agenda-for-html, and
+convert to call to javascript function."
+  (goto-char (point-min))
+  (search-forward "</head>")
+  (beginning-of-line)
+  (insert "
+    <script src=\"http://code.jquery.com/jquery-1.10.2.min.js\"></script>
+    <script>
+        function todo (id) {
+          var xurl   = 'todo/' + id;
+
+          $.ajax({
+              url: xurl
+          }).success(function() {
+              $('#message').text('done ' + xurl).show().fadeOut(1000);
+          }).fail(function(jqXHR, textStatus) {
+              $('#message').text('failed ' + xurl + ': ' + textStatus).show().fadeOut(5000);
+              return false;
+          });
+        }
+    </script>
+")
+  (search-forward "<body>")
+  (beginning-of-line 2)
+  (insert "    <span id=\"message\"></span>")
+  (while (re-search-forward "<a href=\"todo:\\(.*\\)\">\\(.*\\)</a>" nil t)
+    (replace-match "<a href='' onclick='todo(\"\\1\");'>\\2</a>")))
+(add-hook 'htmlize-after-hook #'post-adjust-agenda-for-html)
+
 (defun jeff/capture-handler (request)
   "Handle REQUEST objects meant for 'org-capture'.
 GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
@@ -677,10 +726,28 @@ GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
             (ws-response-header process 200))
         (ws-send-404 process)))))
 
+(defun jeff/todo-handler (request)
+  "Handle REQUEST objects meant for 'org-todo'.
+GET header should contain a path in form '/todo/ID'."
+  (with-slots (process headers) request
+    (let ((path (cdr (assoc :GET headers))))
+      (if (string-match "/todo:?/\\(.*\\)" path)
+        (let* ((id (match-string 1 path))
+               (m (org-id-find id 'marker)))
+          (when m
+            (save-excursion (org-pop-to-buffer-same-window (marker-buffer m))
+                            (goto-char m)
+                            (move-marker m nil)
+                            (org-todo 'done)
+                            (save-buffer)))
+          (ws-response-header process 200))
+        (ws-send-404 process)))))
+
 (setq jeff/org-ehtml-handler
-  '(((:GET  . "/capture") . jeff/capture-handler)
-    ((:GET  . ".*") . org-ehtml-file-handler)
-    ((:POST . ".*") . org-ehtml-edit-handler)))
+      '(((:GET  . "/capture") . jeff/capture-handler)
+        ((:GET  . "/todo")    . jeff/todo-handler)
+        ((:GET  . ".*")       . org-ehtml-file-handler)
+        ((:POST . ".*")       . org-ehtml-edit-handler)))
 
 (when t
   (mapc (lambda (server)
@@ -966,6 +1033,7 @@ recently selected windows nor the buffer list."
     ;; Move mouse cursor into FRAME to avoid that another frame gets
     ;; selected by the window manager.
     (set-mouse-position frame (1- (frame-width frame)) 0))))
+
 
 (provide 'personal)
 ;;; personal.el ends here
