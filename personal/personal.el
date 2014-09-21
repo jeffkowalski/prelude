@@ -58,47 +58,16 @@
 (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
 
 ;; install the missing packages
-(dolist (p '(;;ack-and-a-half
-             cmake-mode
+(dolist (p '(cmake-mode
              cperl-mode
              dired+
              dired-single
-             ;;expand-region       ; prelude
-             ;;gh                  ; required by gist
-             ;;gist                ; prelude
-             ;;guru-mode           ; prelude
-             http-post-simple
-             ;;helm                ; prelude
-             ;;helm-projectile     ; prelude
              helm-swoop
-             htmlize               ; for org-ehtml
+             htmlize
              image+
-             ;;logito              ; required by gh
-             ;;magit               ; prelude
-             ;;magithub            ; prelude
-             ;;melpa               ; prelude
-             ;;nyan-mode
              multi-term
              org
-             org-cua-dwim
-             ;;paredit             ; required by prelude-lisp
-             ;;pcache              ; required by gh
-             ;;prelude-emacs-lisp  ; prelude auto
-             ;;prelude-js          ; prelude auto
-             ;;prelude-lisp        ; required by prelude-emacs-lisp
-             ;;prelude-perl        ; prelude auto
-             ;;prelude-programming
-             ;;prelude-xml         ; prelude auto
-             ;;projectile          ; required by helm-projectile
-             ;;python              ; prelude auto
-             ;;rainbow-delimiters  ; required by prelude-lisp
-             ;;rainbow-mode        ; prelude
-             smex
-             sublimity
              use-package
-             ;;volatile-highlights ; prelude
-             ;;workgroups
-             ;;zenburn-theme       ; prelude
              ))
   (unless (package-installed-p p)
     (package-install p)))
@@ -145,6 +114,11 @@
                :url "https://github.com/jeffkowalski/org-ehtml.git"
                :depends web-server
                :load-path "src")
+        (:name org-cua-dwim
+               :description "Org-mode and CUA-mode compatibility layer"
+               :type git
+               :url "https://github.com/jeffkowalski/org-cua-dwim.git"
+               :features org-cua-dwim)
         (:name nyan-mode
                :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
                :type git
@@ -159,6 +133,7 @@
          evernote-mode
          web-server
          org-ehtml
+         org-cua-dwim
          nyan-mode
          )))
   (el-get 'sync el-get-packages))
