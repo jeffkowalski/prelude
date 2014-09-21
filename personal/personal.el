@@ -4,26 +4,6 @@
 ;;;
 
 
-;; ----------------------------------------------------------- [ shell / eshell ]
-
-(add-hook 'emacs-startup-hook
-          #'(lambda ()
-              (let ((default-directory (getenv "HOME")))
-                (command-execute 'eshell)
-                (bury-buffer))))
-
-;; (add-hook 'eshell-mode-hook
-;;           #'(lambda ()
-;;               (define-key eshell-mode-map
-;;                 [remap pcomplete]
-;;                 'helm-esh-pcomplete)))
-;; (add-hook 'eshell-mode-hook
-;;           #'(lambda ()
-;;               (define-key eshell-mode-map
-;;                 (kbd "M-p")
-;;                 'helm-eshell-history)))
-
-
 ;; ----------------------------------------------------------- [ emacs prelude ]
 
 (add-hook 'prelude-prog-mode-hook
@@ -72,8 +52,9 @@
   (unless (package-installed-p p)
     (package-install p)))
 
-(defalias 'perl-mode 'cperl-mode)
 (define-key package-menu-mode-map "o" 'delete-other-windows)
+
+(require 'use-package)
 
 
 ;; ----------------------------------------------------------- [ el-get ]
@@ -138,11 +119,11 @@
          )))
   (el-get 'sync el-get-packages))
 
+
 ;; ----------------------------------------------------------- [ automodes ]
 
-(add-to-list 'auto-mode-alist '("\\.ahk$" . ahk-mode))
-(autoload 'ahk-mode "ahk-mode") ;; http://www.robf.de/Hacking/elisp/ahk-mode.el
 (require 'compile)
+(defalias 'perl-mode 'cperl-mode)
 
 
 ;; ----------------------------------------------------------- [ keyboard macros ]
@@ -166,35 +147,6 @@
 (global-set-key (kbd "<f8>")            'define-macro-key)
 
 
-;; ----------------------------------------------------------- [ kill line ]
-
-(defun kill-line-or-region ()
-  "Similar to 'kill-line', but will kill the region if one exists."
-  (interactive)
-  (kill-region (point)
-               ;; It is better to move point to the other end of the kill
-               ;; before killing.  That way, in a read-only buffer, point
-               ;; moves across the text that is copied to the kill ring.
-               ;; The choice has no effect on undo now that undo records
-               ;; the value of point from before the command was run.
-               (if (region-active-p)
-                   (mark t)    ; if there's an active mark, kill region instead
-                 (progn
-                   (forward-visible-line 1)
-                   (if (eobp)
-                       (signal 'end-of-buffer nil))
-                   (if (or (looking-at "[ \t]*$") (and kill-whole-line (bolp)))
-                       (forward-visible-line 1)
-                     (end-of-visible-line))
-                   (point)))))
-
-;;(global-set-key (kbd "C-k")             'kill-line-or-region)
-
-(defun kill-to-end-of-buffer ()
-  "Kill all text from point to end of buffer."
-  (interactive)
-  (kill-region (point) (point-max)))
-
 ;; ----------------------------------------------------------- [ adornments ]
 
 (setq frame-title-format '(buffer-file-name "emacs - %f %*" ("%b %*")))
@@ -213,9 +165,32 @@
       '(eshell-mode-hook term-mode-hook))
 
 
+;; ----------------------------------------------------------- [ shell / eshell ]
+
+(add-hook 'emacs-startup-hook
+          #'(lambda ()
+              (let ((default-directory (getenv "HOME")))
+                (command-execute 'eshell)
+                (bury-buffer))))
+
+;; (add-hook 'eshell-mode-hook
+;;           #'(lambda ()
+;;               (define-key eshell-mode-map
+;;                 [remap pcomplete]
+;;                 'helm-esh-pcomplete)))
+;; (add-hook 'eshell-mode-hook
+;;           #'(lambda ()
+;;               (define-key eshell-mode-map
+;;                 (kbd "M-p")
+;;                 'helm-eshell-history)))
+
+
 ;; ----------------------------------------------------------- [ multi-term ]
 
 (require 'multi-term)
+(global-unset-key (kbd "C-c t"))
+(global-set-key (kbd "C-c t")           'multi-term-dedicated-toggle)
+(define-key prelude-mode-map (kbd "C-c t") 'multi-term-dedicated-toggle)
 
 
 ;; ----------------------------------------------------------- [ undo-tree ]
@@ -347,7 +322,6 @@
 
 ;; ----------------------------------------------------------- [ magit ]
 
-(require 'use-package)
 (use-package magit
   :init (setq magit-diff-options '("--ignore-all-space"))) ; ignore whitespace
 
@@ -432,6 +406,7 @@
 (defadvice ibuffer-generate-filter-groups (after reverse-ibuffer-groups () activate)
   "Order ibuffer filter groups so the order is : [Default], [agenda], [Emacs]."
   (setq ad-return-value (nreverse ad-return-value)))
+
 
 ;; ----------------------------------------------------------- [ org-mode ]
 
@@ -947,10 +922,6 @@ GET header should contain a path in form '/todo/ID'."
 (global-set-key (kbd "M-x")             'helm-M-x)
 (global-set-key (kbd "C-x b")           'helm-buffers-list)
 (global-set-key (kbd "C-M-g")           'helm-do-grep)
-
-(global-unset-key (kbd "C-c t"))
-(global-set-key (kbd "C-c t")           'multi-term-dedicated-toggle)
-(define-key prelude-mode-map (kbd "C-c t") 'multi-term-dedicated-toggle)
 
 (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
 (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
