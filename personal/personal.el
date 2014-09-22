@@ -10,12 +10,14 @@
           (lambda ()
             (guru-mode -1)
             (whitespace-mode -1)) t)
+;; fix prelude behavior on terminals that send ^[O{ABCD} for arrows
+(defvar ALT-O-map (make-sparse-keymap) "ALT-O keymap.")
+(define-key prelude-mode-map (kbd "M-O") ALT-O-map)
 
-;; re-tabbing during whitespace-cleanup would kill makefiles
-(add-hook 'makefile-mode-hook
-          (lambda ()  (remove-hook 'before-save-hook 'whitespace-cleanup t)))
 
-;; FIXME - this is referenced from smartparens, and used to be in cua-base, but is no longer there
+;; ----------------------------------------------------------- [ cua ]
+
+;; FIXME: this is referenced from smartparens, and used to be in cua-base, but is no longer there
 ;; https://github.com/Fuco1/smartparens/issues/271
 (eval-when-compile
   (require 'cua-base))
@@ -30,6 +32,14 @@
 		  not-empty
 		  (not (eq this-original-command 'self-insert-command)))))
 	(cua--fallback))))))
+
+;; FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
+;;        behavior on paste
+;;
+(defadvice cua-paste (before clobber-region (&optional arg))
+  "Delete the region before pasting."
+  (when (region-active-p) (delete-region (region-beginning) (region-end))))
+(ad-activate 'cua-paste)
 
 
 ;; ----------------------------------------------------------- [ el-get ]
@@ -117,6 +127,9 @@
 (require 'use-package)
 (use-package use-package
   :config (setq use-package-verbose t))
+(use-package req-package
+  :ensure t
+  :demand t)
 
 ;; Override function defined in use-package, so that packages
 ;; from el-get are considered as well as those from the package manager.
@@ -128,12 +141,17 @@
 
 ;; ----------------------------------------------------------- [ miscellaneous ]
 
-(use-package compile
+(req-package compile
   :bind (("<f5>" . recompile)))
 
-(use-package cperl-mode
+(req-package cperl-mode
   :ensure t
   :init (defalias 'perl-mode 'cperl-mode))
+
+(req-package make-mode
+;; re-tabbing during whitespace-cleanup would kill makefiles
+  :config (add-hook 'makefile-mode-hook
+                  (lambda () (remove-hook 'before-save-hook 'whitespace-cleanup t))))
 
 ;; Enable all commands
 (setq disabled-command-function nil)
@@ -214,27 +232,22 @@
 
 ;; ----------------------------------------------------------- [ multi-term ]
 
-(use-package multi-term
-  :ensure t
-  :init (progn
-            (global-unset-key (kbd "C-c t"))
-            (global-set-key (kbd "C-c t")           'multi-term-dedicated-toggle)
-            (define-key prelude-mode-map (kbd "C-c t") 'multi-term-dedicated-toggle)))
+(req-package multi-term
+  :bind* (("C-c t" . multi-term-dedicated-toggle)))
 
+(bind-key "C-c t" 'multi-term-dedicated-toggle prelude-mode-map)
 
 ;; ----------------------------------------------------------- [ undo-tree ]
 
-(use-package undo-tree
-  :ensure t
+(req-package undo-tree
+  :bind* (("C-z" . undo-tree-undo))
   :init (progn
-          (global-undo-tree-mode)
-          (global-unset-key (kbd "C-z"))
-          (global-set-key (kbd "C-z") 'undo-tree-undo)))
+          (global-undo-tree-mode)))
 
 
 ;; ----------------------------------------------------------- [ image+ ]
 
-(use-package image+
+(req-package image+
   :init (progn
           (imagex-global-sticky-mode)
           (imagex-auto-adjust-mode)
@@ -250,22 +263,15 @@
 
 ;; ----------------------------------------------------------- [ cmake-mode ]
 
-(use-package cmake-mode
-  :ensure t
+(req-package cmake-mode
   :config (add-hook 'cmake-mode-hook
                     #'(lambda () (setq cmake-tab-width 4))))
 
 
 ;; ----------------------------------------------------------- [ dired ]
 
-(use-package dired
-  :init (progn
-          (use-package dired-single
-            :ensure t
-            :commands (dired-single-buffer dired-single-buffer-mouse))
-          (use-package dired+
-            :ensure t
-            :demand t))
+(req-package dired-single
+  :require (dired dired+)
   :config (progn
             (setq-default auto-revert-interval 1)
             (setq-default dired-omit-files-p t)
@@ -281,16 +287,15 @@
 
 ;; ----------------------------------------------------------- [ helm ]
 
-(use-package helm
-  :ensure t
+(req-package helm
   :demand t
   :bind (("C-x C-f" . helm-find-files)
          ("M-x"     . helm-M-x)
          ("C-x b"   . helm-buffers-list)
          ("C-M-g"   . helm-do-grep)))
 
-(use-package helm-swoop
-  :ensure t
+(req-package helm-swoop
+  :require (helm)
   :defines (helm-swoop-last-prefix-number)
   :demand t
   :bind (("M-i" . helm-swoop)))
@@ -335,7 +340,7 @@ recently selected windows nor the buffer list."
 
 ;; ----------------------------------------------------------- [ company ]
 
-(use-package company
+(req-package company
   :config (progn
             (add-to-list 'company-backends 'company-dabbrev t)
             (add-to-list 'company-backends 'company-ispell t)
@@ -368,7 +373,7 @@ recently selected windows nor the buffer list."
 
 ;; ----------------------------------------------------------- [ ido ]
 
-(use-package ido
+(req-package ido
   :init (progn
           (add-hook 'ido-minibuffer-setup-hook
                     (lambda ()
@@ -395,14 +400,14 @@ recently selected windows nor the buffer list."
 
 ;; ----------------------------------------------------------- [ magit ]
 
-(use-package magit
+(req-package magit
   :init (setq magit-diff-options '("--ignore-all-space"))) ; ignore whitespace
 
 
 ;; ----------------------------------------------------------- [ ibuffer ]
 
 ;; *Nice* buffer switching
-(use-package ibuffer
+(req-package ibuffer
   :init (use-package ibuf-ext)
   :config (progn
             (setq ibuffer-show-empty-filter-groups nil)
@@ -666,7 +671,7 @@ recently selected windows nor the buffer list."
 
 ;; ----------------------------------------------------------- [ org-ehtml ]
 
-(use-package org-ehtml
+(req-package org-ehtml
   :init (setq
          org-ehtml-everything-editable t
          org-ehtml-allow-agenda t
@@ -767,11 +772,11 @@ GET header should contain a path in form '/todo/ID'."
 
 ;; ----------------------------------------------------------- [ evernote ]
 
-(use-package evernote-mode
+(req-package evernote-mode
   :init (progn
-          (setq evernote-developer-token "S=s1:U=81f:E=1470997a804:C=13fb1e67c09:P=1cd:A=en-devtoken:V=2:H=0b3aafa546daa4a9b43c77a7574390d4")
-          (setq evernote-enml-formatter-command '("w3m" "-dump" "-I" "UTF8" "-O" "UTF8")) ; optional
-          (setq enh-enclient-command "/home/jeff/Dropbox/workspace/evernote-mode/ruby/bin/enclient.rb"))
+          (setq evernote-developer-token "S=s1:U=81f:E=1470997a804:C=13fb1e67c09:P=1cd:A=en-devtoken:V=2:H=0b3aafa546daa4a9b43c77a7574390d4"
+                evernote-enml-formatter-command '("w3m" "-dump" "-I" "UTF8" "-O" "UTF8") ; optional
+                enh-enclient-command "/home/jeff/Dropbox/workspace/evernote-mode/ruby/bin/enclient.rb"))
   :bind (("C-c E c" . evernote-create-note)
          ("C-c E o" . evernote-open-note)
          ("C-c E s" . evernote-search-notes)
@@ -783,7 +788,7 @@ GET header should contain a path in form '/todo/ID'."
 
 ;; ----------------------------------------------------------- [ windmove ]
 
-(use-package windmove
+(req-package windmove
   :bind (("<M-wheel-up>"   . windmove-up)
          ("<M-wheel-down>" . windmove-down)
          ("<M-up>"         . windmove-up)
@@ -977,22 +982,12 @@ GET header should contain a path in form '/todo/ID'."
 (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
 (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
 
-;; fix prelude behavior on terminals that send ^[O{ABCD} for arrows
-(defvar ALT-O-map (make-sparse-keymap) "ALT-O keymap.")
-(define-key prelude-mode-map (kbd "M-O") ALT-O-map)
-
 
 ;; ----------------------------------------------------------- [ experimental ]
 
 (setq enable-recursive-minibuffers t)
 
-;; FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
-;;        behavior on paste
-;;
-(defadvice cua-paste (before clobber-region (&optional arg))
-  "Delete the region before pasting."
-  (when (region-active-p) (delete-region (region-beginning) (region-end))))
-(ad-activate 'cua-paste)
+(req-package-finish)
 
 (provide 'personal)
 ;;; personal.el ends here
