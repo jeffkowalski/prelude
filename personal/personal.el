@@ -32,31 +32,6 @@
 	(cua--fallback))))))
 
 
-;; ----------------------------------------------------------- [ packages ]
-
-;; (add-to-list 'package-archives '("technomancy" . "http://repo.technomancy.us/emacs/"))
-(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-
-;; install the missing packages
-(dolist (p '(cmake-mode
-             cperl-mode
-             dired+
-             dired-single
-             helm-swoop
-             htmlize
-             image+
-             multi-term
-             org
-             use-package
-             ))
-  (unless (package-installed-p p)
-    (package-install p)))
-
-(define-key package-menu-mode-map "o" 'delete-other-windows)
-
-(require 'use-package)
-
-
 ;; ----------------------------------------------------------- [ el-get ]
 
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
@@ -120,10 +95,50 @@
   (el-get 'sync el-get-packages))
 
 
-;; ----------------------------------------------------------- [ automodes ]
+;; ----------------------------------------------------------- [ packages ]
 
-(require 'compile)
-(defalias 'perl-mode 'cperl-mode)
+(require 'package)
+
+;; (add-to-list 'package-archives '("technomancy" . "http://repo.technomancy.us/emacs/"))
+;; (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/") t)
+(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(package-initialize)
+
+;; install the missing packages
+(dolist (p '(htmlize
+             org
+             use-package
+             ))
+  (unless (package-installed-p p)
+    (package-install p)))
+
+(define-key package-menu-mode-map "o" 'delete-other-windows)
+
+(require 'use-package)
+(use-package use-package
+  :config (setq use-package-verbose t))
+
+;; Override function defined in use-package, so that packages
+;; from el-get are considered as well as those from the package manager.
+(defun use-package-ensure-elpa (package)
+  "Install PACKAGE if not installed by elpa package manager or el-get."
+  (when (not (or (package-installed-p package) (el-get-package-exists-p package)))
+    (package-install package)))
+
+
+;; ----------------------------------------------------------- [ miscellaneous ]
+
+(use-package compile
+  :bind (("<f5>" . recompile)))
+
+(use-package cperl-mode
+  :ensure t
+  :init (defalias 'perl-mode 'cperl-mode))
+
+;; Enable all commands
+(setq disabled-command-function nil)
+
+(auto-revert-mode)
 
 
 ;; ----------------------------------------------------------- [ keyboard macros ]
@@ -165,6 +180,18 @@
       '(eshell-mode-hook term-mode-hook))
 
 
+;; ----------------------------------------------------------- [ registers ]
+
+;; Registers allow you to jump to a file or other location quickly.
+;; To jump to a register, use C-x r j followed by the letter of the register.
+(mapc
+ (lambda (r)
+   (set-register (car r) (cons 'file (cdr r))))
+ '((?p . "~/.emacs.d/personal/personal.el")
+   (?i . "~/Dropbox/sync-linux/installation.txt")
+   (?s . "~/bin/sauron.pl")))
+
+
 ;; ----------------------------------------------------------- [ shell / eshell ]
 
 (add-hook 'emacs-startup-hook
@@ -187,85 +214,133 @@
 
 ;; ----------------------------------------------------------- [ multi-term ]
 
-(require 'multi-term)
-(global-unset-key (kbd "C-c t"))
-(global-set-key (kbd "C-c t")           'multi-term-dedicated-toggle)
-(define-key prelude-mode-map (kbd "C-c t") 'multi-term-dedicated-toggle)
+(use-package multi-term
+  :ensure t
+  :init (progn
+            (global-unset-key (kbd "C-c t"))
+            (global-set-key (kbd "C-c t")           'multi-term-dedicated-toggle)
+            (define-key prelude-mode-map (kbd "C-c t") 'multi-term-dedicated-toggle)))
 
 
 ;; ----------------------------------------------------------- [ undo-tree ]
 
-(require 'undo-tree)
-(global-undo-tree-mode)
-(global-unset-key (kbd "C-z"))
-(global-set-key (kbd "C-z") 'undo-tree-undo)
-;(global-unset-key (kbd "C-y"))
-;(global-set-key (kbd "C-y") 'undo-tree-redo)
+(use-package undo-tree
+  :ensure t
+  :init (progn
+          (global-undo-tree-mode)
+          (global-unset-key (kbd "C-z"))
+          (global-set-key (kbd "C-z") 'undo-tree-undo)))
 
 
 ;; ----------------------------------------------------------- [ image+ ]
 
-(require 'image+)
-(imagex-global-sticky-mode)
-(imagex-auto-adjust-mode)
-(let ((map imagex-sticky-mode-map))
-  (define-key map "+" 'imagex-sticky-zoom-in)
-  (define-key map "-" 'imagex-sticky-zoom-out)
-  (define-key map "l" 'imagex-sticky-rotate-left)
-  (define-key map "r" 'imagex-sticky-rotate-right)
-  (define-key map "m" 'imagex-sticky-maximize)
-  (define-key map "o" 'imagex-sticky-restore-original)
-  (define-key map "\C-x\C-s" 'imagex-sticky-save-image))
+(use-package image+
+  :init (progn
+          (imagex-global-sticky-mode)
+          (imagex-auto-adjust-mode)
+          (let ((map imagex-sticky-mode-map))
+            (define-key map "+" 'imagex-sticky-zoom-in)
+            (define-key map "-" 'imagex-sticky-zoom-out)
+            (define-key map "l" 'imagex-sticky-rotate-left)
+            (define-key map "r" 'imagex-sticky-rotate-right)
+            (define-key map "m" 'imagex-sticky-maximize)
+            (define-key map "o" 'imagex-sticky-restore-original)
+            (define-key map "\C-x\C-s" 'imagex-sticky-save-image))))
 
 
 ;; ----------------------------------------------------------- [ cmake-mode ]
 
-(add-hook 'cmake-mode-hook
-          #'(lambda () (setq cmake-tab-width 4)))
+(use-package cmake-mode
+  :ensure t
+  :config (add-hook 'cmake-mode-hook
+                    #'(lambda () (setq cmake-tab-width 4))))
 
 
 ;; ----------------------------------------------------------- [ dired ]
 
-(eval-when-compile
-  (require 'dired)
-  (require 'dired+))
-
-(autoload 'dired-single-buffer "dired-single" "" t)
-(autoload 'dired-single-buffer-mouse "dired-single" "" t)
-
-(add-hook 'dired-mode-hook
-          (lambda ()
-            ;; Enable all commands
-            (setq disabled-command-function nil)
-
+(use-package dired
+  :init (progn
+          (use-package dired-single
+            :ensure t
+            :commands (dired-single-buffer dired-single-buffer-mouse))
+          (use-package dired+
+            :ensure t
+            :demand t))
+  :config (progn
+            (setq-default auto-revert-interval 1)
+            (setq-default dired-omit-files-p t)
+            (setq font-lock-maximum-decoration (quote ((dired-mode) (t . t)))
+                  dired-omit-files (concat dired-omit-files "\\."))
             (define-key dired-mode-map [return] 'dired-single-buffer)
             (define-key dired-mode-map [down-mouse-1] 'dired-single-buffer-mouse)
             (define-key dired-mode-map [^]
               (lambda ()
                 (interactive)
-                (dired-single-buffer "..")))
+                (dired-single-buffer "..")))))
 
-            ;; Auto-refresh dired on file change
-            (auto-revert-mode)
-            (setq-default auto-revert-interval 1)
 
-            ;; Hide dired current directory (.)
-            (require 'dired+)
-            ;; Fix color theme
-            (setq-default dired-omit-files-p t)
-            (setq font-lock-maximum-decoration (quote ((dired-mode) (t . t)))
-                  dired-omit-files (concat dired-omit-files "\\."))))
+;; ----------------------------------------------------------- [ helm ]
+
+(use-package helm
+  :ensure t
+  :demand t
+  :bind (("C-x C-f" . helm-find-files)
+         ("M-x"     . helm-M-x)
+         ("C-x b"   . helm-buffers-list)
+         ("C-M-g"   . helm-do-grep)))
+
+(use-package helm-swoop
+  :ensure t
+  :defines (helm-swoop-last-prefix-number)
+  :demand t
+  :bind (("M-i" . helm-swoop)))
+
+;; FIXME: workaround problem in
+;;        select-frame-set-input-focus(#<frame *Minibuf-1* * 0x6a44268>)
+;;        helm-frame-or-window-configuration(restore)
+;;        helm-cleanup()
+;;        ...
+;;        helm-internal(...)
+;;        ...
+;;
+;;        which throws error "progn: Not an in-range integer, float, or cons of integers"
+;;
+(defun select-frame-set-input-focus (frame &optional norecord)
+  "Select FRAME, raise it, and set input focus, if possible.
+If `mouse-autoselect-window' is non-nil, also move mouse pointer
+to FRAME's selected window.  Otherwise, if `focus-follows-mouse'
+is non-nil, move mouse cursor to FRAME.
+
+Optional argument NORECORD means to neither change the order of
+recently selected windows nor the buffer list."
+  (select-frame frame norecord)
+  (raise-frame frame)
+
+  ;; Ensure, if possible, that FRAME gets input focus.
+  ;; (when (memq (window-system frame) '(x w32 ns))
+  ;;    (x-focus-frame frame))
+
+  ;; Move mouse cursor if necessary.
+  (cond
+   (mouse-autoselect-window
+    (let ((edges (window-inside-edges (frame-selected-window frame))))
+      ;; Move mouse cursor into FRAME's selected window to avoid that
+      ;; Emacs mouse-autoselects another window.
+      (set-mouse-position frame (nth 2 edges) (nth 1 edges))))
+   (focus-follows-mouse
+    ;; Move mouse cursor into FRAME to avoid that another frame gets
+    ;; selected by the window manager.
+    (set-mouse-position frame (1- (frame-width frame)) 0))))
 
 
 ;; ----------------------------------------------------------- [ company ]
 
-(eval-when-compile
-  (require 'company))
-
-(add-to-list 'company-backends 'company-dabbrev t)
-(add-to-list 'company-backends 'company-ispell t)
-(add-to-list 'company-backends 'company-files t)
-(add-to-list 'company-transformers 'company-sort-by-occurrence)
+(use-package company
+  :config (progn
+            (add-to-list 'company-backends 'company-dabbrev t)
+            (add-to-list 'company-backends 'company-ispell t)
+            (add-to-list 'company-backends 'company-files t)
+            (add-to-list 'company-transformers 'company-sort-by-occurrence)))
 
 (defun my-pcomplete-capf ()
   "Org-mode completions."
@@ -293,31 +368,29 @@
 
 ;; ----------------------------------------------------------- [ ido ]
 
-(eval-when-compile
-  (require 'ido))
-
-(defun ido-disable-line-trucation ()
-  "Locally disable 'truncate-lines'."
-  (set (make-local-variable 'truncate-lines) nil))
-(add-hook 'ido-minibuffer-setup-hook 'ido-disable-line-trucation)
-
-(add-hook 'ido-setup-hook
-          (lambda ()
-            ;; Display ido results vertically, rather than horizontally:
-            (setq ido-decorations (quote ("\n-> "
-                                          ""
-                                          "\n   "
-                                          "\n   ..."
-                                          "[" "]"
-                                          " [No match]"
-                                          " [Matched]"
-                                          " [Not readable]"
-                                          " [Too big]"
-                                          " [Confirm]")))
-            ;;eg. allows "bgorg" to match file "begin.org"
-            (setq ido-enable-flex-matching t)
-            (define-key ido-completion-map (kbd "<up>")   'ido-prev-match)
-            (define-key ido-completion-map (kbd "<down>") 'ido-next-match)))
+(use-package ido
+  :init (progn
+          (add-hook 'ido-minibuffer-setup-hook
+                    (lambda ()
+                      ;; Locally disable 'truncate-lines'
+                      (set (make-local-variable 'truncate-lines) nil)))
+          (add-hook 'ido-setup-hook
+                    (lambda ()
+                      ;; Display ido results vertically, rather than horizontally:
+                      (setq ido-decorations (quote ("\n-> "
+                                                    ""
+                                                    "\n   "
+                                                    "\n   ..."
+                                                    "[" "]"
+                                                    " [No match]"
+                                                    " [Matched]"
+                                                    " [Not readable]"
+                                                    " [Too big]"
+                                                    " [Confirm]")))
+                      ;;eg. allows "bgorg" to match file "begin.org"
+                      (setq ido-enable-flex-matching t)
+                      (define-key ido-completion-map (kbd "<up>")   'ido-prev-match)
+                      (define-key ido-completion-map (kbd "<down>") 'ido-next-match)))))
 
 
 ;; ----------------------------------------------------------- [ magit ]
@@ -329,12 +402,9 @@
 ;; ----------------------------------------------------------- [ ibuffer ]
 
 ;; *Nice* buffer switching
-(eval-when-compile
-  (require 'ibuffer)
-  (require 'ibuf-ext))
-
-(add-hook 'ibuffer-mode-hook
-          (lambda ()
+(use-package ibuffer
+  :init (use-package ibuf-ext)
+  :config (progn
             (setq ibuffer-show-empty-filter-groups nil)
             (setq ibuffer-saved-filter-groups
                   '(("default"
@@ -401,7 +471,7 @@
                                   (mode . bibtex-mode)
                                   (mode . reftex-mode)))
                      ("dired" (or (mode . dired-mode))))))
-            (ibuffer-switch-to-saved-filter-groups "default")))
+            (add-hook 'ibuffer-hook (lambda () (ibuffer-switch-to-saved-filter-groups "default")))))
 
 (defadvice ibuffer-generate-filter-groups (after reverse-ibuffer-groups () activate)
   "Order ibuffer filter groups so the order is : [Default], [agenda], [Emacs]."
@@ -411,35 +481,48 @@
 ;; ----------------------------------------------------------- [ org-mode ]
 
 (eval-when-compile
-  (require 'org)
   (require 'org-mobile)
   (require 'org-clock)
   (require 'org-capture))
 
-(setq org-directory "~/Dropbox/workspace/org/")
-(setq org-mobile-directory "~/Dropbox/mobileorg/")
-(setq org-mobile-agendas '("a"))
-(setq org-agenda-files (list (concat org-directory "toodledo.org")
-                             (concat org-directory "sauron.org")
-                             (concat org-directory "gcal.org")))
-(setq org-mobile-inbox-for-pull (concat org-mobile-directory "flagged.org"))
+(use-package org
+  :init (setq org-directory "~/Dropbox/workspace/org/"
+              ;;org-replace-disputed-keys t ; org-CUA-compatible
+              org-support-shift-select t
+              org-default-notes-file (concat org-directory "refile.org")
+              org-mobile-directory "~/Dropbox/mobileorg/"
+              org-mobile-agendas '("a")
+              org-agenda-files (list (concat org-directory "toodledo.org")
+                                     (concat org-directory "sauron.org")
+                                     (concat org-directory "gcal.org"))
+              org-startup-indented t
+              org-mobile-inbox-for-pull (concat org-mobile-directory "flagged.org"))
+  :bind (("C-c l" . org-store-link)
+         ("C-c c" . org-capture)
+         ("C-c a" . org-agenda)
+         ("C-c b" . org-iswitchb)))
 
-(setq org-startup-indented t)
-;;; (setq org-replace-disputed-keys t) ; org-CUA-compatible
-(setq org-support-shift-select t)
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-cc" 'org-capture)
-(global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
-
-(setq org-agenda-tags-column -97)
-(setq org-agenda-block-separator (let ((retval ""))
-                                   (dotimes (i (- org-agenda-tags-column)) (setq retval (concat retval "=")))
-                                   retval))
-(setq org-agenda-timegrid-use-ampm t)
-(add-hook 'org-finalize-agenda-hook
-          (lambda () (remove-text-properties
-                      (point-min) (point-max) '(mouse-face t))))
+(use-package org-agenda
+  :init (progn (setq org-agenda-tags-column -97
+                     org-agenda-block-separator (let ((retval ""))
+                                                  (dotimes (i (- org-agenda-tags-column)) (setq retval (concat retval "=")))
+                                                  retval)
+                     org-agenda-timegrid-use-ampm t
+                     org-agenda-exporter-settings
+                     '(
+                       ;;(org-agenda-add-entry-text-maxlines 50)
+                       ;;(org-agenda-with-colors nil)
+                       (org-agenda-write-buffer-name "Agenda")
+                       ;;(ps-number-of-columns 2)
+                       (ps-landscape-mode nil)
+                       (ps-print-color-p (quote black-white))
+                       (htmlize-output-type (quote css))))
+               (add-hook 'org-finalize-agenda-hook
+                         (lambda () (remove-text-properties
+                                     (point-min) (point-max) '(mouse-face t))))
+               (add-hook 'org-agenda-mode-hook
+                         (lambda () (whitespace-mode -1)) t)
+               (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)))
 
 (defun my-org-mode-ask-effort ()
   "Ask for an effort estimate when clocking in."
@@ -451,8 +534,7 @@
       (unless (equal effort "")
         (org-set-property "Effort" effort)))))
 
-(add-hook 'org-clock-in-prepare-hook
-          'my-org-mode-ask-effort)
+(add-hook 'org-clock-in-prepare-hook 'my-org-mode-ask-effort)
 
 (setq org-log-into-drawer t)
 (setq org-clock-into-drawer t)
@@ -510,38 +592,21 @@
                           (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
                           (org-agenda-overriding-header "Someday:")))))))
 
-(setq org-default-notes-file (concat org-directory "refile.org"))
-
-(setq org-agenda-exporter-settings
-      '(
-        ;;(org-agenda-add-entry-text-maxlines 50)
-        ;;(org-agenda-with-colors nil)
-        (org-agenda-write-buffer-name "Agenda")
-        ;;(ps-number-of-columns 2)
-        (ps-landscape-mode nil)
-        (ps-print-color-p (quote black-white))
-        (htmlize-output-type (quote css))))
 
 (require 'org-protocol)
-(setq org-capture-templates
-      (quote (("b" "entry.html" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
-               "* TODO [#C] %:description\nSCHEDULED: %t\n%:initial\n"
-               :immediate-finish t)
-              ("s" "sacha" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
-               "* TODO [#C] %^{Task}    %^g
-SCHEDULED: %^t
-%?
-:PROPERTIES:
-:Effort: %^{effort|1:00|0:05|0:15|0:30|2:00|4:00}
-:END:")
-              ("t" "todo" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
-               "* TODO [#C] %?\n")
-              ("w" "org-protocol" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
-               "* TODO [#C] %:description\nSCHEDULED: %t\n%:link\n%:initial\n")
-              ("h" "Habit" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
-               "* TODO [#C] %?\nSCHEDULED: %t .+1d/3d\n:PROPERTIES:\n:STYLE: habit\n:END:\n"))))
-(global-set-key (kbd "C-M-r") 'org-capture)
-(global-set-key (kbd "C-c r") 'org-capture)
+
+(use-package org-capture
+  :init (setq org-capture-templates
+              (quote (("b" "entry.html" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
+                       "* TODO [#C] %:description\nSCHEDULED: %t\n%:initial\n" :immediate-finish t)
+                      ("t" "todo" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
+                       "* TODO [#C] %?\n")
+                      ("w" "org-protocol" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
+                       "* TODO [#C] %:description\nSCHEDULED: %t\n%:link\n%:initial\n")
+                      ("h" "Habit" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
+                       "* TODO [#C] %?\nSCHEDULED: %t .+1d/3d\n:PROPERTIES:\n:STYLE: habit\n:END:\n"))))
+  :bind (("C-M-r" . org-capture)
+         ("C-c r" . org-capture)))
 
 (defun kiwon/org-agenda-redo-in-other-window ()
   "Call org-agenda-redo function even in the non-agenda buffer."
@@ -583,38 +648,29 @@ SCHEDULED: %^t
   (goto-char (match-end 0))
   (activate-mark))
 
-(require 'org-agenda)
-(define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)
+
 
 (defun jeff/org-add-ids-to-headlines-in-file ()
-  "Add ID properties to all headlines in the current file which
-do not already have one."
+  "Add ID properties to all headlines in the current file which do not already have one."
   (interactive)
   (org-map-entries 'org-id-get-create))
-
 ;; (add-hook 'org-mode-hook
 ;;           (lambda ()
 ;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
+
 (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create)
 
-
-(add-hook 'org-agenda-mode-hook
-          (lambda ()
-            (whitespace-mode -1)) t)
-
-(require 'org-cua-dwim)
-(org-cua-dwim-activate)
+(use-package org-cua-dwim
+  :init (org-cua-dwim-activate))
 
 
 ;; ----------------------------------------------------------- [ org-ehtml ]
 
-(eval-when-compile
-  (require 'org-ehtml))
-
-(setq
- org-ehtml-everything-editable t
- org-ehtml-allow-agenda t
- org-ehtml-docroot (expand-file-name "~/Dropbox/workspace/org"))
+(use-package org-ehtml
+  :init (setq
+         org-ehtml-everything-editable t
+         org-ehtml-allow-agenda t
+         org-ehtml-docroot (expand-file-name "~/Dropbox/workspace/org")))
 
 (defun pre-adjust-agenda-for-html nil
   "Adjust agenda buffer before htmlize.
@@ -711,21 +767,29 @@ GET header should contain a path in form '/todo/ID'."
 
 ;; ----------------------------------------------------------- [ evernote ]
 
-(require 'evernote-mode)
-(setq evernote-developer-token "S=s1:U=81f:E=1470997a804:C=13fb1e67c09:P=1cd:A=en-devtoken:V=2:H=0b3aafa546daa4a9b43c77a7574390d4")
-(setq evernote-enml-formatter-command '("w3m" "-dump" "-I" "UTF8" "-O" "UTF8")) ; optional
-                                        ;(setq evernote-username "jeffkowalski") ; optional: you can use this username as default.
-                                        ;(setq evernote-password-cache t)
-                                        ;(setq enh-password-cache-file "~/.emacs-evernote-mode.gpg")
-(setq enh-enclient-command "/home/jeff/Dropbox/workspace/evernote-mode/ruby/bin/enclient.rb")
-                                        ;(setq evernote-developer-token "dd1e37ae18197b8e")
-(global-set-key "\C-cEc" 'evernote-create-note)
-(global-set-key "\C-cEo" 'evernote-open-note)
-(global-set-key "\C-cEs" 'evernote-search-notes)
-(global-set-key "\C-cES" 'evernote-do-saved-search)
-(global-set-key "\C-cEw" 'evernote-write-note)
-(global-set-key "\C-cEp" 'evernote-post-region)
-(global-set-key "\C-cEb" 'evernote-browser)
+(use-package evernote-mode
+  :init (progn
+          (setq evernote-developer-token "S=s1:U=81f:E=1470997a804:C=13fb1e67c09:P=1cd:A=en-devtoken:V=2:H=0b3aafa546daa4a9b43c77a7574390d4")
+          (setq evernote-enml-formatter-command '("w3m" "-dump" "-I" "UTF8" "-O" "UTF8")) ; optional
+          (setq enh-enclient-command "/home/jeff/Dropbox/workspace/evernote-mode/ruby/bin/enclient.rb"))
+  :bind (("C-c E c" . evernote-create-note)
+         ("C-c E o" . evernote-open-note)
+         ("C-c E s" . evernote-search-notes)
+         ("C-c E S" . evernote-do-saved-search)
+         ("C-c E w" . evernote-write-note)
+         ("C-c E p" . evernote-post-region)
+         ("C-c E b" . evernote-browser)))
+
+
+;; ----------------------------------------------------------- [ windmove ]
+
+(use-package windmove
+  :bind (("<M-wheel-up>"   . windmove-up)
+         ("<M-wheel-down>" . windmove-down)
+         ("<M-up>"         . windmove-up)
+         ("<M-down>"       . windmove-down)
+         ("<M-left>"       . windmove-left)
+         ("<M-right>"      . windmove-right)))
 
 
 ;; ----------------------------------------------------------- [ modeline ]
@@ -887,7 +951,6 @@ GET header should contain a path in form '/todo/ID'."
 (define-key special-event-map [delete-frame] 'save-buffers-kill-terminal)
 (global-set-key (kbd "<M-f4>")          'save-buffers-kill-terminal)
 (global-set-key (kbd "<f4>")            'next-error)
-(global-set-key (kbd "<f5>")            'recompile)
 (global-set-key (kbd "<f7>")            'goto-line)
 (global-set-key (kbd "<f10>")           'eval-last-sexp)
 (global-set-key (kbd "C-w")             'kill-buffer-and-window)
@@ -897,12 +960,6 @@ GET header should contain a path in form '/todo/ID'."
 (global-set-key (kbd "<C-prior>")       'scroll-other-window-down)
 (global-set-key (kbd "<C-tab>")         'next-buffer)
 (global-set-key (kbd "<C-S-iso-lefttab>") 'previous-buffer)
-(global-set-key (kbd "<M-wheel-up>")    'windmove-up)
-(global-set-key (kbd "<M-wheel-down>")  'windmove-down)
-(global-set-key (kbd "<M-up>")          'windmove-up)
-(global-set-key (kbd "<M-down>")        'windmove-down)
-(global-set-key (kbd "<M-left>")        'windmove-left)
-(global-set-key (kbd "<M-right>")       'windmove-right)
 
 (global-set-key (kbd "M-z")             'zap-up-to-char)
 
@@ -916,12 +973,6 @@ GET header should contain a path in form '/todo/ID'."
 (define-key ALT-F-map "x"               'save-buffers-kill-emacs)
 (define-key ALT-F-map "o"               'find-file)
 (define-key ALT-F-map "c"               'kill-current-buffer)
-
-(global-set-key (kbd "M-i")             'helm-swoop)
-(global-set-key (kbd "C-x C-f")         'helm-find-files)
-(global-set-key (kbd "M-x")             'helm-M-x)
-(global-set-key (kbd "C-x b")           'helm-buffers-list)
-(global-set-key (kbd "C-M-g")           'helm-do-grep)
 
 (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
 (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
@@ -942,44 +993,6 @@ GET header should contain a path in form '/todo/ID'."
   "Delete the region before pasting."
   (when (region-active-p) (delete-region (region-beginning) (region-end))))
 (ad-activate 'cua-paste)
-
-;; FIXME: workaround problem in
-;;        select-frame-set-input-focus(#<frame *Minibuf-1* * 0x6a44268>)
-;;        helm-frame-or-window-configuration(restore)
-;;        helm-cleanup()
-;;        ...
-;;        helm-internal(...)
-;;        ...
-;;
-;;        which throws error "progn: Not an in-range integer, float, or cons of integers"
-;;
-(defun select-frame-set-input-focus (frame &optional norecord)
-  "Select FRAME, raise it, and set input focus, if possible.
-If `mouse-autoselect-window' is non-nil, also move mouse pointer
-to FRAME's selected window.  Otherwise, if `focus-follows-mouse'
-is non-nil, move mouse cursor to FRAME.
-
-Optional argument NORECORD means to neither change the order of
-recently selected windows nor the buffer list."
-  (select-frame frame norecord)
-  (raise-frame frame)
-
-  ;; Ensure, if possible, that FRAME gets input focus.
-  ;; (when (memq (window-system frame) '(x w32 ns))
-  ;;    (x-focus-frame frame))
-
-  ;; Move mouse cursor if necessary.
-  (cond
-   (mouse-autoselect-window
-    (let ((edges (window-inside-edges (frame-selected-window frame))))
-      ;; Move mouse cursor into FRAME's selected window to avoid that
-      ;; Emacs mouse-autoselects another window.
-      (set-mouse-position frame (nth 2 edges) (nth 1 edges))))
-   (focus-follows-mouse
-    ;; Move mouse cursor into FRAME to avoid that another frame gets
-    ;; selected by the window manager.
-    (set-mouse-position frame (1- (frame-width frame)) 0))))
-
 
 (provide 'personal)
 ;;; personal.el ends here
