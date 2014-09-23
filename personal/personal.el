@@ -115,8 +115,7 @@
 (package-initialize)
 
 ;; install the missing packages
-(dolist (p '(htmlize
-             org
+(dolist (p '(org
              use-package
              ))
   (unless (package-installed-p p)
@@ -207,6 +206,8 @@
    (set-register (car r) (cons 'file (cdr r))))
  '((?p . "~/.emacs.d/personal/personal.el")
    (?i . "~/Dropbox/sync-linux/installation.txt")
+   (?m . "~/Dropbox/sync-linux/mac_addrs.org")
+   (?z . "~/.zshrc")
    (?s . "~/bin/sauron.pl")))
 
 
@@ -485,29 +486,31 @@ recently selected windows nor the buffer list."
 
 ;; ----------------------------------------------------------- [ org-mode ]
 
-(eval-when-compile
-  (require 'org-mobile)
-  (require 'org-clock)
-  (require 'org-capture))
-
-(use-package org
+(req-package org
   :init (setq org-directory "~/Dropbox/workspace/org/"
               ;;org-replace-disputed-keys t ; org-CUA-compatible
+              org-log-into-drawer t
               org-support-shift-select t
               org-default-notes-file (concat org-directory "refile.org")
-              org-mobile-directory "~/Dropbox/mobileorg/"
-              org-mobile-agendas '("a")
               org-agenda-files (list (concat org-directory "toodledo.org")
                                      (concat org-directory "sauron.org")
                                      (concat org-directory "gcal.org"))
-              org-startup-indented t
-              org-mobile-inbox-for-pull (concat org-mobile-directory "flagged.org"))
+              org-startup-indented t)
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-capture)
          ("C-c a" . org-agenda)
          ("C-c b" . org-iswitchb)))
 
-(use-package org-agenda
+(req-package org-mobile
+  :require (org)
+  :init (setq org-mobile-directory "~/Dropbox/mobileorg/"
+              org-mobile-agendas '("a")
+              org-mobile-inbox-for-pull (concat org-mobile-directory "flagged.org")))
+
+(req-package htmlize)
+
+(req-package org-agenda
+  :require (org htmlize)
   :init (progn (setq org-agenda-tags-column -97
                      org-agenda-block-separator (let ((retval ""))
                                                   (dotimes (i (- org-agenda-tags-column)) (setq retval (concat retval "=")))
@@ -521,28 +524,82 @@ recently selected windows nor the buffer list."
                        ;;(ps-number-of-columns 2)
                        (ps-landscape-mode nil)
                        (ps-print-color-p (quote black-white))
-                       (htmlize-output-type (quote css))))
+                       (htmlize-output-type (quote css)))
+                     org-agenda-custom-commands
+                     '(("s" "Startup View"
+                        ((agenda ""     ((org-agenda-ndays 3)
+                                         (org-agenda-start-on-weekday nil)
+                                         ;;(org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                         (org-agenda-skip-scheduled-if-deadline-is-shown t)
+                                         (org-agenda-prefix-format "  %-10T %t")
+                                         (org-agenda-hide-tags-regexp "^@")
+                                         (org-agenda-cmp-user-defined 'my-org-cmp-tag)
+                                         (org-agenda-sorting-strategy '(time-up todo-state-down habit-up tag-up priority-down user-defined-up alpha-up))
+                                         ;;(org-agenda-todo-ignore-scheduled 'future)
+                                         (org-deadline-warning-days 0)))
+                         (agenda "TODO" ((org-agenda-time-grid nil)
+                                         (org-deadline-warning-days 365)
+                                         (org-agenda-prefix-format "  %-10T %s")
+                                         (org-agenda-hide-tags-regexp "^@")
+                                         (org-agenda-entry-types '(:deadline))
+                                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
+                                         (org-agenda-start-on-weekday nil)
+                                         (org-agenda-ndays 1)
+                                         (org-agenda-overriding-header "Unscheduled upcoming deadlines:")))
+                         (todo "TODO"   ((org-agenda-time-grid nil)
+                                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexp "#[A-C]" 'scheduled 'deadline))
+                                         ;;(org-agenda-todo-keyword-format "")
+                                         (org-agenda-prefix-format "  %-10T %t")
+                                         (org-agenda-hide-tags-regexp "^@")
+                                         ;;(org-agenda-show-inherited-tags nil)
+                                         (org-agenda-cmp-user-defined 'my-org-cmp-tag)
+                                         (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
+                                         (org-agenda-overriding-header "Unscheduled, no deadline:")))
+                         (todo "TODO"   ((org-agenda-time-grid nil)
+                                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'regexp "#[A-C]" 'scheduled 'deadline))
+                                         ;;(org-agenda-todo-keyword-format "")
+                                         (org-agenda-prefix-format "  %-10T %t")
+                                         (org-agenda-hide-tags-regexp "^@")
+                                         ;;(org-agenda-show-inherited-tags nil)
+                                         (org-agenda-cmp-user-defined 'my-org-cmp-tag)
+                                         (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
+                                         (org-agenda-overriding-header "Someday:")))))))
                (add-hook 'org-finalize-agenda-hook
                          (lambda () (remove-text-properties
                                      (point-min) (point-max) '(mouse-face t))))
                (add-hook 'org-agenda-mode-hook
                          (lambda () (whitespace-mode -1)) t)
+               (defun jeff/org-agenda-edit-headline ()
+                 "Go to the Org-mode file containing the item at point, then mark headline for overwriting."
+                 (interactive)
+                 (org-agenda-goto)
+                 (search-backward (org-get-heading t t))
+                 (push-mark)
+                 (goto-char (match-end 0))
+                 (activate-mark))
+               (defun kiwon/org-agenda-redo-in-other-window ()
+                 "Call org-agenda-redo function even in the non-agenda buffer."
+                 (interactive)
+                 (let ((agenda-window (get-buffer-window org-agenda-buffer-name t)))
+                   (when agenda-window
+                     (with-selected-window agenda-window (org-agenda-redo)))))
+               ;;(run-at-time nil 60 'kiwon/org-agenda-redo-in-other-window)
                (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)))
 
-(defun my-org-mode-ask-effort ()
-  "Ask for an effort estimate when clocking in."
-  (unless (org-entry-get (point) "Effort")
-    (let ((effort
-           (completing-read
-            "Effort: "
-            (org-entry-get-multivalued-property (point) "Effort"))))
-      (unless (equal effort "")
-        (org-set-property "Effort" effort)))))
-
-(add-hook 'org-clock-in-prepare-hook 'my-org-mode-ask-effort)
-
-(setq org-log-into-drawer t)
-(setq org-clock-into-drawer t)
+(req-package org-clock
+  :require (org)
+  :init (progn
+          (setq org-clock-into-drawer t)
+          (defun jeff/org-mode-ask-effort ()
+            "Ask for an effort estimate when clocking in."
+            (unless (org-entry-get (point) "Effort")
+              (let ((effort
+                     (completing-read
+                      "Effort: "
+                      (org-entry-get-multivalued-property (point) "Effort"))))
+                (unless (equal effort "")
+                  (org-set-property "Effort" effort)))))
+          (add-hook 'org-clock-in-prepare-hook 'jeff/org-mode-ask-effort)))
 
 (defun my-org-cmp-tag (a b)
   "Compare the non-context tags of A and B."
@@ -557,50 +614,18 @@ recently selected windows nor the buffer list."
           ((string-lessp tb ta) +1)
           (t nil))))
 
-(setq org-agenda-custom-commands
-      '(("s" "Startup View"
-         ((agenda ""     ((org-agenda-ndays 3)
-                          (org-agenda-start-on-weekday nil)
-                          ;;(org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                          (org-agenda-skip-scheduled-if-deadline-is-shown t)
-                          (org-agenda-prefix-format "  %-10T %t")
-                          (org-agenda-hide-tags-regexp "^@")
-                          (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                          (org-agenda-sorting-strategy '(time-up todo-state-down habit-up tag-up priority-down user-defined-up alpha-up))
-                          ;;(org-agenda-todo-ignore-scheduled 'future)
-                          (org-deadline-warning-days 0)))
-          (agenda "TODO" ((org-agenda-time-grid nil)
-                          (org-deadline-warning-days 365)
-                          (org-agenda-prefix-format "  %-10T %s")
-                          (org-agenda-hide-tags-regexp "^@")
-                          (org-agenda-entry-types '(:deadline))
-                          (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
-                          (org-agenda-start-on-weekday nil)
-                          (org-agenda-ndays 1)
-                          (org-agenda-overriding-header "Unscheduled upcoming deadlines:")))
-          (todo "TODO"   ((org-agenda-time-grid nil)
-                          (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexp "#[A-C]" 'scheduled 'deadline))
-                          ;;(org-agenda-todo-keyword-format "")
-                          (org-agenda-prefix-format "  %-10T %t")
-                          (org-agenda-hide-tags-regexp "^@")
-                          ;;(org-agenda-show-inherited-tags nil)
-                          (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                          (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
-                          (org-agenda-overriding-header "Unscheduled, no deadline:")))
-          (todo "TODO"   ((org-agenda-time-grid nil)
-                          (org-agenda-skip-function '(org-agenda-skip-entry-if 'regexp "#[A-C]" 'scheduled 'deadline))
-                          ;;(org-agenda-todo-keyword-format "")
-                          (org-agenda-prefix-format "  %-10T %t")
-                          (org-agenda-hide-tags-regexp "^@")
-                          ;;(org-agenda-show-inherited-tags nil)
-                          (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                          (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
-                          (org-agenda-overriding-header "Someday:")))))))
+(req-package org-protocol)
 
+(defun jeff/org-add-ids-to-headlines-in-file ()
+  "Add ID properties to all headlines in the current file which do not already have one."
+  (interactive)
+  (org-map-entries 'org-id-get-create))
+;; (add-hook 'org-mode-hook
+;;           (lambda ()
+;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
 
-(require 'org-protocol)
-
-(use-package org-capture
+(req-package org-capture
+  :require (org)
   :init (setq org-capture-templates
               (quote (("b" "entry.html" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
                        "* TODO [#C] %:description\nSCHEDULED: %t\n%:initial\n" :immediate-finish t)
@@ -610,16 +635,10 @@ recently selected windows nor the buffer list."
                        "* TODO [#C] %:description\nSCHEDULED: %t\n%:link\n%:initial\n")
                       ("h" "Habit" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
                        "* TODO [#C] %?\nSCHEDULED: %t .+1d/3d\n:PROPERTIES:\n:STYLE: habit\n:END:\n"))))
+  :config (progn
+            (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create))
   :bind (("C-M-r" . org-capture)
          ("C-c r" . org-capture)))
-
-(defun kiwon/org-agenda-redo-in-other-window ()
-  "Call org-agenda-redo function even in the non-agenda buffer."
-  (interactive)
-  (let ((agenda-window (get-buffer-window org-agenda-buffer-name t)))
-    (when agenda-window
-      (with-selected-window agenda-window (org-agenda-redo)))))
-                                        ;(run-at-time nil 60 'kiwon/org-agenda-redo-in-other-window)
 
 (defun org-check-misformatted-subtree ()
   "Check misformatted entries in the current buffer."
@@ -644,28 +663,8 @@ recently selected windows nor the buffer list."
   (toggle-frame-fullscreen)
   (org-agenda nil "s"))
 
-(defun jeff/org-agenda-edit-headline ()
-  "Go to the Org-mode file containing the item at point, then mark headline for overwriting."
-  (interactive)
-  (org-agenda-goto)
-  (search-backward (org-get-heading t t))
-  (push-mark)
-  (goto-char (match-end 0))
-  (activate-mark))
-
-
-
-(defun jeff/org-add-ids-to-headlines-in-file ()
-  "Add ID properties to all headlines in the current file which do not already have one."
-  (interactive)
-  (org-map-entries 'org-id-get-create))
-;; (add-hook 'org-mode-hook
-;;           (lambda ()
-;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
-
-(add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create)
-
-(use-package org-cua-dwim
+(req-package org-cua-dwim
+  :require (cua-base org)
   :init (org-cua-dwim-activate))
 
 
