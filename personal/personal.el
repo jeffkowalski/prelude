@@ -137,6 +137,14 @@
   (when (not (or (package-installed-p package) (el-get-package-exists-p package)))
     (package-install package)))
 
+;; Enable sorting on all columns in package menu's tabular list.
+;; Note my naive mapping removes the final properties (like :right-align) if present.
+(add-hook 'package-menu-mode-hook
+          #'(lambda () (setq tabulated-list-format
+                             (vconcat (mapcar #'(lambda (arg) (list (nth 0 arg) (nth 1 arg)
+                                                            (or (nth 2 arg) t)))
+                                       tabulated-list-format)))))
+
 
 ;; ----------------------------------------------------------- [ miscellaneous ]
 
