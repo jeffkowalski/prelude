@@ -4,47 +4,11 @@
 ;;;
 
 
-;; ----------------------------------------------------------- [ emacs prelude ]
-
-(add-hook 'prelude-prog-mode-hook
-          (lambda ()
-            (guru-mode -1)
-            (whitespace-mode -1)) t)
-;; fix prelude behavior on terminals that send ^[O{ABCD} for arrows
-(defvar ALT-O-map (make-sparse-keymap) "ALT-O keymap.")
-(define-key prelude-mode-map (kbd "M-O") ALT-O-map)
-
-
-;; ----------------------------------------------------------- [ cua ]
-
-;; FIXME: this is referenced from smartparens, and used to be in cua-base, but is no longer there
-;; https://github.com/Fuco1/smartparens/issues/271
-(eval-when-compile
-  (require 'cua-base))
-(unless (fboundp 'cua-replace-region)
-  (defun cua-replace-region ()
-  "Replace the active region with the character you type."
-  (interactive)
-  (let ((not-empty (and cua-delete-selection (cua-delete-region))))
-    (unless (eq this-original-command this-command)
-      (let ((overwrite-mode
-	     (and overwrite-mode
-		  not-empty
-		  (not (eq this-original-command 'self-insert-command)))))
-	(cua--fallback))))))
-
-;; FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
-;;        behavior on paste
-;;
-(defadvice cua-paste (before clobber-region (&optional arg))
-  "Delete the region before pasting."
-  (when (region-active-p) (delete-region (region-beginning) (region-end))))
-(ad-activate 'cua-paste)
-
-
 ;; ----------------------------------------------------------- [ el-get ]
 
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+
+;; (setq )el-get-byte-compile nil)
 
 (unless (require 'el-get nil 'noerror)
   (with-current-buffer
@@ -90,23 +54,17 @@
                :type git
                :url "https://github.com/jeffkowalski/nyan-mode.git"
                :features nyan-mode)
-        (:name helm-swoop
-               :description "Efficiently hopping squeezed lines powered by Emacs helm interface"
-               :type git
-               :url "https://github.com/jeffkowalski/helm-swoop.git"
-               :features helm-swoop)
         ))
 
 ;; now set our own packages
 (let ((el-get-packages
-       '(el-get				; el-get is self-hosting
+       '(el-get        ; el-get is self-hosting
          arduino-mode
          evernote-mode
          web-server
          org-ehtml
          org-cua-dwim
          nyan-mode
-         helm-swoop
          )))
   (el-get 'sync el-get-packages))
 
@@ -131,7 +89,8 @@
 
 (require 'use-package)
 (use-package use-package
-  :config (setq use-package-verbose t))
+  :config (setq use-package-verbose t
+                use-package-minimum-reported-time 0))
 (use-package req-package
   :ensure t
   :demand t)
@@ -152,7 +111,82 @@
                                        tabulated-list-format)))))
 
 
+;; ----------------------------------------------------------- [ cua ]
+
+(use-package cua-base
+  :init (cua-mode t)
+  :config (setq cua-keep-region-after-copy nil))
+
+;; FIXME: this is referenced from smartparens, and used to be in cua-base, but is no longer there
+;; https://github.com/Fuco1/smartparens/issues/271
+(eval-when-compile
+  (require 'cua-base))
+(unless (fboundp 'cua-replace-region)
+  (defun cua-replace-region ()
+    "Replace the active region with the character you type."
+    (interactive)
+    (let ((not-empty (and cua-delete-selection (cua-delete-region))))
+      (unless (eq this-original-command this-command)
+        (let ((overwrite-mode
+               (and overwrite-mode
+                    not-empty
+                    (not (eq this-original-command 'self-insert-command)))))
+          (cua--fallback))))))
+
+;; FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
+;;        behavior on paste
+;;
+(defadvice cua-paste (before clobber-region (&optional arg))
+  "Delete the region before pasting."
+  (when (region-active-p) (delete-region (region-beginning) (region-end))))
+(ad-activate 'cua-paste)
+
+
+;; ----------------------------------------------------------- [ adornments ]
+
+;; off
+(scroll-bar-mode -1)
+(horizontal-scroll-bar-mode -1)
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+;; on
+(blink-cursor-mode t)
+(column-number-mode t)
+(size-indication-mode t)
+(global-hl-line-mode t)
+(show-paren-mode t)
+(display-time)
+(set-default 'cursor-type '(bar . 2))
+
+(setq frame-title-format '(buffer-file-name "emacs - %f %*" ("%b %*"))
+      icon-title-format  '(buffer-file-name "emacs - %f %*" ("%b %*"))
+      indicate-empty-lines t
+      inhibit-startup-echo-area-message "jeff"
+      inhibit-startup-screen t
+      initial-scratch-message nil
+      show-trailing-whitespace t
+      indent-tabs-mode nil
+      redisplay-dont-pause t)
+
 ;; ----------------------------------------------------------- [ miscellaneous ]
+
+;; Enable all commands
+(setq disabled-command-function nil)
+
+(auto-revert-mode)
+
+(setq
+ auto-save-list-file-prefix nil ;; startup
+ auto-save-default nil ;; files
+ kill-whole-line t ;; simple
+ make-backup-files nil ;; files
+ password-cache-expiry 900) ;; password-cache
+
+ ;; hide trailing whitespaces in some programming modes:
+ (mapc (lambda (hook)
+         (add-hook hook (lambda ()
+                          (setq show-trailing-whitespace nil))))
+       '(eshell-mode-hook term-mode-hook))
 
 (req-package compile
   :bind (("<f5>" . recompile)))
@@ -162,14 +196,27 @@
   :init (defalias 'perl-mode 'cperl-mode))
 
 (req-package make-mode
-;; re-tabbing during whitespace-cleanup would kill makefiles
+  ;; re-tabbing during whitespace-cleanup would kill makefiles
   :config (add-hook 'makefile-mode-hook
-                  (lambda () (remove-hook 'before-save-hook 'whitespace-cleanup t))))
+                    (lambda () (remove-hook 'before-save-hook 'whitespace-cleanup t))))
 
-;; Enable all commands
-(setq disabled-command-function nil)
+(req-package doc-view
+  :config (setq doc-view-ghostscript-options
+                '("-dMaxBitmap=2147483647" "-dSAFER" "-dNOPAUSE" "-sDEVICE=png16m" "-dTextAlphaBits=4" "-dBATCH" "-dGraphicsAlphaBits=4" "-dQUIET")
+                doc-view-resolution 300))
 
-(auto-revert-mode)
+
+;; ----------------------------------------------------------- [ emacs prelude ]
+
+(req-package prelude-mode
+  :defines (prelude-mode-map)
+  :init (define-key prelude-mode-map (kbd "M-O") ALT-O-map))
+
+(req-package prelude-programming
+  :init (add-hook 'prelude-prog-mode-hook
+                  (lambda ()
+                    (guru-mode -1)
+                    (whitespace-mode -1)) t))
 
 
 ;; ----------------------------------------------------------- [ keyboard macros ]
@@ -193,24 +240,6 @@
 (global-set-key (kbd "<f8>")            'define-macro-key)
 
 
-;; ----------------------------------------------------------- [ adornments ]
-
-(setq frame-title-format '(buffer-file-name "emacs - %f %*" ("%b %*")))
-(setq icon-title-format '(buffer-file-name "emacs - %f %*" ("%b %*")))
-(display-time)
-(set-default 'cursor-type '(bar . 2))
-(blink-cursor-mode)
-(setq redisplay-dont-pause t)
-(scroll-bar-mode -1)
-(horizontal-scroll-bar-mode -1)
-
-;; hide trailing whitespaces in some programming modes:
-(mapc (lambda (hook)
-        (add-hook hook (lambda ()
-                         (setq show-trailing-whitespace nil))))
-      '(eshell-mode-hook term-mode-hook))
-
-
 ;; ----------------------------------------------------------- [ registers ]
 
 ;; Registers allow you to jump to a file or other location quickly.
@@ -220,6 +249,7 @@
    (set-register (car r) (cons 'file (cdr r))))
  '((?p . "~/.emacs.d/personal/personal.el")
    (?i . "~/Dropbox/sync-linux/installation.txt")
+   (?c . "~/.emacs.d/personal/custom.el")
    (?m . "~/Dropbox/sync-linux/mac_addrs.org")
    (?z . "~/.zshrc")
    (?s . "~/bin/sauron.pl")))
@@ -248,9 +278,11 @@
 ;; ----------------------------------------------------------- [ multi-term ]
 
 (req-package multi-term
-  :bind* (("C-c t" . multi-term-dedicated-toggle)))
-
-(bind-key "C-c t" 'multi-term-dedicated-toggle prelude-mode-map)
+  :bind* (("C-c t" . multi-term-dedicated-toggle))
+  :config (progn (setq multi-term-dedicated-close-back-to-open-buffer-p t
+                       multi-term-dedicated-select-after-open-p t
+                       multi-term-program-switches "--login")
+                 (bind-key "C-c t" 'multi-term-dedicated-toggle prelude-mode-map)))
 
 ;; ----------------------------------------------------------- [ undo-tree ]
 
@@ -276,7 +308,7 @@
             (define-key map "\C-x\C-s" 'imagex-sticky-save-image))))
 
 
-;; ----------------------------------------------------------- [ cmake-mode ]
+;; ----------------------------------------------------------- [ cmake ]
 
 (req-package cmake-mode
   :config (add-hook 'cmake-mode-hook
@@ -304,16 +336,11 @@
 
 (req-package helm
   :demand t
+  :init (helm-mode 1)
   :bind (("C-x C-f" . helm-find-files)
          ("M-x"     . helm-M-x)
          ("C-x b"   . helm-buffers-list)
          ("C-M-g"   . helm-do-grep)))
-
-(req-package helm-swoop
-  :require (helm)
-  :defines (helm-swoop-last-prefix-number)
-  :demand t
-  :bind (("M-i" . helm-swoop)))
 
 ;; FIXME: workaround problem in
 ;;        select-frame-set-input-focus(#<frame *Minibuf-1* * 0x6a44268>)
@@ -352,11 +379,19 @@ recently selected windows nor the buffer list."
     ;; selected by the window manager.
     (set-mouse-position frame (1- (frame-width frame)) 0))))
 
+(req-package helm-swoop
+  :require (helm)
+  :defines (helm-swoop-last-prefix-number)
+  :demand t
+  :bind (("M-i" . helm-swoop)))
+
 
 ;; ----------------------------------------------------------- [ company ]
 
 (req-package company
   :config (progn
+            (setq company-auto-complete t
+                  company-idle-delay 0.5)
             (add-to-list 'company-backends 'company-dabbrev t)
             (add-to-list 'company-backends 'company-ispell t)
             (add-to-list 'company-backends 'company-files t)
@@ -389,7 +424,8 @@ recently selected windows nor the buffer list."
 ;; ----------------------------------------------------------- [ ido ]
 
 (req-package ido
-  :init (progn
+  :config (progn
+          (setq ido-everywhere nil)
           (add-hook 'ido-minibuffer-setup-hook
                     (lambda ()
                       ;; Locally disable 'truncate-lines'
@@ -498,22 +534,41 @@ recently selected windows nor the buffer list."
   (setq ad-return-value (nreverse ad-return-value)))
 
 
-;; ----------------------------------------------------------- [ org-mode ]
+;; ----------------------------------------------------------- [ ace-window ]
+
+(req-package ace-window
+  :config '(setq aw-scope 'frame))
+
+
+;; ----------------------------------------------------------- [ org ]
 
 (req-package org
   :init (setq org-directory "~/Dropbox/workspace/org/"
               ;;org-replace-disputed-keys t ; org-CUA-compatible
               org-log-into-drawer t
-              org-support-shift-select t
+              org-support-shift-select 'always
               org-default-notes-file (concat org-directory "refile.org")
               org-agenda-files (list (concat org-directory "toodledo.org")
                                      (concat org-directory "sauron.org")
                                      (concat org-directory "gcal.org"))
-              org-startup-indented t)
+              org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m)
+              org-startup-indented t
+              org-enforce-todo-dependencies t
+              org-babel-load-languages '((sh . t)))
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-capture)
          ("C-c a" . org-agenda)
          ("C-c b" . org-iswitchb)))
+
+(req-package ox
+  :require (org)
+  :init (setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
+)
+
+(req-package org-habit
+  :require (org)
+  :init (setq org-habit-following-days 1
+              org-habit-graph-column 46))
 
 (req-package org-mobile
   :require (org)
@@ -530,6 +585,7 @@ recently selected windows nor the buffer list."
                                                   (dotimes (i (- org-agenda-tags-column)) (setq retval (concat retval "=")))
                                                   retval)
                      org-agenda-timegrid-use-ampm t
+                     org-agenda-window-setup 'current-window
                      org-agenda-exporter-settings
                      '(
                        ;;(org-agenda-add-entry-text-maxlines 50)
@@ -995,6 +1051,11 @@ GET header should contain a path in form '/todo/ID'."
 (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
 (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
 
+(define-key smartparens-strict-mode-map (kbd "M-<delete>") 'sp-unwrap-sexp)
+(define-key smartparens-strict-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)
+
+;; fix keyboard behavior on terminals that send ^[O{ABCD} for arrows
+(defvar ALT-O-map (make-sparse-keymap) "ALT-O keymap.")
 
 ;; ----------------------------------------------------------- [ experimental ]
 
