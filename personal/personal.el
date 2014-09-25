@@ -90,6 +90,11 @@
                :type git
                :url "https://github.com/jeffkowalski/nyan-mode.git"
                :features nyan-mode)
+        (:name helm-swoop
+               :description "Efficiently hopping squeezed lines powered by Emacs helm interface"
+               :type git
+               :url "https://github.com/jeffkowalski/helm-swoop.git"
+               :features helm-swoop)
         ))
 
 ;; now set our own packages
@@ -101,6 +106,7 @@
          org-ehtml
          org-cua-dwim
          nyan-mode
+         helm-swoop
          )))
   (el-get 'sync el-get-packages))
 
