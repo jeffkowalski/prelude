@@ -168,6 +168,7 @@
       indent-tabs-mode nil
       redisplay-dont-pause t)
 
+
 ;; ----------------------------------------------------------- [ miscellaneous ]
 
 ;; Enable all commands
@@ -180,6 +181,8 @@
  auto-save-default nil ;; files
  kill-whole-line t ;; simple
  make-backup-files nil ;; files
+ help-window-select t ;; help
+ enable-recursive-minibuffers t
  password-cache-expiry 900) ;; password-cache
 
  ;; hide trailing whitespaces in some programming modes:
@@ -280,7 +283,7 @@
 (req-package multi-term
   :bind* (("C-c t" . multi-term-dedicated-toggle))
   :config (progn (setq multi-term-dedicated-close-back-to-open-buffer-p t
-                       multi-term-dedicated-select-after-open-p t
+                       multi-term-dedicated-select-after-open-p nil
                        multi-term-program-switches "--login")
                  (bind-key "C-c t" 'multi-term-dedicated-toggle prelude-mode-map)))
 
@@ -1057,9 +1060,7 @@ GET header should contain a path in form '/todo/ID'."
 ;; fix keyboard behavior on terminals that send ^[O{ABCD} for arrows
 (defvar ALT-O-map (make-sparse-keymap) "ALT-O keymap.")
 
-;; ----------------------------------------------------------- [ experimental ]
-
-(setq enable-recursive-minibuffers t)
+;; ----------------------------------------------------------- [ finish ]
 
 (req-package-finish)
 
