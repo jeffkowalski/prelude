@@ -701,7 +701,7 @@ recently selected windows nor the buffer list."
   :require (org)
   :init (setq org-capture-templates
               (quote (("b" "entry.html" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
-                       "* TODO [#C] %:description\nSCHEDULED: %t\n%:initial\n" :immediate-finish t)
+                       "* TODO %:description\n%:initial\n" :immediate-finish t)
                       ("t" "todo" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
                        "* TODO [#C] %?\n")
                       ("w" "org-protocol" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
