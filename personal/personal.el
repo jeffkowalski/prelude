@@ -33,27 +33,33 @@
                :type git
                :url "https://github.com/jeffkowalski/evernote-mode.git"
                :features evernote-mode)
-        (:name web-server
-               :description "web server running Emacs Lisp handlers"
+        (:name nyan-mode
+               :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
                :type git
-               :url "https://github.com/eschulte/emacs-web-server.git"
-               :features web-server)
+               :url "https://github.com/jeffkowalski/nyan-mode.git"
+               :features nyan-mode)
+        (:name org-cua-dwim
+               :description "Org-mode and CUA-mode compatibility layer"
+               :type git
+               :url "https://github.com/jeffkowalski/org-cua-dwim.git"
+               :features org-cua-dwim)
         (:name org-ehtml
                :description "Export Org-mode files as editable web pages"
                :type git
                :url "https://github.com/jeffkowalski/org-ehtml.git"
                :depends web-server
                :load-path "src")
-        (:name org-cua-dwim
-               :description "Org-mode and CUA-mode compatibility layer"
+        (:name org-reveal
+               :description "Exports Org-mode contents to Reveal.js HTML presentation"
                :type git
-               :url "https://github.com/jeffkowalski/org-cua-dwim.git"
-               :features org-cua-dwim)
-        (:name nyan-mode
-               :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
+               :url "https://github.com/jeffkowalski/org-reveal.git"
+               :depends org-mode
+               :features ox-reveal)
+        (:name web-server
+               :description "web server running Emacs Lisp handlers"
                :type git
-               :url "https://github.com/jeffkowalski/nyan-mode.git"
-               :features nyan-mode)
+               :url "https://github.com/eschulte/emacs-web-server.git"
+               :features web-server)
         ))
 
 ;; now set our own packages
@@ -64,6 +70,7 @@
          web-server
          org-ehtml
          org-cua-dwim
+         org-reveal
          nyan-mode
          )))
   (el-get 'sync el-get-packages))
