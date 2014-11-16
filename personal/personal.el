@@ -112,8 +112,8 @@
 ;; Enable sorting on all columns in package menu's tabular list.
 ;; Note my naive mapping removes the final properties (like :right-align) if present.
 (add-hook 'package-menu-mode-hook
-          #'(lambda () (setq tabulated-list-format
-                             (vconcat (mapcar #'(lambda (arg) (list (nth 0 arg) (nth 1 arg)
+          (lambda () (setq tabulated-list-format
+                             (vconcat (mapcar (lambda (arg) (list (nth 0 arg) (nth 1 arg)
                                                             (or (nth 2 arg) t)))
                                        tabulated-list-format)))))
 
@@ -268,18 +268,18 @@
 ;; ----------------------------------------------------------- [ shell / eshell ]
 
 (add-hook 'emacs-startup-hook
-          #'(lambda ()
+          (lambda ()
               (let ((default-directory (getenv "HOME")))
                 (command-execute 'eshell)
                 (bury-buffer))))
 
 ;; (add-hook 'eshell-mode-hook
-;;           #'(lambda ()
+;;           (lambda ()
 ;;               (define-key eshell-mode-map
 ;;                 [remap pcomplete]
 ;;                 'helm-esh-pcomplete)))
 ;; (add-hook 'eshell-mode-hook
-;;           #'(lambda ()
+;;           (lambda ()
 ;;               (define-key eshell-mode-map
 ;;                 (kbd "M-p")
 ;;                 'helm-eshell-history)))
@@ -322,7 +322,7 @@
 
 (req-package cmake-mode
   :config (add-hook 'cmake-mode-hook
-                    #'(lambda () (setq cmake-tab-width 4))))
+                    (lambda () (setq cmake-tab-width 4))))
 
 
 ;; ----------------------------------------------------------- [ dired ]
@@ -410,7 +410,7 @@ recently selected windows nor the buffer list."
 (defun my-pcomplete-capf ()
   "Org-mode completions."
   (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
-(add-hook 'org-mode-hook #'my-pcomplete-capf)
+(add-hook 'org-mode-hook 'my-pcomplete-capf)
 
 
 ;; ----------------------------------------------------------- [ tramp ]
@@ -772,7 +772,7 @@ Adds a link overlay to be intercepted by post-adjust-agenda-for-html."
           (htmlize-make-link-overlay (match-beginning 0) (match-end 0) (concat "todo:" id)))
         ))
       (beginning-of-line 2))))
-(add-hook 'htmlize-before-hook #'pre-adjust-agenda-for-html)
+(add-hook 'htmlize-before-hook 'pre-adjust-agenda-for-html)
 
 (defun post-adjust-agenda-for-html nil
   "Adjust agenda buffer after htmlize.
@@ -803,7 +803,7 @@ convert to call to javascript function."
   (insert "    <span id=\"message\"></span>")
   (while (re-search-forward "<a href=\"todo:\\(.*\\)\">\\(.*\\)</a>" nil t)
     (replace-match "<a href='' onclick='todo(\"\\1\");'>\\2</a>")))
-(add-hook 'htmlize-after-hook #'post-adjust-agenda-for-html)
+(add-hook 'htmlize-after-hook 'post-adjust-agenda-for-html)
 
 (defun jeff/capture-handler (request)
   "Handle REQUEST objects meant for 'org-capture'.
