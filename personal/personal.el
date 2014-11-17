@@ -596,6 +596,7 @@ recently selected windows nor the buffer list."
                                                   retval)
                      org-agenda-timegrid-use-ampm t
                      org-agenda-window-setup 'current-window
+                     org-agenda-log-mode-items '(clock closed state)
                      org-agenda-exporter-settings
                      '(
                        ;;(org-agenda-add-entry-text-maxlines 50)
@@ -605,9 +606,17 @@ recently selected windows nor the buffer list."
                        (ps-landscape-mode nil)
                        (ps-print-color-p (quote black-white))
                        (htmlize-output-type (quote css)))
+
                      org-agenda-custom-commands
-                     '(("s" "Startup View"
-                        ((agenda ""     ((org-agenda-ndays 3)
+                     '(("d" "Timeline for today" ((agenda "" ))
+                        ((org-agenda-ndays 1)
+                         (org-agenda-show-log t)
+                         (org-agenda-log-mode-items '(clock closed state))
+                         (org-agenda-clockreport-mode t)
+                         (org-agenda-entry-types '())))
+
+                       ("s" "Startup View"
+                         ((agenda ""    ((org-agenda-ndays 3)
                                          (org-agenda-start-on-weekday nil)
                                          ;;(org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
                                          (org-agenda-skip-scheduled-if-deadline-is-shown t)
@@ -657,14 +666,15 @@ recently selected windows nor the buffer list."
                  (push-mark)
                  (goto-char (match-end 0))
                  (activate-mark))
-               (defun kiwon/org-agenda-redo-in-other-window ()
-                 "Call org-agenda-redo function even in the non-agenda buffer."
-                 (interactive)
-                 (let ((agenda-window (get-buffer-window org-agenda-buffer-name t)))
-                   (when agenda-window
-                     (with-selected-window agenda-window (org-agenda-redo)))))
+               (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)
+               ;; (defun kiwon/org-agenda-redo-in-other-window ()
+               ;;   "Call org-agenda-redo function even in the non-agenda buffer."
+               ;;   (interactive)
+               ;;   (let ((agenda-window (get-buffer-window org-agenda-buffer-name t)))
+               ;;     (when agenda-window
+               ;;       (with-selected-window agenda-window (org-agenda-redo)))))
                ;;(run-at-time nil 60 'kiwon/org-agenda-redo-in-other-window)
-               (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)))
+               ))
 
 (req-package org-clock
   :require (org)
