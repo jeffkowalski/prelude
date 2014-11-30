@@ -396,6 +396,15 @@ recently selected windows nor the buffer list."
   :bind (("M-i" . helm-swoop)))
 
 
+;; ----------------------------------------------------------- [ guide-key ]
+
+(req-package guide-key
+  :init (progn
+          (setq guide-key/guide-key-sequence
+                '("C-x r" "C-x 4" (org-mode "C-c C-x")))
+          (guide-key-mode 1)))
+
+
 ;; ----------------------------------------------------------- [ company ]
 
 (req-package company
