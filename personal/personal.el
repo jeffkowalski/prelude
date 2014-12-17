@@ -1069,14 +1069,6 @@ GET header should contain a path in form '/todo/ID'."
 (define-key isearch-mode-map (kbd "<f3>") 'isearch-repeat-forward)
 (define-key isearch-mode-map (kbd "C-f")  'isearch-repeat-forward)
 
-(defvar ALT-F-map (make-sparse-keymap) "ALT-F keymap.")
-(global-set-key [(alt f)]               ALT-F-map)
-(global-set-key [(meta f)]              ALT-F-map)
-(define-key ALT-F-map "s"               'save-buffer)
-(define-key ALT-F-map "x"               'save-buffers-kill-emacs)
-(define-key ALT-F-map "o"               'find-file)
-(define-key ALT-F-map "c"               'kill-current-buffer)
-
 (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
 (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
 
