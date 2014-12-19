@@ -38,6 +38,24 @@
                :type git
                :url "https://github.com/jeffkowalski/nyan-mode.git"
                :features nyan-mode)
+         (:name org-mode
+                :website "http://orgmode.org/"
+                :description "Org-mode is for keeping notes, maintaining ToDo lists, doing project planning, and authoring with a fast and effective plain-text system."
+                :type git
+                :url "git://orgmode.org/org-mode.git"
+                :info "doc"
+                :build/berkeley-unix `,(mapcar
+                                        (lambda (target)
+                                          (list "gmake" target (concat "EMACS=" (shell-quote-argument el-get-emacs))))
+                                        '("oldorg"))
+                :build `,(mapcar
+                          (lambda (target)
+                            (list "make" target (concat "EMACS=" (shell-quote-argument el-get-emacs))))
+                          '("oldorg"))
+                :load-path ("." "contrib/lisp" "lisp")
+                ;; :load ("lisp/org-loaddefs.el")
+                :load ("lisp/org.el")
+                )
         (:name org-cua-dwim
                :description "Org-mode and CUA-mode compatibility layer"
                :type git
@@ -68,6 +86,7 @@
          arduino-mode
          evernote-mode
          web-server
+         org-mode
          org-ehtml
          org-cua-dwim
          org-reveal
@@ -78,16 +97,8 @@
 
 ;; ----------------------------------------------------------- [ packages ]
 
-(require 'package)
-
-;; (add-to-list 'package-archives '("technomancy" . "http://repo.technomancy.us/emacs/"))
-;; (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/") t)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-(package-initialize)
-
 ;; install the missing packages
-(dolist (p '(org
-             use-package
+(dolist (p '(use-package
              ))
   (unless (package-installed-p p)
     (package-install p)))
@@ -108,6 +119,19 @@
   "Install PACKAGE if not installed by elpa package manager or el-get."
   (when (not (or (package-installed-p package) (el-get-package-exists-p package)))
     (package-install package)))
+
+;; Override function defined in req-package, so that packages
+;; from el-get-sources are considered as well as those from el-get-recipes
+(defun req-package-try-el-get (package)
+  (if req-package-el-get-present
+      (let* ((AVAIL (or (el-get-recipe-filename package)
+                        (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources))))
+             (INSTALLED (or (el-get-package-exists-p package)
+                            (package-installed-p package))))
+        (if (and AVAIL (not INSTALLED))
+            (or (el-get 'sync package) t) ;; TODO check for success
+          INSTALLED))
+    nil))
 
 ;; Enable sorting on all columns in package menu's tabular list.
 ;; Note my naive mapping removes the final properties (like :right-align) if present.
@@ -562,6 +586,7 @@ recently selected windows nor the buffer list."
 ;; ----------------------------------------------------------- [ org ]
 
 (req-package org
+  :loader req-package-try-el-get
   :init (setq org-directory "~/Dropbox/workspace/org/"
               ;;org-replace-disputed-keys t ; org-CUA-compatible
               org-log-into-drawer t
@@ -763,13 +788,19 @@ recently selected windows nor the buffer list."
   (org-agenda nil "s"))
 
 (req-package org-cua-dwim
+  :loader req-package-try-el-get
   :require (cua-base org)
   :init (org-cua-dwim-activate))
 
 
 ;; ----------------------------------------------------------- [ org-ehtml ]
 
+(req-package web-server
+  :loader req-package-try-el-get)
+
 (req-package org-ehtml
+  :loader req-package-try-el-get
+  :require web-server
   :init (setq
          org-ehtml-everything-editable t
          org-ehtml-allow-agenda t
