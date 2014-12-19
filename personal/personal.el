@@ -8,8 +8,6 @@
 
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
-;; (setq )el-get-byte-compile nil)
-
 (unless (require 'el-get nil 'noerror)
   (with-current-buffer
       (url-retrieve
@@ -38,7 +36,7 @@
                :type git
                :url "https://github.com/jeffkowalski/nyan-mode.git"
                :features nyan-mode)
-         (:name org-mode
+        (:name org
                 :website "http://orgmode.org/"
                 :description "Org-mode is for keeping notes, maintaining ToDo lists, doing project planning, and authoring with a fast and effective plain-text system."
                 :type git
@@ -71,28 +69,9 @@
                :description "Exports Org-mode contents to Reveal.js HTML presentation"
                :type git
                :url "https://github.com/jeffkowalski/org-reveal.git"
-               :depends org-mode
+               :depends org
                :features ox-reveal)
-        (:name web-server
-               :description "web server running Emacs Lisp handlers"
-               :type git
-               :url "https://github.com/eschulte/emacs-web-server.git"
-               :features web-server)
         ))
-
-;; now set our own packages
-(let ((el-get-packages
-       '(el-get        ; el-get is self-hosting
-         arduino-mode
-         evernote-mode
-         web-server
-         org-mode
-         org-ehtml
-         org-cua-dwim
-         org-reveal
-         nyan-mode
-         )))
-  (el-get 'sync el-get-packages))
 
 
 ;; ----------------------------------------------------------- [ packages ]
@@ -102,8 +81,6 @@
              ))
   (unless (package-installed-p p)
     (package-install p)))
-
-(define-key package-menu-mode-map "o" 'delete-other-windows)
 
 (require 'use-package)
 (use-package use-package
@@ -140,6 +117,8 @@
                              (vconcat (mapcar (lambda (arg) (list (nth 0 arg) (nth 1 arg)
                                                             (or (nth 2 arg) t)))
                                        tabulated-list-format)))))
+
+(define-key package-menu-mode-map "o" 'delete-other-windows)
 
 
 ;; ----------------------------------------------------------- [ cua ]
@@ -244,7 +223,10 @@
 
 (req-package prelude-mode
   :defines (prelude-mode-map)
-  :init (define-key prelude-mode-map (kbd "M-O") ALT-O-map))
+  :init (progn
+          ;; fix keyboard behavior on terminals that send ^[O{ABCD} for arrows
+          (defvar ALT-O-map (make-sparse-keymap) "ALT-O keymap.")
+          (define-key prelude-mode-map (kbd "M-O") ALT-O-map)))
 
 (req-package prelude-programming
   :init (add-hook 'prelude-prog-mode-hook
@@ -414,7 +396,7 @@ recently selected windows nor the buffer list."
     (set-mouse-position frame (1- (frame-width frame)) 0))))
 
 (req-package helm-swoop
-  :require (helm)
+  :require helm
   :defines (helm-swoop-last-prefix-number)
   :demand t
   :bind (("M-i" . helm-swoop)))
@@ -605,22 +587,26 @@ recently selected windows nor the buffer list."
          ("C-c b" . org-iswitchb)))
 
 (req-package ox
-  :require (org)
+  :require org
   :init (setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
 )
 
 (req-package org-habit
-  :require (org)
+  :require org
   :init (setq org-habit-following-days 1
               org-habit-graph-column 46))
 
 (req-package org-mobile
-  :require (org)
+  :require org
   :init (setq org-mobile-directory "~/Dropbox/mobileorg/"
               org-mobile-agendas '("a")
               org-mobile-inbox-for-pull (concat org-mobile-directory "flagged.org")))
 
 (req-package htmlize)
+
+(req-package org-reveal
+  :require org
+  :loader req-package-try-el-get)
 
 (req-package org-agenda
   :require (org htmlize)
@@ -711,7 +697,7 @@ recently selected windows nor the buffer list."
                ))
 
 (req-package org-clock
-  :require (org)
+  :require org
   :init (progn
           (setq org-clock-into-drawer t)
           (defun jeff/org-mode-ask-effort ()
@@ -749,7 +735,7 @@ recently selected windows nor the buffer list."
 ;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
 
 (req-package org-capture
-  :require (org)
+  :require org
   :init (setq org-capture-templates
               (quote (("b" "entry.html" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
                        "* TODO %:description\n%:initial\n" :immediate-finish t)
@@ -795,12 +781,11 @@ recently selected windows nor the buffer list."
 
 ;; ----------------------------------------------------------- [ org-ehtml ]
 
-(req-package web-server
-  :loader req-package-try-el-get)
+(req-package web-server)
 
 (req-package org-ehtml
   :loader req-package-try-el-get
-  :require web-server
+  :require (org web-server)
   :init (setq
          org-ehtml-everything-editable t
          org-ehtml-allow-agenda t
@@ -889,7 +874,7 @@ GET header should contain a path in form '/todo/ID'."
         ((:GET  . ".*")       . org-ehtml-file-handler)
         ((:POST . ".*")       . org-ehtml-edit-handler)))
 
-(when t
+(when (boundp 'ws-servers)
   (mapc (lambda (server)
           (if (= 3333 (port server))
               (ws-stop server)))
@@ -902,6 +887,7 @@ GET header should contain a path in form '/todo/ID'."
 ;; ----------------------------------------------------------- [ evernote ]
 
 (req-package evernote-mode
+  :loader req-package-try-el-get
   :init (progn
           (setq evernote-developer-token "S=s1:U=81f:E=1470997a804:C=13fb1e67c09:P=1cd:A=en-devtoken:V=2:H=0b3aafa546daa4a9b43c77a7574390d4"
                 evernote-enml-formatter-command '("w3m" "-dump" "-I" "UTF8" "-O" "UTF8") ; optional
@@ -928,6 +914,13 @@ GET header should contain a path in form '/todo/ID'."
 
 ;; ----------------------------------------------------------- [ modeline ]
 
+(req-package smart-mode-line
+  :init (sml/setup))
+
+(req-package nyan-mode
+  :loader req-package-try-el-get)
+
+(when nil
 (set-face-attribute 'mode-line nil :box nil)
 
 ;; Mode line setup, after http://amitp.blogspot.com/2011/08/emacs-custom-mode-line.html
@@ -1078,7 +1071,7 @@ GET header should contain a path in form '/todo/ID'."
 (set-face-attribute 'mode-line-process-face nil
                     :inherit 'mode-line-face
                     :foreground "#718c00")
-
+)
 
 ;; ----------------------------------------------------------- [ key bindings ]
 
@@ -1106,8 +1099,6 @@ GET header should contain a path in form '/todo/ID'."
 (define-key smartparens-strict-mode-map (kbd "M-<delete>") 'sp-unwrap-sexp)
 (define-key smartparens-strict-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)
 
-;; fix keyboard behavior on terminals that send ^[O{ABCD} for arrows
-(defvar ALT-O-map (make-sparse-keymap) "ALT-O keymap.")
 
 ;; ----------------------------------------------------------- [ finish ]
 
