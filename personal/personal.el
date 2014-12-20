@@ -770,7 +770,7 @@ recently selected windows nor the buffer list."
   "Show schedule in fullscreen."
   (interactive)
   (toggle-frame-fullscreen)
-  (org-agenda nil "s"))
+  (run-with-idle-timer 1 nil (lambda () (org-agenda nil "s"))))
 
 (req-package org-cua-dwim
   :demand t
@@ -917,13 +917,40 @@ GET header should contain a path in form '/todo/ID'."
 ;; ----------------------------------------------------------- [ modeline ]
 
 (req-package smart-mode-line
-  :init (sml/setup))
+  :init (progn
+          (sml/setup))
+  :config (progn
+            (add-to-list 'rm-excluded-modes " MRev" t)
+            (add-to-list 'rm-excluded-modes " Guide" t)
+            (add-to-list 'rm-excluded-modes " Helm" t)
+            (add-to-list 'rm-excluded-modes " company" t)0
+            (add-to-list 'sml/replacer-regexp-list '("^:DB:workspace" ":WS:")   t)
+            (add-to-list 'sml/replacer-regexp-list '("^:WS:/uplands"  ":UP:")   t)
+            (add-to-list 'sml/replacer-regexp-list '("^:WS:/autodesk" ":ADSK:") t)
+            (setq sml/col-number-format "%03c")
+            (setq projectile-mode-line '(:eval (format " Proj[%s]" (projectile-project-name))))
+            (deftheme smart-mode-line-jeff "Jeff's theme for smart-mode-line.")
+            (custom-theme-set-faces
+             'smart-mode-line-jeff
+             '(mode-line-inactive    ((t :foreground "gray60" :background "gray30"  :inverse-video nil
+                                         :font-family "Mono" )))
+             '(mode-line             ((t :foreground "gray60" :background "black"   :inverse-video nil
+                                         :font-family "Mono" :box nil :height 1.09)))
+             '(sml/global            ((t :foreground "gray50"                       :inverse-video nil)))
+             '(sml/prefix            ((t :inherit sml/global       :foreground "#bf6000")))
+             '(sml/modes             ((t :inherit sml/global       :foreground "White")))
+             '(sml/filename          ((t :inherit sml/global       :foreground "#eab700"     :weight bold)))
+             '(sml/read-only         ((t :inherit sml/not-modified :foreground "DeepSkyBlue")))
+             '(mode-line-buffer-id   ((t :inherit sml/filename     :foreground nil           :background nil)))
+             '(persp-selected-face   ((t :inherit sml/filename     :foreground "ForestGreen")))
+             '(helm-candidate-number ((t :inherit sml/filename     :foreground nil           :background nil ))))
+            (enable-theme 'smart-mode-line-jeff)))
 
 (req-package nyan-mode
   :demand t
   :loader req-package-try-el-get
   :init (progn (nyan-mode +1)
-               (setq nyan-wavy-trail t)
+               ;;(setq nyan-wavy-trail t)
                (nyan-start-animation)))
 
 ;; ----------------------------------------------------------- [ key bindings ]
