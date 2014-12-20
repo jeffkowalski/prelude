@@ -409,7 +409,12 @@ recently selected windows nor the buffer list."
 (req-package guide-key
   :init (progn
           (setq guide-key/guide-key-sequence
-                '("C-x r" "C-x 4" (org-mode "C-c C-x")))
+                '("C-x r"
+                  "C-x 4"
+                  (flycheck-mode   "C-c !")
+                  (helm-mode       "C-c h")
+                  (projectile-mode "C-c p")
+                  (org-mode        "C-c C-x")))
           (guide-key-mode 1)))
 
 
@@ -923,11 +928,12 @@ GET header should contain a path in form '/todo/ID'."
             (add-to-list 'rm-excluded-modes " MRev" t)
             (add-to-list 'rm-excluded-modes " Guide" t)
             (add-to-list 'rm-excluded-modes " Helm" t)
-            (add-to-list 'rm-excluded-modes " company" t)0
+            (add-to-list 'rm-excluded-modes " company" t)
             (add-to-list 'sml/replacer-regexp-list '("^:DB:workspace" ":WS:")   t)
             (add-to-list 'sml/replacer-regexp-list '("^:WS:/uplands"  ":UP:")   t)
             (add-to-list 'sml/replacer-regexp-list '("^:WS:/autodesk" ":ADSK:") t)
             (setq sml/col-number-format "%03c")
+            (setq sml/use-projectile-p 'before-prefixes)
             (setq projectile-mode-line '(:eval (format " Proj[%s]" (projectile-project-name))))
             (deftheme smart-mode-line-jeff "Jeff's theme for smart-mode-line.")
             (custom-theme-set-faces
@@ -935,7 +941,8 @@ GET header should contain a path in form '/todo/ID'."
              '(mode-line-inactive    ((t :foreground "gray60" :background "gray30"  :inverse-video nil
                                          :font-family "Mono" )))
              '(mode-line             ((t :foreground "gray60" :background "black"   :inverse-video nil
-                                         :font-family "Mono" :box nil :height 1.09)))
+                                         :font-family "Mono" :box nil :height 110
+                                         )))
              '(sml/global            ((t :foreground "gray50"                       :inverse-video nil)))
              '(sml/prefix            ((t :inherit sml/global       :foreground "#bf6000")))
              '(sml/modes             ((t :inherit sml/global       :foreground "White")))
@@ -944,6 +951,13 @@ GET header should contain a path in form '/todo/ID'."
              '(mode-line-buffer-id   ((t :inherit sml/filename     :foreground nil           :background nil)))
              '(persp-selected-face   ((t :inherit sml/filename     :foreground "ForestGreen")))
              '(helm-candidate-number ((t :inherit sml/filename     :foreground nil           :background nil ))))
+            (defun sml/fill-width-available ()
+              "Return the size available for filling."
+              (max 0
+                   (+ sml/extra-filler
+                      (- (/ (* (window-body-width) (frame-char-height)) (window-mode-line-height))
+                         (let ((sml/simplified t))
+                           (length (format-mode-line mode-line-format)))))))
             (enable-theme 'smart-mode-line-jeff)))
 
 (req-package nyan-mode
