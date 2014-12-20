@@ -52,18 +52,19 @@
                           '("oldorg"))
                 :load-path ("." "contrib/lisp" "lisp")
                 ;; :load ("lisp/org-loaddefs.el")
+                :features org
                 :load ("lisp/org.el")
                 )
         (:name org-cua-dwim
                :description "Org-mode and CUA-mode compatibility layer"
                :type git
                :url "https://github.com/jeffkowalski/org-cua-dwim.git"
+               :depends org
                :features org-cua-dwim)
         (:name org-ehtml
                :description "Export Org-mode files as editable web pages"
                :type git
                :url "https://github.com/jeffkowalski/org-ehtml.git"
-               :depends web-server
                :load-path "src")
         (:name org-reveal
                :description "Exports Org-mode contents to Reveal.js HTML presentation"
@@ -72,7 +73,6 @@
                :depends org
                :features ox-reveal)
         ))
-
 
 ;; ----------------------------------------------------------- [ packages ]
 
@@ -109,6 +109,8 @@
             (or (el-get 'sync package) t) ;; TODO check for success
           INSTALLED))
     nil))
+
+(el-get 'sync)
 
 ;; Enable sorting on all columns in package menu's tabular list.
 ;; Note my naive mapping removes the final properties (like :right-align) if present.
@@ -568,6 +570,7 @@ recently selected windows nor the buffer list."
 ;; ----------------------------------------------------------- [ org ]
 
 (req-package org
+  :demand t
   :loader req-package-try-el-get
   :init (setq org-directory "~/Dropbox/workspace/org/"
               ;;org-replace-disputed-keys t ; org-CUA-compatible
@@ -603,10 +606,6 @@ recently selected windows nor the buffer list."
               org-mobile-inbox-for-pull (concat org-mobile-directory "flagged.org")))
 
 (req-package htmlize)
-
-(req-package org-reveal
-  :require org
-  :loader req-package-try-el-get)
 
 (req-package org-agenda
   :require (org htmlize)
@@ -774,6 +773,7 @@ recently selected windows nor the buffer list."
   (org-agenda nil "s"))
 
 (req-package org-cua-dwim
+  :demand t
   :loader req-package-try-el-get
   :require (cua-base org)
   :init (org-cua-dwim-activate))
@@ -784,6 +784,7 @@ recently selected windows nor the buffer list."
 (req-package web-server)
 
 (req-package org-ehtml
+  :demand t
   :loader req-package-try-el-get
   :require (org web-server)
   :init (setq
@@ -887,6 +888,7 @@ GET header should contain a path in form '/todo/ID'."
 ;; ----------------------------------------------------------- [ evernote ]
 
 (req-package evernote-mode
+  :demand t
   :loader req-package-try-el-get
   :init (progn
           (setq evernote-developer-token "S=s1:U=81f:E=1470997a804:C=13fb1e67c09:P=1cd:A=en-devtoken:V=2:H=0b3aafa546daa4a9b43c77a7574390d4"
@@ -918,160 +920,11 @@ GET header should contain a path in form '/todo/ID'."
   :init (sml/setup))
 
 (req-package nyan-mode
-  :loader req-package-try-el-get)
-
-(when nil
-(set-face-attribute 'mode-line nil :box nil)
-
-;; Mode line setup, after http://amitp.blogspot.com/2011/08/emacs-custom-mode-line.html
-(setq-default
- mode-line-format
- '(
-   ;; Position, including warning for 80 columns
-   (:propertize "%4l:" face mode-line-position-face)
-   (:eval (propertize "%3c" 'face
-                      (if (>= (current-column) 80)
-                          'mode-line-80col-face
-                        'mode-line-position-face)))
-   " "
-   (-3 :eval (propertize (format "%2d%%%%"
-                                 (if (= (point-max) (point-min))
-                                     100
-                                   (min 100 (/ (- (point) (point-min) 1) (/ (- (point-max) (point-min)) 100))))
-                                 )
-                         'face
-                         (if (let* ((beg (point-min))
-                                    (end (point-max))
-                                    (total (buffer-size)))
-                               (or (/= beg 1) (/= end (1+ total))))
-                             'mode-line-narrow-face
-                           'mode-line-position-face)))
-
-   ;; emacsclient [default -- keep?]
-   ;;mode-line-client
-   " "
-   ;; read-only or modified status
-   (:eval
-    (cond (buffer-read-only
-           (propertize " RO " 'face 'mode-line-read-only-face))
-          ((buffer-modified-p)
-           (propertize " ** " 'face 'mode-line-modified-face))
-          (t
-           (propertize "    " 'face 'mode-line-unmodified-face))))
-   " "
-   ;; directory and buffer/file name
-   (:propertize (:eval (shorten-directory default-directory 20))
-                face mode-line-folder-face)
-   (:propertize "%b"
-                face mode-line-filename-face)
-   ;; narrow [default -- keep?]
-   ;; mode indicators: vc, recursive edit, major mode, minor modes, process, global
-   " "
-   (:eval (when vc-mode (concat vc-mode " ")))
-   " %[["
-   (:propertize mode-name
-                face mode-line-mode-face)
-   "%]]"
-   (:propertize mode-line-process
-                face mode-line-process-face)
-   " "
-   (:eval (propertize (format-mode-line minor-mode-alist)
-                      'face 'mode-line-minor-mode-face))
-   "  "
-   (global-mode-string global-mode-string)
-   "  "
-   ;; nyan-mode uses nyan cat as an alternative to %p
-   (:eval (when nyan-mode (list (nyan-create))))
-   )
- )
-
-;; Helper function
-(defun shorten-directory (dir max-length)
-  "Show directory name DIR up to MAX-LENGTH characters."
-  (let ((path (reverse (split-string (abbreviate-file-name dir) "/")))
-        (output ""))
-    (when (and path (equal "" (car path)))
-      (setq path (cdr path)))
-    (while (and path (< (length output) (- max-length 4)))
-      (setq output (concat (car path) "/" output))
-      (setq path (cdr path)))
-    (when path
-      (setq output (concat ".../" output)))
-    output))
-
-;; Extra mode line faces
-(defvar mono-mode-line-family "Mono")
-(set-face-attribute 'mode-line nil
-                    :foreground "gray80" :background "gray15"
-                    :inverse-video nil
-                    :box '(:line-width 6 :color "gray15" :style nil))
-
-(set-face-attribute 'mode-line-inactive nil
-                    :foreground "gray60" :background "gray30"
-                    :inverse-video nil
-                    :box '(:line-width 6 :color "gray30" :style nil))
-
-(make-face 'mode-line-position-face)
-(set-face-attribute 'mode-line-position-face nil
-                    :inherit 'mode-line-face
-                    :family 'mono-mode-line-family)
-
-(make-face 'mode-line-80col-face)
-(set-face-attribute 'mode-line-80col-face nil
-                    :inherit 'mode-line-position-face
-                    :foreground "black" :background "#eab700")
-
-(make-face 'mode-line-narrow-face)
-(set-face-attribute 'mode-line-narrow-face nil
-                    :inherit 'mode-line-position-face
-                    :box '(:line-width 2 :color "gray40"))
-
-(make-face 'mode-line-unmodified-face)
-(set-face-attribute 'mode-line-unmodified-face nil
-                    :inherit 'mode-line-face
-                    :family 'mono-mode-line-family :height 110)
-
-(make-face 'mode-line-read-only-face)
-(set-face-attribute 'mode-line-read-only-face nil
-                    :inherit 'mode-line-face
-                    :foreground "#4271ae"
-                    :family 'mono-mode-line-family :height 110
-                    :box '(:line-width 2 :color "#4271ae"))
-
-(make-face 'mode-line-modified-face)
-(set-face-attribute 'mode-line-modified-face nil
-                    :inherit 'mode-line-face
-                    :foreground "#c82829"
-                    ;; :background "#ffffff"
-                    :family 'mono-mode-line-family :height 110
-                    :box '(:line-width 2 :color "#c82829"))
-
-(make-face 'mode-line-folder-face)
-(set-face-attribute 'mode-line-folder-face nil
-                    :inherit 'mode-line-face
-                    :foreground "gray60")
-
-(make-face 'mode-line-filename-face)
-(set-face-attribute 'mode-line-filename-face nil
-                    :inherit 'mode-line-face
-                    :foreground "#eab700"
-                    :weight 'bold)
-
-(make-face 'mode-line-mode-face)
-(set-face-attribute 'mode-line-mode-face nil
-                    :inherit 'mode-line-face
-                    :foreground "gray80")
-
-(make-face 'mode-line-minor-mode-face)
-(set-face-attribute 'mode-line-minor-mode-face nil
-                    :inherit 'mode-line-mode-face
-                    :foreground "gray40")
-
-(make-face 'mode-line-process-face)
-(set-face-attribute 'mode-line-process-face nil
-                    :inherit 'mode-line-face
-                    :foreground "#718c00")
-)
+  :demand t
+  :loader req-package-try-el-get
+  :init (progn (nyan-mode +1)
+               (setq nyan-wavy-trail t)
+               (nyan-start-animation)))
 
 ;; ----------------------------------------------------------- [ key bindings ]
 
