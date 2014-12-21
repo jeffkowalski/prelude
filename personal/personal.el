@@ -259,6 +259,13 @@
 (global-set-key (kbd "<f8>")            'define-macro-key)
 
 
+;; ----------------------------------------------------------- [ smartparens ]
+
+(req-package smartparens
+  :config (progn (define-key smartparens-strict-mode-map (kbd "M-<delete>")    'sp-unwrap-sexp)
+                 (define-key smartparens-strict-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)))
+
+
 ;; ----------------------------------------------------------- [ registers ]
 
 ;; Registers allow you to jump to a file or other location quickly.
@@ -359,7 +366,16 @@
   :bind (("C-x C-f" . helm-find-files)
          ("M-x"     . helm-M-x)
          ("C-x b"   . helm-buffers-list)
-         ("C-M-g"   . helm-do-grep)))
+         ("C-M-g"   . helm-do-grep))
+  :config (progn
+            (defun jeff/find-file-as-root ()
+              "Like 'helm-find-file', but automatically edit the file with root-privileges (using tramp/sudo), if the file is not writable by user."
+              (interactive)
+              (let ((file (helm-read-file-name "Edit as root: ")))
+                (unless (file-writable-p file)
+                  (setq file (concat "/sudo:root@localhost:" file)))
+                (find-file file)))
+            (global-set-key (kbd "C-x F") 'jeff/find-file-as-root)))
 
 ;; FIXME: workaround problem in
 ;;        select-frame-set-input-focus(#<frame *Minibuf-1* * 0x6a44268>)
@@ -443,16 +459,6 @@ recently selected windows nor the buffer list."
       (format "\\(%s\\)\\|\\(%s\\)"
               vc-ignore-dir-regexp
               tramp-file-name-regexp))
-
-(defun jeff/find-file-as-root ()
-  "Like 'helm-find-file', but automatically edit the file with root-privileges (using tramp/sudo), if the file is not writable by user."
-  (interactive)
-  (let ((file (helm-read-file-name "Edit as root: ")))
-    (unless (file-writable-p file)
-      (setq file (concat "/sudo:root@localhost:" file)))
-    (find-file file)))
-(global-set-key (kbd "C-x F") 'jeff/find-file-as-root)
-
 
 ;; ----------------------------------------------------------- [ ido ]
 
@@ -578,18 +584,46 @@ recently selected windows nor the buffer list."
 (req-package org
   :demand t
   :loader req-package-try-el-get
-  :init (setq org-directory "~/Dropbox/workspace/org/"
-              ;;org-replace-disputed-keys t ; org-CUA-compatible
-              org-log-into-drawer t
-              org-support-shift-select 'always
-              org-default-notes-file (concat org-directory "refile.org")
-              org-agenda-files (list (concat org-directory "toodledo.org")
-                                     (concat org-directory "sauron.org")
-                                     (concat org-directory "gcal.org"))
-              org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m)
-              org-startup-indented t
-              org-enforce-todo-dependencies t
-              org-babel-load-languages '((sh . t)))
+  :init
+  (setq org-directory "~/Dropbox/workspace/org/"
+        ;;org-replace-disputed-keys t ; org-CUA-compatible
+        org-log-into-drawer t
+        org-support-shift-select 'always
+        org-default-notes-file (concat org-directory "refile.org")
+        org-agenda-files (list (concat org-directory "toodledo.org")
+                               (concat org-directory "sauron.org")
+                               (concat org-directory "gcal.org"))
+        org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m)
+        org-startup-indented t
+        org-enforce-todo-dependencies t
+        org-babel-load-languages '((sh . t)))
+  :config
+  (progn
+    (defun jeff/org-add-ids-to-headlines-in-file ()
+      "Add ID properties to all headlines in the current file which do not already have one."
+      (interactive)
+      (org-map-entries 'org-id-get-create))
+    ;; (add-hook 'org-mode-hook
+    ;;           (lambda ()
+    ;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
+
+    (defun org-check-misformatted-subtree ()
+      "Check misformatted entries in the current buffer."
+      (interactive)
+      (show-all)
+      (org-map-entries
+       (lambda ()
+         (when (and (move-beginning-of-line 2)
+                    (not (looking-at org-heading-regexp)))
+           (if (or (and (org-get-scheduled-time (point))
+                        (not (looking-at (concat "^.*" org-scheduled-regexp))))
+                   (and (org-get-deadline-time (point))
+                        (not (looking-at (concat "^.*" org-deadline-regexp)))))
+               (when (y-or-n-p "Fix this subtree? ")
+                 (message "Call the function again when you're done fixing this subtree.")
+                 (recursive-edit))
+             (message "All subtrees checked.")))))))
+
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-capture)
          ("C-c a" . org-agenda)
@@ -731,14 +765,6 @@ recently selected windows nor the buffer list."
 
 (req-package org-protocol)
 
-(defun jeff/org-add-ids-to-headlines-in-file ()
-  "Add ID properties to all headlines in the current file which do not already have one."
-  (interactive)
-  (org-map-entries 'org-id-get-create))
-;; (add-hook 'org-mode-hook
-;;           (lambda ()
-;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
-
 (req-package org-capture
   :require org
   :init (setq org-capture-templates
@@ -754,23 +780,6 @@ recently selected windows nor the buffer list."
             (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create))
   :bind (("C-M-r" . org-capture)
          ("C-c r" . org-capture)))
-
-(defun org-check-misformatted-subtree ()
-  "Check misformatted entries in the current buffer."
-  (interactive)
-  (show-all)
-  (org-map-entries
-   (lambda ()
-     (when (and (move-beginning-of-line 2)
-                (not (looking-at org-heading-regexp)))
-       (if (or (and (org-get-scheduled-time (point))
-                    (not (looking-at (concat "^.*" org-scheduled-regexp))))
-               (and (org-get-deadline-time (point))
-                    (not (looking-at (concat "^.*" org-deadline-regexp)))))
-           (when (y-or-n-p "Fix this subtree? ")
-             (message "Call the function again when you're done fixing this subtree.")
-             (recursive-edit))
-         (message "All subtrees checked."))))))
 
 (defun jeff/organizer ()
   "Show schedule in fullscreen."
@@ -796,34 +805,34 @@ recently selected windows nor the buffer list."
   :init (setq
          org-ehtml-everything-editable t
          org-ehtml-allow-agenda t
-         org-ehtml-docroot (expand-file-name "~/Dropbox/workspace/org")))
-
-(defun pre-adjust-agenda-for-html nil
-  "Adjust agenda buffer before htmlize.
+         org-ehtml-docroot (expand-file-name "~/Dropbox/workspace/org"))
+  :config
+  (defun pre-adjust-agenda-for-html nil
+    "Adjust agenda buffer before htmlize.
 Adds a link overlay to be intercepted by post-adjust-agenda-for-html."
-  (goto-char (point-min))
-  (let (marker id)
-    (while (not (eobp))
-      (cond
-       ((setq marker (or (get-text-property (point) 'org-hd-marker)
-                         (get-text-property (point) 'org-marker)))
-        (when (and (setq id (org-id-get marker))
-                   (let ((case-fold-search nil))
-                     (re-search-forward (get-text-property (point) 'org-not-done-regexp)
-                                        (point-at-eol) t)))
-          (htmlize-make-link-overlay (match-beginning 0) (match-end 0) (concat "todo:" id)))
-        ))
-      (beginning-of-line 2))))
-(add-hook 'htmlize-before-hook 'pre-adjust-agenda-for-html)
+    (goto-char (point-min))
+    (let (marker id)
+      (while (not (eobp))
+        (cond
+         ((setq marker (or (get-text-property (point) 'org-hd-marker)
+                           (get-text-property (point) 'org-marker)))
+          (when (and (setq id (org-id-get marker))
+                     (let ((case-fold-search nil))
+                       (re-search-forward (get-text-property (point) 'org-not-done-regexp)
+                                          (point-at-eol) t)))
+            (htmlize-make-link-overlay (match-beginning 0) (match-end 0) (concat "todo:" id)))
+          ))
+        (beginning-of-line 2))))
+  (add-hook 'htmlize-before-hook 'pre-adjust-agenda-for-html)
 
-(defun post-adjust-agenda-for-html nil
-  "Adjust agenda buffer after htmlize.
+  (defun post-adjust-agenda-for-html nil
+    "Adjust agenda buffer after htmlize.
 Intercept link overlay from pre-adjust-agenda-for-html, and
 convert to call to javascript function."
-  (goto-char (point-min))
-  (search-forward "</head>")
-  (beginning-of-line)
-  (insert "
+    (goto-char (point-min))
+    (search-forward "</head>")
+    (beginning-of-line)
+    (insert "
     <script src=\"http://code.jquery.com/jquery-1.10.2.min.js\"></script>
     <script>
         function todo (id) {
@@ -840,54 +849,54 @@ convert to call to javascript function."
         }
     </script>
 ")
-  (search-forward "<body>")
-  (beginning-of-line 2)
-  (insert "    <span id=\"message\"></span>")
-  (while (re-search-forward "<a href=\"todo:\\(.*\\)\">\\(.*\\)</a>" nil t)
-    (replace-match "<a href='' onclick='todo(\"\\1\");'>\\2</a>")))
-(add-hook 'htmlize-after-hook 'post-adjust-agenda-for-html)
+    (search-forward "<body>")
+    (beginning-of-line 2)
+    (insert "    <span id=\"message\"></span>")
+    (while (re-search-forward "<a href=\"todo:\\(.*\\)\">\\(.*\\)</a>" nil t)
+      (replace-match "<a href='' onclick='todo(\"\\1\");'>\\2</a>")))
+  (add-hook 'htmlize-after-hook 'post-adjust-agenda-for-html)
 
-(defun jeff/capture-handler (request)
-  "Handle REQUEST objects meant for 'org-capture'.
+  (defun jeff/capture-handler (request)
+    "Handle REQUEST objects meant for 'org-capture'.
 GET header should contain a path in form '/capture/KEY/LINK/TITLE/BODY'."
-  (with-slots (process headers) request
-    (let ((path (cdr (assoc :GET headers))))
-      (if (string-match "/capture:?/\\(.*\\)" path)
-          (progn
-            (org-protocol-capture (match-string 1 path))
-            (ws-response-header process 200))
-        (ws-send-404 process)))))
+    (with-slots (process headers) request
+      (let ((path (cdr (assoc :GET headers))))
+        (if (string-match "/capture:?/\\(.*\\)" path)
+            (progn
+              (org-protocol-capture (match-string 1 path))
+              (ws-response-header process 200))
+          (ws-send-404 process)))))
 
-(defun jeff/todo-handler (request)
-  "Handle REQUEST objects meant for 'org-todo'.
+  (defun jeff/todo-handler (request)
+    "Handle REQUEST objects meant for 'org-todo'.
 GET header should contain a path in form '/todo/ID'."
-  (with-slots (process headers) request
-    (let ((path (cdr (assoc :GET headers))))
-      (if (string-match "/todo:?/\\(.*\\)" path)
-        (let* ((id (match-string 1 path))
-               (m (org-id-find id 'marker)))
-          (when m
-            (save-excursion (org-pop-to-buffer-same-window (marker-buffer m))
-                            (goto-char m)
-                            (move-marker m nil)
-                            (org-todo 'done)
-                            (save-buffer)))
-          (ws-response-header process 200))
-        (ws-send-404 process)))))
+    (with-slots (process headers) request
+      (let ((path (cdr (assoc :GET headers))))
+        (if (string-match "/todo:?/\\(.*\\)" path)
+            (let* ((id (match-string 1 path))
+                   (m (org-id-find id 'marker)))
+              (when m
+                (save-excursion (org-pop-to-buffer-same-window (marker-buffer m))
+                                (goto-char m)
+                                (move-marker m nil)
+                                (org-todo 'done)
+                                (save-buffer)))
+              (ws-response-header process 200))
+          (ws-send-404 process)))))
 
-(when (boundp 'ws-servers)
-  (mapc (lambda (server)
-          (if (= 3333 (port server))
-              (ws-stop server)))
-        ws-servers)
-  (condition-case-unless-debug nil
-      (ws-start '(((:GET  . "/capture") . jeff/capture-handler)
-                  ((:GET  . "/todo")    . jeff/todo-handler)
-                  ((:GET  . ".*")       . org-ehtml-file-handler)
-                  ((:POST . ".*")       . org-ehtml-edit-handler))
-                3333)
-    (error (message "Failed to create web server"))))
-
+  (when (boundp 'ws-servers)
+    (mapc (lambda (server)
+            (if (= 3333 (port server))
+                (ws-stop server)))
+          ws-servers)
+    (condition-case-unless-debug nil
+        (ws-start '(((:GET  . "/capture") . jeff/capture-handler)
+                    ((:GET  . "/todo")    . jeff/todo-handler)
+                    ((:GET  . ".*")       . org-ehtml-file-handler)
+                    ((:POST . ".*")       . org-ehtml-edit-handler))
+                  3333)
+      (error (message "Failed to create web server"))))
+)
 
 ;; ----------------------------------------------------------- [ evernote ]
 
@@ -918,40 +927,13 @@ GET header should contain a path in form '/todo/ID'."
          ("<M-right>"      . windmove-right)))
 
 
-;; ----------------------------------------------------------- [ modeline ]
-
-(req-package smart-mode-line
-  :init (progn
-          (sml/setup))
-  :config (progn
-            (sml/apply-theme 'automatic)
-            (add-to-list 'rm-excluded-modes " MRev" t)
-            (add-to-list 'rm-excluded-modes " Guide" t)
-            (add-to-list 'rm-excluded-modes " Helm" t)
-            (add-to-list 'rm-excluded-modes " company" t)
-            (add-to-list 'sml/replacer-regexp-list '("^:DB:workspace" ":WS:")   t)
-            (add-to-list 'sml/replacer-regexp-list '("^:WS:/uplands"  ":UP:")   t)
-            (add-to-list 'sml/replacer-regexp-list '("^:WS:/autodesk" ":ADSK:") t)
-            (setq sml/col-number-format "%03c")
-            (setq sml/use-projectile-p 'before-prefixes)
-            (setq projectile-mode-line '(:eval (format " Proj[%s]" (projectile-project-name))))
-            ))
-
-(req-package nyan-mode
-  :demand t
-  :loader req-package-try-el-get
-  :require smart-mode-line
-  :init (progn (nyan-mode +1)
-               ;;(setq nyan-wavy-trail t)
-               (nyan-start-animation)))
-
-
 ;; ----------------------------------------------------------- [ theme ]
 
 (req-package custom
   :init (setq custom-safe-themes t))
 
 (req-package solarized-theme
+   :require custom
    :init (progn (disable-theme 'zenburn)
                 (setq solarized-high-contrast-mode-line nil)
                 (setq solarized-scale-org-headlines t)
@@ -979,6 +961,35 @@ GET header should contain a path in form '/todo/ID'."
 (enable-theme 'jeff-theme)
 
 
+;; ----------------------------------------------------------- [ modeline ]
+
+(req-package smart-mode-line
+  :require custom
+  :init (progn
+          (sml/setup))
+  :config (progn
+            (sml/apply-theme 'automatic)
+            (add-to-list 'rm-excluded-modes " MRev" t)
+            (add-to-list 'rm-excluded-modes " Guide" t)
+            (add-to-list 'rm-excluded-modes " Helm" t)
+            (add-to-list 'rm-excluded-modes " company" t)
+            (add-to-list 'sml/replacer-regexp-list '("^:DB:workspace" ":WS:")   t)
+            (add-to-list 'sml/replacer-regexp-list '("^:WS:/uplands"  ":UP:")   t)
+            (add-to-list 'sml/replacer-regexp-list '("^:WS:/autodesk" ":ADSK:") t)
+            (setq sml/col-number-format "%03c")
+            (setq sml/use-projectile-p 'before-prefixes)
+            (setq projectile-mode-line '(:eval (format " Proj[%s]" (projectile-project-name))))
+            ))
+
+(req-package nyan-mode
+  :demand t
+  :loader req-package-try-el-get
+  :require smart-mode-line
+  :init (progn (nyan-mode +1)
+               ;;(setq nyan-wavy-trail t)
+               (nyan-start-animation)))
+
+
 ;; ----------------------------------------------------------- [ key bindings ]
 
 (define-key special-event-map [delete-frame] 'save-buffers-kill-terminal)
@@ -1001,9 +1012,6 @@ GET header should contain a path in form '/todo/ID'."
 
 (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
 (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
-
-(define-key smartparens-strict-mode-map (kbd "M-<delete>")    'sp-unwrap-sexp)
-(define-key smartparens-strict-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)
 
 
 ;; ----------------------------------------------------------- [ finish ]
