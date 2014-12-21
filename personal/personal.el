@@ -100,6 +100,7 @@
 ;; Override function defined in req-package, so that packages
 ;; from el-get-sources are considered as well as those from el-get-recipes
 (defun req-package-try-el-get (package)
+  "Install PACKAGE if available and not already installed."
   (if req-package-el-get-present
       (let* ((AVAIL (or (el-get-recipe-filename package)
                         (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources))))
@@ -874,19 +875,17 @@ GET header should contain a path in form '/todo/ID'."
           (ws-response-header process 200))
         (ws-send-404 process)))))
 
-(setq jeff/org-ehtml-handler
-      '(((:GET  . "/capture") . jeff/capture-handler)
-        ((:GET  . "/todo")    . jeff/todo-handler)
-        ((:GET  . ".*")       . org-ehtml-file-handler)
-        ((:POST . ".*")       . org-ehtml-edit-handler)))
-
 (when (boundp 'ws-servers)
   (mapc (lambda (server)
           (if (= 3333 (port server))
               (ws-stop server)))
         ws-servers)
   (condition-case-unless-debug nil
-      (ws-start jeff/org-ehtml-handler 3333)
+      (ws-start '(((:GET  . "/capture") . jeff/capture-handler)
+                  ((:GET  . "/todo")    . jeff/todo-handler)
+                  ((:GET  . ".*")       . org-ehtml-file-handler)
+                  ((:POST . ".*")       . org-ehtml-edit-handler))
+                3333)
     (error (message "Failed to create web server"))))
 
 
@@ -925,6 +924,7 @@ GET header should contain a path in form '/todo/ID'."
   :init (progn
           (sml/setup))
   :config (progn
+            (sml/apply-theme 'automatic)
             (add-to-list 'rm-excluded-modes " MRev" t)
             (add-to-list 'rm-excluded-modes " Guide" t)
             (add-to-list 'rm-excluded-modes " Helm" t)
@@ -935,37 +935,49 @@ GET header should contain a path in form '/todo/ID'."
             (setq sml/col-number-format "%03c")
             (setq sml/use-projectile-p 'before-prefixes)
             (setq projectile-mode-line '(:eval (format " Proj[%s]" (projectile-project-name))))
-            (deftheme smart-mode-line-jeff "Jeff's theme for smart-mode-line.")
-            (custom-theme-set-faces
-             'smart-mode-line-jeff
-             '(mode-line-inactive    ((t :foreground "gray60" :background "gray30"  :inverse-video nil
-                                         :font-family "Mono" )))
-             '(mode-line             ((t :foreground "gray60" :background "black"   :inverse-video nil
-                                         :font-family "Mono" :box nil :height 110
-                                         )))
-             '(sml/global            ((t :foreground "gray50"                       :inverse-video nil)))
-             '(sml/prefix            ((t :inherit sml/global       :foreground "#bf6000")))
-             '(sml/modes             ((t :inherit sml/global       :foreground "White")))
-             '(sml/filename          ((t :inherit sml/global       :foreground "#eab700"     :weight bold)))
-             '(sml/read-only         ((t :inherit sml/not-modified :foreground "DeepSkyBlue")))
-             '(mode-line-buffer-id   ((t :inherit sml/filename     :foreground nil           :background nil)))
-             '(persp-selected-face   ((t :inherit sml/filename     :foreground "ForestGreen")))
-             '(helm-candidate-number ((t :inherit sml/filename     :foreground nil           :background nil ))))
-            (defun sml/fill-width-available ()
-              "Return the size available for filling."
-              (max 0
-                   (+ sml/extra-filler
-                      (- (/ (* (window-body-width) (frame-char-height)) (window-mode-line-height))
-                         (let ((sml/simplified t))
-                           (length (format-mode-line mode-line-format)))))))
-            (enable-theme 'smart-mode-line-jeff)))
+            ))
 
 (req-package nyan-mode
   :demand t
   :loader req-package-try-el-get
+  :require smart-mode-line
   :init (progn (nyan-mode +1)
                ;;(setq nyan-wavy-trail t)
                (nyan-start-animation)))
+
+
+;; ----------------------------------------------------------- [ theme ]
+
+(req-package custom
+  :init (setq custom-safe-themes t))
+
+(req-package solarized-theme
+   :init (progn (disable-theme 'zenburn)
+                (setq solarized-high-contrast-mode-line nil)
+                (setq solarized-scale-org-headlines t)
+                (load-theme 'solarized-dark t))
+   :config (progn (setq x-underline-at-descent-line t)))
+
+;; (req-package color-theme-sanityinc-solarized
+;;   :init (progn (disable-theme 'zenburn)
+;;                (load-theme 'sanityinc-solarized-dark t)))
+
+(deftheme jeff-theme "Jeff's theme.")
+(custom-theme-set-faces
+ 'jeff-theme
+ ;; '(helm-ff-directory ((t (:foreground "deep sky blue"))))
+ ;; '(helm-ff-file ((t (:foreground "gainsboro"))))
+ ;; '(helm-ff-symlink ((t (:foreground "cyan"))))
+ ;; '(highlight ((t (:background "black"))))
+ ;; '(org-agenda-current-time ((t (:inherit org-time-grid :background "dim gray"))) t)
+ ;; '(org-agenda-done ((t (:foreground "dim gray"))))
+ ;; '(org-scheduled-previously ((t (:foreground "#bc8383"))))
+ ;; '(org-warning ((t (:foreground "#cc9393" :weight bold))))
+ ;; '(region ((t (:background "dim gray"))))
+ ;; '(mode-line ((t :overline ,unspecified :underline nil :box '(:line-width 1 :color "#969896"))))
+ )
+(enable-theme 'jeff-theme)
+
 
 ;; ----------------------------------------------------------- [ key bindings ]
 
@@ -990,7 +1002,7 @@ GET header should contain a path in form '/todo/ID'."
 (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
 (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
 
-(define-key smartparens-strict-mode-map (kbd "M-<delete>") 'sp-unwrap-sexp)
+(define-key smartparens-strict-mode-map (kbd "M-<delete>")    'sp-unwrap-sexp)
 (define-key smartparens-strict-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)
 
 
