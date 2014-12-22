@@ -220,19 +220,28 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
            (add-hook hook (lambda ()
                             (setq show-trailing-whitespace nil))))
          '(eshell-mode-hook term-mode-hook))
+#+END_SRC
+*** compile
+#+BEGIN_SRC emacs-lisp
 
   (req-package compile
     :bind (("<f5>" . recompile)))
-
+#+END_SRC
+*** cperl mode
+#+BEGIN_SRC emacs-lisp
   (req-package cperl-mode
     :ensure t
     :init (defalias 'perl-mode 'cperl-mode))
-
+#+END_SRC
+*** mode mode
+#+BEGIN_SRC emacs-lisp
   (req-package make-mode
     ;; re-tabbing during whitespace-cleanup would kill makefiles
     :config (add-hook 'makefile-mode-hook
                       (lambda () (remove-hook 'before-save-hook 'whitespace-cleanup t))))
-
+#+END_SRC
+*** doc view
+#+BEGIN_SRC emacs-lisp
   (req-package doc-view
     :config (setq doc-view-ghostscript-options
                   '("-dMaxBitmap=2147483647" "-dSAFER" "-dNOPAUSE" "-sDEVICE=png16m" "-dTextAlphaBits=4" "-dBATCH" "-dGraphicsAlphaBits=4" "-dQUIET")
@@ -289,7 +298,7 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
   (mapc
    (lambda (r)
      (set-register (car r) (cons 'file (cdr r))))
-   '((?p . "~/.emacs.d/personal/personal.el")
+   '((?p . "~/.emacs.d/personal/personal.org")
      (?i . "~/Dropbox/sync-linux/installation.txt")
      (?c . "~/.emacs.d/personal/custom.el")
      (?m . "~/Dropbox/sync-linux/mac_addrs.org")
@@ -595,7 +604,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
 #+BEGIN_SRC emacs-lisp
   (req-package ace-window
     :config '(setq aw-scope 'frame))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ org ]
 #+BEGIN_SRC emacs-lisp
@@ -651,20 +659,28 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
     :require org
     :init (setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
   )
-
+#+END_SRC
+*** org habit
+#+BEGIN_SRC emacs-lisp
   (req-package org-habit
     :require org
     :init (setq org-habit-following-days 1
                 org-habit-graph-column 46))
-
+#+END_SRC
+*** org mobile
+#+BEGIN_SRC emacs-lisp
   (req-package org-mobile
     :require org
     :init (setq org-mobile-directory "~/Dropbox/mobileorg/"
                 org-mobile-agendas '("a")
                 org-mobile-inbox-for-pull (concat org-mobile-directory "flagged.org")))
-
+#+END_SRC
+*** htmlize
+#+BEGIN_SRC emacs-lisp
   (req-package htmlize)
-
+#+END_SRC
+*** org agenda
+#+BEGIN_SRC emacs-lisp
   (req-package org-agenda
     :require (org htmlize)
     :init (progn (setq org-agenda-tags-column -97
@@ -752,7 +768,9 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
                  ;;       (with-selected-window agenda-window (org-agenda-redo)))))
                  ;;(run-at-time nil 60 'kiwon/org-agenda-redo-in-other-window)
                  ))
-
+#+END_SRC
+*** org clock
+#+BEGIN_SRC emacs-lisp
   (req-package org-clock
     :require org
     :init (progn
@@ -782,7 +800,9 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
             (t nil))))
 
   (req-package org-protocol)
-
+#+END_SRC
+*** org capture
+#+BEGIN_SRC emacs-lisp
   (req-package org-capture
     :require org
     :init (setq org-capture-templates
@@ -798,19 +818,14 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
               (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create))
     :bind (("C-M-r" . org-capture)
            ("C-c r" . org-capture)))
-
-  (defun jeff/organizer ()
-    "Show schedule in fullscreen."
-    (interactive)
-    (toggle-frame-fullscreen)
-    (run-with-idle-timer 1 nil (lambda () (org-agenda nil "s"))))
-
+#+END_SRC
+*** org cua dwim
+#+BEGIN_SRC emacs-lisp
   (req-package org-cua-dwim
     :demand t
     :loader req-package-try-el-get
     :require (cua-base org)
     :init (org-cua-dwim-activate))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ org-ehtml ]
 #+BEGIN_SRC emacs-lisp
@@ -1040,6 +1055,12 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
 ** ----------------------------------------------------------- [ finish ]
 #+BEGIN_SRC emacs-lisp
   (req-package-finish)
+
+  (defun jeff/organizer ()
+    "Show schedule in fullscreen."
+    (interactive)
+    (toggle-frame-fullscreen)
+    (run-with-idle-timer 1 nil (lambda () (org-agenda nil "s"))))
 
   (provide 'personal)
   ;;; personal.el ends here

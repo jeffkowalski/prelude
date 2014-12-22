@@ -205,17 +205,25 @@
                           (setq show-trailing-whitespace nil))))
        '(eshell-mode-hook term-mode-hook))
 
+;; compile
+
 (req-package compile
   :bind (("<f5>" . recompile)))
+
+;; cperl mode
 
 (req-package cperl-mode
   :ensure t
   :init (defalias 'perl-mode 'cperl-mode))
 
+;; mode mode
+
 (req-package make-mode
   ;; re-tabbing during whitespace-cleanup would kill makefiles
   :config (add-hook 'makefile-mode-hook
                     (lambda () (remove-hook 'before-save-hook 'whitespace-cleanup t))))
+
+;; doc view
 
 (req-package doc-view
   :config (setq doc-view-ghostscript-options
@@ -270,7 +278,7 @@
 (mapc
  (lambda (r)
    (set-register (car r) (cons 'file (cdr r))))
- '((?p . "~/.emacs.d/personal/personal.el")
+ '((?p . "~/.emacs.d/personal/personal.org")
    (?i . "~/Dropbox/sync-linux/installation.txt")
    (?c . "~/.emacs.d/personal/custom.el")
    (?m . "~/Dropbox/sync-linux/mac_addrs.org")
@@ -618,10 +626,14 @@ recently selected windows nor the buffer list."
   :init (setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
 )
 
+;; org habit
+
 (req-package org-habit
   :require org
   :init (setq org-habit-following-days 1
               org-habit-graph-column 46))
+
+;; org mobile
 
 (req-package org-mobile
   :require org
@@ -629,7 +641,11 @@ recently selected windows nor the buffer list."
               org-mobile-agendas '("a")
               org-mobile-inbox-for-pull (concat org-mobile-directory "flagged.org")))
 
+;; htmlize
+
 (req-package htmlize)
+
+;; org agenda
 
 (req-package org-agenda
   :require (org htmlize)
@@ -719,6 +735,8 @@ recently selected windows nor the buffer list."
                ;;(run-at-time nil 60 'kiwon/org-agenda-redo-in-other-window)
                ))
 
+;; org clock
+
 (req-package org-clock
   :require org
   :init (progn
@@ -749,6 +767,8 @@ recently selected windows nor the buffer list."
 
 (req-package org-protocol)
 
+;; org capture
+
 (req-package org-capture
   :require org
   :init (setq org-capture-templates
@@ -765,11 +785,7 @@ recently selected windows nor the buffer list."
   :bind (("C-M-r" . org-capture)
          ("C-c r" . org-capture)))
 
-(defun jeff/organizer ()
-  "Show schedule in fullscreen."
-  (interactive)
-  (toggle-frame-fullscreen)
-  (run-with-idle-timer 1 nil (lambda () (org-agenda nil "s"))))
+;; org cua dwim
 
 (req-package org-cua-dwim
   :demand t
@@ -997,6 +1013,12 @@ GET header should contain a path in form '/todo/ID'."
 ;; ----------------------------------------------------------- [ finish ]
 
 (req-package-finish)
+
+(defun jeff/organizer ()
+  "Show schedule in fullscreen."
+  (interactive)
+  (toggle-frame-fullscreen)
+  (run-with-idle-timer 1 nil (lambda () (org-agenda nil "s"))))
 
 (provide 'personal)
 ;;; personal.el ends here
