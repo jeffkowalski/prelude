@@ -24,6 +24,7 @@
   (require 'el-get))
 
 ;; set local recipes
+
 (setq el-get-sources
       '((:name evernote-mode
                :description "Functions for editing Evernote notes directly from Emacs"
@@ -74,8 +75,8 @@
         ))
 
 ;; ----------------------------------------------------------- [ packages ]
+;; Install the missing packages
 
-;; install the missing packages
 (dolist (p '(use-package
              ))
   (unless (package-installed-p p)
@@ -91,6 +92,7 @@
 
 ;; Override function defined in use-package, so that packages
 ;; from el-get are considered as well as those from the package manager.
+
 (defun use-package-ensure-elpa (package)
   "Install PACKAGE if not installed by elpa package manager or el-get."
   (when (not (or (package-installed-p package) (el-get-package-exists-p package)))
@@ -98,6 +100,7 @@
 
 ;; Override function defined in req-package, so that packages
 ;; from el-get-sources are considered as well as those from el-get-recipes
+
 (defun req-package-try-el-get (package)
   "Install PACKAGE if available and not already installed."
   (if req-package-el-get-present
@@ -114,6 +117,7 @@
 
 ;; Enable sorting on all columns in package menu's tabular list.
 ;; Note my naive mapping removes the final properties (like :right-align) if present.
+
 (add-hook 'package-menu-mode-hook
           (lambda () (setq tabulated-list-format
                              (vconcat (mapcar (lambda (arg) (list (nth 0 arg) (nth 1 arg)
@@ -129,7 +133,8 @@
   :config (setq cua-keep-region-after-copy nil))
 
 ;; FIXME: this is referenced from smartparens, and used to be in cua-base, but is no longer there
-;; https://github.com/Fuco1/smartparens/issues/271
+;;        https://github.com/Fuco1/smartparens/issues/271
+
 (eval-when-compile
   (require 'cua-base))
 (unless (fboundp 'cua-replace-region)
@@ -146,7 +151,7 @@
 
 ;; FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
 ;;        behavior on paste
-;;
+
 (defadvice cua-paste (before clobber-region (&optional arg))
   "Delete the region before pasting."
   (when (region-active-p) (delete-region (region-beginning) (region-end))))

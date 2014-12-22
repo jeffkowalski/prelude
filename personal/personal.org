@@ -26,13 +26,15 @@
 
 now either el-get is `require'd already, or have been `load'ed by the
 el-get installer.
-
 #+BEGIN_SRC emacs-lisp
   (eval-when-compile
     (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
     (require 'el-get))
 
-  ;; set local recipes
+#+END_SRC
+
+*** set local recipes
+#+BEGIN_SRC emacs-lisp
   (setq el-get-sources
         '((:name evernote-mode
                  :description "Functions for editing Evernote notes directly from Emacs"
@@ -84,8 +86,8 @@ el-get installer.
 #+END_SRC
 
 ** ----------------------------------------------------------- [ packages ]
+Install the missing packages
 #+BEGIN_SRC emacs-lisp
-  ;; install the missing packages
   (dolist (p '(use-package
                ))
     (unless (package-installed-p p)
@@ -98,16 +100,20 @@ el-get installer.
   (use-package req-package
     :ensure t
     :demand t)
+#+END_SRC
 
-  ;; Override function defined in use-package, so that packages
-  ;; from el-get are considered as well as those from the package manager.
+Override function defined in use-package, so that packages
+from el-get are considered as well as those from the package manager.
+#+BEGIN_SRC emacs-lisp
   (defun use-package-ensure-elpa (package)
     "Install PACKAGE if not installed by elpa package manager or el-get."
     (when (not (or (package-installed-p package) (el-get-package-exists-p package)))
       (package-install package)))
+#+END_SRC
 
-  ;; Override function defined in req-package, so that packages
-  ;; from el-get-sources are considered as well as those from el-get-recipes
+Override function defined in req-package, so that packages
+from el-get-sources are considered as well as those from el-get-recipes
+#+BEGIN_SRC emacs-lisp
   (defun req-package-try-el-get (package)
     "Install PACKAGE if available and not already installed."
     (if req-package-el-get-present
@@ -121,9 +127,11 @@ el-get installer.
       nil))
 
   (el-get 'sync)
+#+END_SRC
 
-  ;; Enable sorting on all columns in package menu's tabular list.
-  ;; Note my naive mapping removes the final properties (like :right-align) if present.
+Enable sorting on all columns in package menu's tabular list.
+Note my naive mapping removes the final properties (like :right-align) if present.
+#+BEGIN_SRC emacs-lisp
   (add-hook 'package-menu-mode-hook
             (lambda () (setq tabulated-list-format
                                (vconcat (mapcar (lambda (arg) (list (nth 0 arg) (nth 1 arg)
@@ -131,16 +139,17 @@ el-get installer.
                                          tabulated-list-format)))))
 
   (define-key package-menu-mode-map "o" 'delete-other-windows)
-
 #+END_SRC
 ** ----------------------------------------------------------- [ cua ]
 #+BEGIN_SRC emacs-lisp
   (use-package cua-base
     :init (cua-mode t)
     :config (setq cua-keep-region-after-copy nil))
+#+END_SRC
 
-  ;; FIXME: this is referenced from smartparens, and used to be in cua-base, but is no longer there
-  ;; https://github.com/Fuco1/smartparens/issues/271
+FIXME: this is referenced from smartparens, and used to be in cua-base, but is no longer there
+       https://github.com/Fuco1/smartparens/issues/271
+#+BEGIN_SRC emacs-lisp
   (eval-when-compile
     (require 'cua-base))
   (unless (fboundp 'cua-replace-region)
@@ -154,15 +163,15 @@ el-get installer.
                       not-empty
                       (not (eq this-original-command 'self-insert-command)))))
             (cua--fallback))))))
+#+END_SRC
 
-  ;; FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
-  ;;        behavior on paste
-  ;;
+FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
+       behavior on paste
+#+BEGIN_SRC emacs-lisp
   (defadvice cua-paste (before clobber-region (&optional arg))
     "Delete the region before pasting."
     (when (region-active-p) (delete-region (region-beginning) (region-end))))
   (ad-activate 'cua-paste)
-
 #+END_SRC
 ** ----------------------------------------------------------- [ adornments ]
 #+BEGIN_SRC emacs-lisp

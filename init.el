@@ -126,10 +126,10 @@ by Prelude.")
         (message "Loading personal configuration org-files in %s..." prelude-personal-dir)
         (load-file custom-file)
         (require 'org)
-        (mapc 'org-babel-load-file (directory-files prelude-personal-dir 't "^[^#].*org$"))))
-  (progn
-    (message "Loading personal configuration files in %s..." prelude-personal-dir)
-    (mapc 'org-babel-load-file (directory-files prelude-personal-dir 't "^[^#].*el$") ))
+        (mapc 'org-babel-load-file (directory-files prelude-personal-dir 't "^[^#].*org$")))
+    (progn
+      (message "Loading personal configuration files in %s..." prelude-personal-dir)
+      (mapc 'load-file (directory-files prelude-personal-dir 't "^[^#].*el$") )))
   )
 
 (message "Prelude is ready to do thy bidding, Master %s!" current-user)
