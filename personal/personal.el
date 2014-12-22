@@ -3,7 +3,6 @@
 ;;; Code:
 ;;;
 
-
 ;; ----------------------------------------------------------- [ el-get ]
 
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
@@ -123,7 +122,6 @@
 
 (define-key package-menu-mode-map "o" 'delete-other-windows)
 
-
 ;; ----------------------------------------------------------- [ cua ]
 
 (use-package cua-base
@@ -154,7 +152,6 @@
   (when (region-active-p) (delete-region (region-beginning) (region-end))))
 (ad-activate 'cua-paste)
 
-
 ;; ----------------------------------------------------------- [ adornments ]
 
 ;; off
@@ -180,7 +177,6 @@
       show-trailing-whitespace t
       indent-tabs-mode nil
       redisplay-dont-pause t)
-
 
 ;; ----------------------------------------------------------- [ miscellaneous ]
 
@@ -221,7 +217,6 @@
                 '("-dMaxBitmap=2147483647" "-dSAFER" "-dNOPAUSE" "-sDEVICE=png16m" "-dTextAlphaBits=4" "-dBATCH" "-dGraphicsAlphaBits=4" "-dQUIET")
                 doc-view-resolution 300))
 
-
 ;; ----------------------------------------------------------- [ emacs prelude ]
 
 (req-package prelude-mode
@@ -236,7 +231,6 @@
                   (lambda ()
                     (guru-mode -1)
                     (whitespace-mode -1)) t))
-
 
 ;; ----------------------------------------------------------- [ keyboard macros ]
 
@@ -258,13 +252,11 @@
 
 (global-set-key (kbd "<f8>")            'define-macro-key)
 
-
 ;; ----------------------------------------------------------- [ smartparens ]
 
 (req-package smartparens
   :config (progn (define-key smartparens-strict-mode-map (kbd "M-<delete>")    'sp-unwrap-sexp)
                  (define-key smartparens-strict-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)))
-
 
 ;; ----------------------------------------------------------- [ registers ]
 
@@ -279,7 +271,6 @@
    (?m . "~/Dropbox/sync-linux/mac_addrs.org")
    (?z . "~/.zshrc")
    (?s . "~/bin/sauron.pl")))
-
 
 ;; ----------------------------------------------------------- [ shell / eshell ]
 
@@ -300,7 +291,6 @@
 ;;                 (kbd "M-p")
 ;;                 'helm-eshell-history)))
 
-
 ;; ----------------------------------------------------------- [ multi-term ]
 
 (req-package multi-term
@@ -317,7 +307,6 @@
   :init (progn
           (global-undo-tree-mode)))
 
-
 ;; ----------------------------------------------------------- [ image+ ]
 
 (req-package image+
@@ -333,13 +322,11 @@
             (define-key map "o" 'imagex-sticky-restore-original)
             (define-key map "\C-x\C-s" 'imagex-sticky-save-image))))
 
-
 ;; ----------------------------------------------------------- [ cmake ]
 
 (req-package cmake-mode
   :config (add-hook 'cmake-mode-hook
                     (lambda () (setq cmake-tab-width 4))))
-
 
 ;; ----------------------------------------------------------- [ dired ]
 
@@ -356,7 +343,6 @@
               (lambda ()
                 (interactive)
                 (dired-single-buffer "..")))))
-
 
 ;; ----------------------------------------------------------- [ helm ]
 
@@ -420,7 +406,6 @@ recently selected windows nor the buffer list."
   :demand t
   :bind (("M-i" . helm-swoop)))
 
-
 ;; ----------------------------------------------------------- [ guide-key ]
 
 (req-package guide-key
@@ -433,7 +418,6 @@ recently selected windows nor the buffer list."
                   (projectile-mode "C-c p")
                   (org-mode        "C-c C-x")))
           (guide-key-mode 1)))
-
 
 ;; ----------------------------------------------------------- [ company ]
 
@@ -450,7 +434,6 @@ recently selected windows nor the buffer list."
   "Org-mode completions."
   (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
 (add-hook 'org-mode-hook 'my-pcomplete-capf)
-
 
 ;; ----------------------------------------------------------- [ tramp ]
 
@@ -487,12 +470,10 @@ recently selected windows nor the buffer list."
                       (define-key ido-completion-map (kbd "<up>")   'ido-prev-match)
                       (define-key ido-completion-map (kbd "<down>") 'ido-next-match)))))
 
-
 ;; ----------------------------------------------------------- [ magit ]
 
 (req-package magit
   :init (setq magit-diff-options '("--ignore-all-space"))) ; ignore whitespace
-
 
 ;; ----------------------------------------------------------- [ ibuffer ]
 
@@ -572,12 +553,10 @@ recently selected windows nor the buffer list."
   "Order ibuffer filter groups so the order is : [Default], [agenda], [Emacs]."
   (setq ad-return-value (nreverse ad-return-value)))
 
-
 ;; ----------------------------------------------------------- [ ace-window ]
 
 (req-package ace-window
   :config '(setq aw-scope 'frame))
-
 
 ;; ----------------------------------------------------------- [ org ]
 
@@ -793,7 +772,6 @@ recently selected windows nor the buffer list."
   :require (cua-base org)
   :init (org-cua-dwim-activate))
 
-
 ;; ----------------------------------------------------------- [ org-ehtml ]
 
 (req-package web-server)
@@ -915,7 +893,6 @@ GET header should contain a path in form '/todo/ID'."
          ("C-c E p" . evernote-post-region)
          ("C-c E b" . evernote-browser)))
 
-
 ;; ----------------------------------------------------------- [ windmove ]
 
 (req-package windmove
@@ -925,7 +902,6 @@ GET header should contain a path in form '/todo/ID'."
          ("<M-down>"       . windmove-down)
          ("<M-left>"       . windmove-left)
          ("<M-right>"      . windmove-right)))
-
 
 ;; ----------------------------------------------------------- [ theme ]
 
@@ -960,8 +936,7 @@ GET header should contain a path in form '/todo/ID'."
  )
 (enable-theme 'jeff-theme)
 
-
-;; ----------------------------------------------------------- [ modeline ]
+;; smart mode line
 
 (req-package smart-mode-line
   :require custom
@@ -981,6 +956,8 @@ GET header should contain a path in form '/todo/ID'."
             (setq projectile-mode-line '(:eval (format " Proj[%s]" (projectile-project-name))))
             ))
 
+;; nyan mode
+
 (req-package nyan-mode
   :demand t
   :loader req-package-try-el-get
@@ -988,7 +965,6 @@ GET header should contain a path in form '/todo/ID'."
   :init (progn (nyan-mode +1)
                ;;(setq nyan-wavy-trail t)
                (nyan-start-animation)))
-
 
 ;; ----------------------------------------------------------- [ key bindings ]
 
@@ -1012,7 +988,6 @@ GET header should contain a path in form '/todo/ID'."
 
 (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
 (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
-
 
 ;; ----------------------------------------------------------- [ finish ]
 
