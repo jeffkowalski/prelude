@@ -582,7 +582,7 @@ recently selected windows nor the buffer list."
         org-log-into-drawer t
         org-support-shift-select 'always
         org-default-notes-file (concat org-directory "refile.org")
-        org-agenda-files (list (concat org-directory "toodledo.org")
+        org-agenda-files (list (concat org-directory "tasks.org")
                                (concat org-directory "sauron.org")
                                (concat org-directory "gcal.org"))
         org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m)
