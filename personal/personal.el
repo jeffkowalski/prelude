@@ -16,7 +16,7 @@
            (goto-char (point-max))
            (eval-print-last-sexp))))))
 
-;; now either el-get is `require'd already, or have been `load'ed by the
+;; now either el-get is `require'd already, or has been `load'ed by the
 ;; el-get installer.
 
 (eval-when-compile
@@ -924,39 +924,6 @@ GET header should contain a path in form '/todo/ID'."
          ("<M-left>"       . windmove-left)
          ("<M-right>"      . windmove-right)))
 
-;; ----------------------------------------------------------- [ theme ]
-
-(req-package custom
-  :init (setq custom-safe-themes t))
-
-(req-package solarized-theme
-   :require custom
-   :init (progn (disable-theme 'zenburn)
-                (setq solarized-high-contrast-mode-line nil)
-                (setq solarized-scale-org-headlines t)
-                (load-theme 'solarized-dark t))
-   :config (progn (setq x-underline-at-descent-line t)))
-
-;; (req-package color-theme-sanityinc-solarized
-;;   :init (progn (disable-theme 'zenburn)
-;;                (load-theme 'sanityinc-solarized-dark t)))
-
-(deftheme jeff-theme "Jeff's theme.")
-(custom-theme-set-faces
- 'jeff-theme
- ;; '(helm-ff-directory ((t (:foreground "deep sky blue"))))
- ;; '(helm-ff-file ((t (:foreground "gainsboro"))))
- ;; '(helm-ff-symlink ((t (:foreground "cyan"))))
- ;; '(highlight ((t (:background "black"))))
- ;; '(org-agenda-current-time ((t (:inherit org-time-grid :background "dim gray"))) t)
- ;; '(org-agenda-done ((t (:foreground "dim gray"))))
- ;; '(org-scheduled-previously ((t (:foreground "#bc8383"))))
- ;; '(org-warning ((t (:foreground "#cc9393" :weight bold))))
- ;; '(region ((t (:background "dim gray"))))
- ;; '(mode-line ((t :overline ,unspecified :underline nil :box '(:line-width 1 :color "#969896"))))
- )
-(enable-theme 'jeff-theme)
-
 ;; smart mode line
 
 (req-package smart-mode-line
@@ -986,6 +953,48 @@ GET header should contain a path in form '/todo/ID'."
   :init (progn (nyan-mode +1)
                ;;(setq nyan-wavy-trail t)
                (nyan-start-animation)))
+
+;; ----------------------------------------------------------- [ theme ]
+
+(req-package custom
+  :init (setq custom-safe-themes t))
+
+(req-package solarized-theme
+   :require custom
+   :init (defun solarized nil
+           "Enable solarized theme"
+           (interactive)
+           (disable-theme 'zenburn)
+           (setq solarized-high-contrast-mode-line nil)
+           (setq solarized-scale-org-headlines t)
+           (load-theme 'solarized-dark t)
+           (sml/apply-theme 'automatic)
+           (setq x-underline-at-descent-line t)))
+
+(req-package zenburn-theme
+  :require custom
+  :init (defun zenburn nil
+          "Enable zenburn theme"
+          (interactive)
+          (disable-theme 'solarized-dark)
+          (sml/apply-theme 'dark)
+          (load-theme 'zenburn t)))
+
+(deftheme jeff-theme "Jeff's theme.")
+(custom-theme-set-faces
+ 'jeff-theme
+ ;; '(helm-ff-directory ((t (:foreground "deep sky blue"))))
+ ;; '(helm-ff-file ((t (:foreground "gainsboro"))))
+ ;; '(helm-ff-symlink ((t (:foreground "cyan"))))
+ ;; '(highlight ((t (:background "black"))))
+ ;; '(org-agenda-current-time ((t (:inherit org-time-grid :background "dim gray"))) t)
+ ;; '(org-agenda-done ((t (:foreground "dim gray"))))
+ ;; '(org-scheduled-previously ((t (:foreground "#bc8383"))))
+ ;; '(org-warning ((t (:foreground "#cc9393" :weight bold))))
+ ;; '(region ((t (:background "dim gray"))))
+ ;; '(mode-line ((t :overline ,unspecified :underline nil :box '(:line-width 1 :color "#969896"))))
+ )
+(enable-theme 'jeff-theme)
 
 ;; ----------------------------------------------------------- [ key bindings ]
 
@@ -1019,6 +1028,9 @@ GET header should contain a path in form '/todo/ID'."
   (interactive)
   (toggle-frame-fullscreen)
   (run-with-idle-timer 1 nil (lambda () (org-agenda nil "s"))))
+
+(add-hook 'after-init-hook
+          '(lambda () (if (tty-type (frame-terminal)) (zenburn) (solarized) )))
 
 (provide 'personal)
 ;;; personal.el ends here
