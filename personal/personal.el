@@ -128,7 +128,7 @@
 
 ;; ----------------------------------------------------------- [ cua ]
 
-(use-package cua-base
+(req-package cua-base
   :init (cua-mode t)
   :config (setq cua-keep-region-after-copy nil))
 
@@ -492,7 +492,8 @@ recently selected windows nor the buffer list."
 
 ;; *Nice* buffer switching
 (req-package ibuffer
-  :init (use-package ibuf-ext)
+  :require ibuf-ext
+  :bind ("C-x C-b" . ibuffer)
   :config (progn
             (setq ibuffer-show-empty-filter-groups nil)
             (setq ibuffer-saved-filter-groups
