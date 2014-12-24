@@ -1019,6 +1019,55 @@ GET header should contain a path in form '/todo/ID'."
 (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
 (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
 
+;; ----------------------------------------------------------- [ quicken ]
+
+(defun number-lines-region (start end &optional beg)
+  "Add numbers to all lines from START to ENDs, beginning at number BEG."
+  (interactive "*r\np")
+  (let* ((lines (count-lines start end))
+         (from (or beg 1))
+         (to (+ lines (1- from)))
+         (numbers (number-sequence from to))
+         (width (max (length (int-to-string lines))
+                     (length (int-to-string from)))))
+    (goto-char start)
+    (dolist (n numbers)
+      (beginning-of-line)
+      (save-match-data
+        (if (looking-at " *-?[0-9]+\\. ")
+            (replace-match "")))
+      (insert (format (concat "%" (int-to-string width) "d. ") n))
+      (forward-line))))
+
+(defun quicken-cleanup-uncategorized ()
+  "Transform raw data pasted from quicken report into format suitable for email."
+  (interactive)
+  (goto-char (point-min))
+  (kill-line)(kill-line)(kill-line)(kill-line)
+  (beginning-of-line 2)
+  (kill-line)
+  (goto-char (point-max))
+  (beginning-of-line 0)
+  (kill-line)
+  (goto-char (point-min))
+  (re-search-forward ".*Date.*Account.*Num.*Description.*Amount")
+  (replace-match "Item | Date | Account | Num | Description | Amount | Category |
+--+")
+  (replace-regexp "^[^/]+$" "")
+  (goto-char (point-min))
+  (flush-lines "^$")
+  (goto-char (point-min))
+  (forward-line)(forward-line)
+  (number-lines-region (point) (point-max))
+  (goto-char (point-min))
+  (while (re-search-forward "\t" nil t) (replace-match "|"))
+  (goto-char (point-min))
+  (replace-regexp "^" "|")
+  (goto-char (point-min))
+  (org-mode)
+  (org-table-align)
+  )
+
 ;; ----------------------------------------------------------- [ finish ]
 
 (req-package-finish)
