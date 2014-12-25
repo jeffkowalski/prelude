@@ -773,13 +773,13 @@ recently selected windows nor the buffer list."
 (req-package org-capture
   :require org
   :init (setq org-capture-templates
-              (quote (("b" "entry.html" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
+              (quote (("b" "entry.html" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                        "* TODO %:description\n%:initial\n" :immediate-finish t)
-                      ("t" "todo" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
+                      ("t" "todo" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                        "* TODO [#C] %?\n")
-                      ("w" "org-protocol" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
+                      ("w" "org-protocol" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                        "* TODO [#C] %:description\nSCHEDULED: %t\n%:link\n%:initial\n")
-                      ("h" "Habit" entry (file+headline (concat org-directory "toodledo.org") "TASKS")
+                      ("h" "Habit" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                        "* TODO [#C] %?\nSCHEDULED: %t .+1d/3d\n:PROPERTIES:\n:STYLE: habit\n:END:\n"))))
   :config (progn
             (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create))
