@@ -655,6 +655,7 @@ recently selected windows nor the buffer list."
                                                   (dotimes (i (- org-agenda-tags-column)) (setq retval (concat retval "=")))
                                                   retval)
                      org-agenda-timegrid-use-ampm t
+                     org-agenda-search-headline-for-time nil
                      org-agenda-window-setup 'current-window
                      org-agenda-log-mode-items '(clock closed state)
                      org-agenda-exporter-settings
