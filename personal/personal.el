@@ -134,9 +134,14 @@
 
 ;; FIXME: this is referenced from smartparens, and used to be in cua-base, but is no longer there
 ;;        https://github.com/Fuco1/smartparens/issues/271
+;;        Now addressed in "reworking-input-system" branch,
+;;        waiting for integration to master, and packaging
+;;        https://github.com/Fuco1/smartparens/commit/ea812bfca6f5487bedfc20e93073308878bb6b01
 
 (eval-when-compile
   (require 'cua-base))
+(unless (fboundp 'sp--cua-replace-region)
+  (message "*** It's now safe to remove the cua-replace-region hack for smartparens. ***"))
 (unless (fboundp 'cua-replace-region)
   (defun cua-replace-region ()
     "Replace the active region with the character you type."
