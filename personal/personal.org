@@ -184,7 +184,7 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
 #+BEGIN_SRC emacs-lisp
   ;; off
   (scroll-bar-mode -1)
-  (horizontal-scroll-bar-mode -1)
+  ;;(horizontal-scroll-bar-mode -1)
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   ;; on
