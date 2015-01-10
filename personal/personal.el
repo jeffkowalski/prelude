@@ -288,7 +288,7 @@
    (?c . "~/.emacs.d/personal/custom.el")
    (?m . "~/Dropbox/sync-linux/mac_addrs.org")
    (?z . "~/.zshrc")
-   (?s . "~/bin/sauron.pl")))
+   (?s . "~/bin/sauron.rb")))
 
 ;; ----------------------------------------------------------- [ shell / eshell ]
 
