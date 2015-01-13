@@ -314,7 +314,7 @@
 (req-package multi-term
   :bind* (("C-c t" . multi-term-dedicated-toggle))
   :config (progn (setq multi-term-dedicated-close-back-to-open-buffer-p t
-                       multi-term-dedicated-select-after-open-p nil
+                       multi-term-dedicated-select-after-open-p t
                        multi-term-program-switches "--login")
                  (bind-key "C-c t" 'multi-term-dedicated-toggle prelude-mode-map)))
 
