@@ -149,29 +149,6 @@ Note my naive mapping removes the final properties (like :right-align) if presen
     :config (setq cua-keep-region-after-copy nil))
 #+END_SRC
 
-FIXME: this is referenced from smartparens, and used to be in cua-base, but is no longer there
-       https://github.com/Fuco1/smartparens/issues/271
-       Now addressed in "reworking-input-system" branch,
-       waiting for integration to master, and packaging
-       https://github.com/Fuco1/smartparens/commit/ea812bfca6f5487bedfc20e93073308878bb6b01
-#+BEGIN_SRC emacs-lisp
-  (eval-when-compile
-    (require 'cua-base))
-  (unless (fboundp 'sp--cua-replace-region)
-    (message "*** It's now safe to remove the cua-replace-region hack for smartparens. ***"))
-  (unless (fboundp 'cua-replace-region)
-    (defun cua-replace-region ()
-      "Replace the active region with the character you type."
-      (interactive)
-      (let ((not-empty (and cua-delete-selection (cua-delete-region))))
-        (unless (eq this-original-command this-command)
-          (let ((overwrite-mode
-                 (and overwrite-mode
-                      not-empty
-                      (not (eq this-original-command 'self-insert-command)))))
-            (cua--fallback))))))
-#+END_SRC
-
 FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
        behavior on paste
 #+BEGIN_SRC emacs-lisp
