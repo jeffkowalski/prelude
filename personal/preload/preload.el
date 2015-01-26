@@ -16,7 +16,6 @@
 ;; FIXME: defines to overcome warning about reference to
 ;; free variables in packages
 ;;     packages that use ido...
-(defvar predicate nil)
 (defvar inherit-input-method nil)
 (defvar ido-cur-item nil)
 (defvar ido-default-item nil)
