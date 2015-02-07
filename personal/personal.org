@@ -1031,6 +1031,12 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
   (enable-theme 'jeff-theme)
 
 #+END_SRC
+** ----------------------------------------------------------- [ zop-to-char ]
+#+BEGIN_SRC emacs-lisp
+  (req-package zop-to-char
+    :bind (("M-z" . zop-up-to-char)))
+
+#+END_SRC
 ** ----------------------------------------------------------- [ key bindings ]
 #+BEGIN_SRC emacs-lisp
   (define-key special-event-map [delete-frame] 'save-buffers-kill-terminal)
@@ -1045,8 +1051,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
   (global-set-key (kbd "<C-prior>")       'scroll-other-window-down)
   (global-set-key (kbd "<C-tab>")         'next-buffer)
   (global-set-key (kbd "<C-S-iso-lefttab>") 'previous-buffer)
-
-  (global-set-key (kbd "M-z")             'zap-up-to-char)
 
   (define-key isearch-mode-map (kbd "<f3>") 'isearch-repeat-forward)
   (define-key isearch-mode-map (kbd "C-f")  'isearch-repeat-forward)

@@ -988,6 +988,11 @@ GET header should contain a path in form '/todo/ID'."
  )
 (enable-theme 'jeff-theme)
 
+;; ----------------------------------------------------------- [ zop-to-char ]
+
+(req-package zop-to-char
+  :bind (("M-z" . zop-up-to-char)))
+
 ;; ----------------------------------------------------------- [ key bindings ]
 
 (define-key special-event-map [delete-frame] 'save-buffers-kill-terminal)
@@ -1002,8 +1007,6 @@ GET header should contain a path in form '/todo/ID'."
 (global-set-key (kbd "<C-prior>")       'scroll-other-window-down)
 (global-set-key (kbd "<C-tab>")         'next-buffer)
 (global-set-key (kbd "<C-S-iso-lefttab>") 'previous-buffer)
-
-(global-set-key (kbd "M-z")             'zap-up-to-char)
 
 (define-key isearch-mode-map (kbd "<f3>") 'isearch-repeat-forward)
 (define-key isearch-mode-map (kbd "C-f")  'isearch-repeat-forward)
