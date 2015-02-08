@@ -92,7 +92,7 @@ el-get installer.
 (when (>= emacs-major-version 24)
   (setq package-archives '(("ELPA" . "http://tromey.com/elpa/")
                            ("gnu" . "http://elpa.gnu.org/packages/")
-                           ("melpa" . "http://melpa.org/packages/"<span">)
+                           ("melpa" . "http://melpa.org/packages/")
                            ("melpa-stable" . "http://stable.melpa.org/packages/")
                            ("marmalade" . "http://marmalade-repo.org/packages/")
                            )))
@@ -1029,12 +1029,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
    ;; '(mode-line ((t :overline ,unspecified :underline nil :box '(:line-width 1 :color "#969896"))))
    )
   (enable-theme 'jeff-theme)
-
-#+END_SRC
-** ----------------------------------------------------------- [ zop-to-char ]
-#+BEGIN_SRC emacs-lisp
-  (req-package zop-to-char
-    :bind (("M-z" . zop-up-to-char)))
 
 #+END_SRC
 ** ----------------------------------------------------------- [ key bindings ]

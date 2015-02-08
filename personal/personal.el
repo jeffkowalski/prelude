@@ -988,11 +988,6 @@ GET header should contain a path in form '/todo/ID'."
  )
 (enable-theme 'jeff-theme)
 
-;; ----------------------------------------------------------- [ zop-to-char ]
-
-(req-package zop-to-char
-  :bind (("M-z" . zop-up-to-char)))
-
 ;; ----------------------------------------------------------- [ key bindings ]
 
 (define-key special-event-map [delete-frame] 'save-buffers-kill-terminal)
