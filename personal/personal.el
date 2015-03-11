@@ -235,6 +235,51 @@
                     (guru-mode -1)
                     (whitespace-mode -1)) t))
 
+;; ----------------------------------------------------------- [ hydra ]
+
+(req-package hydra
+  :require (windmove ace-window)
+  :init (progn
+          (global-set-key
+           (kbd "C-M-o")
+           (defhydra hydra-window ()
+             "window"
+             ("h" windmove-left "left")
+             ("j" windmove-down "down")
+             ("k" windmove-up "up")
+             ("l" windmove-right "right")
+             ("a" (lambda ()
+                    (interactive)
+                    (ace-window 1)
+                    (add-hook 'ace-window-end-once-hook
+                              'hydra-window/body))
+              "ace")
+             ("v" (lambda ()
+                    (interactive)
+                    (split-window-right)
+                    (windmove-right))
+              "vert")
+             ("x" (lambda ()
+                    (interactive)
+                    (split-window-below)
+                    (windmove-down))
+              "horz")
+             ("s" (lambda ()
+                    (interactive)
+                    (ace-window 4)
+                    (add-hook 'ace-window-end-once-hook
+                              'hydra-window/body))
+              "swap")
+             ("d" (lambda ()
+                    (interactive)
+                    (ace-window 16)
+                    (add-hook 'ace-window-end-once-hook
+                              'hydra-window/body))
+              "del")
+             ("o" delete-other-windows "1" :color blue)
+             ("i" ace-maximize-window "a1" :color blue)
+             ("q" nil "cancel")))))
+
 ;; ----------------------------------------------------------- [ keyboard macros ]
 
 (defvar defining-key)
