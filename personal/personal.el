@@ -988,8 +988,8 @@ GET header should contain a path in form '/todo/ID'."
   :loader req-package-try-el-get
   :require smart-mode-line
   :init (progn (nyan-mode +1)
-               ;;(setq nyan-wavy-trail t)
-               (nyan-start-animation)))
+               (setq nyan-wavy-trail t)
+               (setq nyan-animate-nyancat t)))
 
 ;; ----------------------------------------------------------- [ theme ]
 

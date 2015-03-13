@@ -1030,9 +1030,8 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
     :loader req-package-try-el-get
     :require smart-mode-line
     :init (progn (nyan-mode +1)
-                 ;;(setq nyan-wavy-trail t)
-                 (nyan-start-animation)))
-
+                 (setq nyan-wavy-trail t)
+                 (setq nyan-animate-nyancat t)))
 #+END_SRC
 ** ----------------------------------------------------------- [ theme ]
 #+BEGIN_SRC emacs-lisp
