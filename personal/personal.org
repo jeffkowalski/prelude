@@ -27,13 +27,13 @@ Use C-' to edit block
              (eval-print-last-sexp))))))
 #+END_SRC
 
-now either el-get is `require'd already, or has been `load'ed by the
+Now either el-get is `require'd already, or has been `load'ed by the
 el-get installer.
+
 #+BEGIN_SRC emacs-lisp
   (eval-when-compile
     (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
     (require 'el-get))
-
 #+END_SRC
 
 *** set local recipes
@@ -49,30 +49,10 @@ el-get installer.
                  :type git
                  :url "https://github.com/jeffkowalski/nyan-mode.git"
                  :features nyan-mode)
-          (:name org
-                  :website "http://orgmode.org/"
-                  :description "Org-mode is for keeping notes, maintaining ToDo lists, doing project planning, and authoring with a fast and effective plain-text system."
-                  :type git
-                  :url "git://orgmode.org/org-mode.git"
-                  :info "doc"
-                  :build/berkeley-unix `,(mapcar
-                                          (lambda (target)
-                                            (list "gmake" target (concat "EMACS=" (shell-quote-argument el-get-emacs))))
-                                          '("oldorg"))
-                  :build `,(mapcar
-                            (lambda (target)
-                              (list "make" target (concat "EMACS=" (shell-quote-argument el-get-emacs))))
-                            '("oldorg"))
-                  :load-path ("." "contrib/lisp" "lisp")
-                  ;; :load ("lisp/org-loaddefs.el")
-                  :features org
-                  :load ("lisp/org.el")
-                  )
           (:name org-cua-dwim
                  :description "Org-mode and CUA-mode compatibility layer"
                  :type git
                  :url "https://github.com/jeffkowalski/org-cua-dwim.git"
-                 :depends org
                  :features org-cua-dwim)
           (:name org-ehtml
                  :description "Export Org-mode files as editable web pages"
@@ -83,12 +63,12 @@ el-get installer.
                  :description "Exports Org-mode contents to Reveal.js HTML presentation"
                  :type git
                  :url "https://github.com/jeffkowalski/org-reveal.git"
-                 :depends org
                  :features ox-reveal)
           ))
 #+END_SRC
 
 ** ----------------------------------------------------------- [ packages ]
+Set repositories
 #+BEGIN_SRC emacs-lisp
 (when (>= emacs-major-version 24)
   (setq package-archives '(("ELPA" . "http://tromey.com/elpa/")
@@ -99,6 +79,7 @@ el-get installer.
                            )))
 #+END_SRC
 
+Setup use-package
 #+BEGIN_SRC emacs-lisp
   (dolist (p '(use-package
                ))
@@ -217,7 +198,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
 #+END_SRC
 *** compile
 #+BEGIN_SRC emacs-lisp
-
   (req-package compile
     :bind (("<f5>" . recompile)))
 #+END_SRC
@@ -255,7 +235,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
                     (lambda ()
                       (guru-mode -1)
                       (whitespace-mode -1)) t))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ hydra ]
 #+BEGIN_SRC emacs-lisp
@@ -321,14 +300,12 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
     (start-kbd-macro nil))
 
   (global-set-key (kbd "<f8>")            'define-macro-key)
-
 #+END_SRC
 ** ----------------------------------------------------------- [ smartparens ]
 #+BEGIN_SRC emacs-lisp
   (req-package smartparens
     :config (progn (define-key smartparens-strict-mode-map (kbd "M-<delete>")    'sp-unwrap-sexp)
                    (define-key smartparens-strict-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ registers ]
 #+BEGIN_SRC emacs-lisp
@@ -343,7 +320,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
      (?m . "~/Dropbox/sync-linux/mac_addrs.org")
      (?z . "~/.zshrc")
      (?s . "~/bin/sauron.rb")))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ shell / eshell ]
 #+BEGIN_SRC emacs-lisp
@@ -363,7 +339,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
   ;;               (define-key eshell-mode-map
   ;;                 (kbd "M-p")
   ;;                 'helm-eshell-history)))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ multi-term ]
 #+BEGIN_SRC emacs-lisp
@@ -380,7 +355,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
     :bind* (("C-z" . undo-tree-undo))
     :init (progn
             (global-undo-tree-mode)))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ image+ ]
 #+BEGIN_SRC emacs-lisp
@@ -396,14 +370,12 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
               (define-key map "m" 'imagex-sticky-maximize)
               (define-key map "o" 'imagex-sticky-restore-original)
               (define-key map "\C-x\C-s" 'imagex-sticky-save-image))))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ cmake ]
 #+BEGIN_SRC emacs-lisp
   (req-package cmake-mode
     :config (add-hook 'cmake-mode-hook
                       (lambda () (setq cmake-tab-width 4))))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ dired ]
 #+BEGIN_SRC emacs-lisp
@@ -420,8 +392,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
                 (lambda ()
                   (interactive)
                   (dired-single-buffer "..")))))
-
-
 #+END_SRC
 ** ----------------------------------------------------------- [ helm ]
 #+BEGIN_SRC emacs-lisp
@@ -484,7 +454,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
     :defines (helm-swoop-last-prefix-number)
     :demand t
     :bind (("M-i" . helm-swoop)))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ guide-key ]
 #+BEGIN_SRC emacs-lisp
@@ -498,7 +467,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
                     (projectile-mode "C-c p")
                     (org-mode        "C-c C-x")))
             (guide-key-mode 1)))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ company ]
 #+BEGIN_SRC emacs-lisp
@@ -515,7 +483,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
     "Org-mode completions."
     (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
   (add-hook 'org-mode-hook 'my-pcomplete-capf)
-
 #+END_SRC
 ** ----------------------------------------------------------- [ tramp ]
 #+BEGIN_SRC emacs-lisp
@@ -524,7 +491,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
         (format "\\(%s\\)\\|\\(%s\\)"
                 vc-ignore-dir-regexp
                 tramp-file-name-regexp))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ ido ]
 #+BEGIN_SRC emacs-lisp
@@ -552,13 +518,11 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
                         (setq ido-enable-flex-matching t)
                         (define-key ido-completion-map (kbd "<up>")   'ido-prev-match)
                         (define-key ido-completion-map (kbd "<down>") 'ido-next-match)))))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ magit ]
 #+BEGIN_SRC emacs-lisp
   (req-package magit
     :init (setq magit-diff-options '("--ignore-all-space"))) ; ignore whitespace
-
 #+END_SRC
 ** ----------------------------------------------------------- [ ibuffer ]
 #+BEGIN_SRC emacs-lisp
@@ -638,7 +602,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
   (defadvice ibuffer-generate-filter-groups (after reverse-ibuffer-groups () activate)
     "Order ibuffer filter groups so the order is : [Default], [agenda], [Emacs]."
     (setq ad-return-value (nreverse ad-return-value)))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ ace-window ]
 #+BEGIN_SRC emacs-lisp
@@ -649,7 +612,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
 #+BEGIN_SRC emacs-lisp
   (req-package org
     :demand t
-    :loader req-package-try-el-get
     :init
     (setq org-directory "~/Dropbox/workspace/org/"
           ;;org-replace-disputed-keys t ; org-CUA-compatible
@@ -863,7 +825,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
 *** org cua dwim
 #+BEGIN_SRC emacs-lisp
   (req-package org-cua-dwim
-    :demand t
     :loader req-package-try-el-get
     :require (cua-base org)
     :init (org-cua-dwim-activate))
@@ -971,7 +932,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
                     3333)
         (error (message "Failed to create web server"))))
   )
-
 #+END_SRC
 ** ----------------------------------------------------------- [ evernote ]
 #+BEGIN_SRC emacs-lisp
@@ -989,7 +949,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
            ("C-c E w" . evernote-write-note)
            ("C-c E p" . evernote-post-region)
            ("C-c E b" . evernote-browser)))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ windmove ]
 #+BEGIN_SRC emacs-lisp
@@ -1000,7 +959,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
            ("<M-down>"       . windmove-down)
            ("<M-left>"       . windmove-left)
            ("<M-right>"      . windmove-right)))
-
 #+END_SRC
 ** ----------------------------------------------------------- [ modeline ]
 *** smart mode line
@@ -1074,7 +1032,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
    ;; '(mode-line ((t :overline ,unspecified :underline nil :box '(:line-width 1 :color "#969896"))))
    )
   (enable-theme 'jeff-theme)
-
 #+END_SRC
 ** ----------------------------------------------------------- [ key bindings ]
 #+BEGIN_SRC emacs-lisp
@@ -1096,8 +1053,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
 
   (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
   (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
-
-
 #+END_SRC
 ** ----------------------------------------------------------- [ quicken ]
 #+BEGIN_SRC emacs-lisp

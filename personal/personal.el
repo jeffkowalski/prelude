@@ -16,7 +16,7 @@
            (goto-char (point-max))
            (eval-print-last-sexp))))))
 
-;; now either el-get is `require'd already, or has been `load'ed by the
+;; Now either el-get is `require'd already, or has been `load'ed by the
 ;; el-get installer.
 
 (eval-when-compile
@@ -36,30 +36,10 @@
                :type git
                :url "https://github.com/jeffkowalski/nyan-mode.git"
                :features nyan-mode)
-        (:name org
-                :website "http://orgmode.org/"
-                :description "Org-mode is for keeping notes, maintaining ToDo lists, doing project planning, and authoring with a fast and effective plain-text system."
-                :type git
-                :url "git://orgmode.org/org-mode.git"
-                :info "doc"
-                :build/berkeley-unix `,(mapcar
-                                        (lambda (target)
-                                          (list "gmake" target (concat "EMACS=" (shell-quote-argument el-get-emacs))))
-                                        '("oldorg"))
-                :build `,(mapcar
-                          (lambda (target)
-                            (list "make" target (concat "EMACS=" (shell-quote-argument el-get-emacs))))
-                          '("oldorg"))
-                :load-path ("." "contrib/lisp" "lisp")
-                ;; :load ("lisp/org-loaddefs.el")
-                :features org
-                :load ("lisp/org.el")
-                )
         (:name org-cua-dwim
                :description "Org-mode and CUA-mode compatibility layer"
                :type git
                :url "https://github.com/jeffkowalski/org-cua-dwim.git"
-               :depends org
                :features org-cua-dwim)
         (:name org-ehtml
                :description "Export Org-mode files as editable web pages"
@@ -70,11 +50,11 @@
                :description "Exports Org-mode contents to Reveal.js HTML presentation"
                :type git
                :url "https://github.com/jeffkowalski/org-reveal.git"
-               :depends org
                :features ox-reveal)
         ))
 
 ;; ----------------------------------------------------------- [ packages ]
+;; Set repositories
 
 (when (>= emacs-major-version 24)
   (setq package-archives '(("ELPA" . "http://tromey.com/elpa/")
@@ -83,6 +63,8 @@
                            ("melpa-stable" . "http://stable.melpa.org/packages/")
                            ("marmalade" . "http://marmalade-repo.org/packages/")
                            )))
+
+;; Setup use-package
 
 (dolist (p '(use-package
              ))
@@ -611,7 +593,6 @@ recently selected windows nor the buffer list."
 
 (req-package org
   :demand t
-  :loader req-package-try-el-get
   :init
   (setq org-directory "~/Dropbox/workspace/org/"
         ;;org-replace-disputed-keys t ; org-CUA-compatible
@@ -825,7 +806,6 @@ recently selected windows nor the buffer list."
 ;; org cua dwim
 
 (req-package org-cua-dwim
-  :demand t
   :loader req-package-try-el-get
   :require (cua-base org)
   :init (org-cua-dwim-activate))
