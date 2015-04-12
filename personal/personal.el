@@ -384,6 +384,7 @@
          ("C-x b"   . helm-buffers-list)
          ("C-M-g"   . helm-do-grep))
   :config (progn
+            (helm-adaptive-mode t)
             (defun jeff/find-file-as-root ()
               "Like 'helm-find-file', but automatically edit the file with root-privileges (using tramp/sudo), if the file is not writable by user."
               (interactive)
