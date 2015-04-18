@@ -177,6 +177,11 @@
                           (setq show-trailing-whitespace nil))))
        '(eshell-mode-hook term-mode-hook))
 
+;; psession
+
+(req-package psession
+  :init (psession-mode 1))
+
 ;; compile
 
 (req-package compile
