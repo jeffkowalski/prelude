@@ -801,7 +801,7 @@ recently selected windows nor the buffer list."
                       ("t" "todo" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                        "* TODO [#C] %?\n")
                       ("w" "org-protocol" entry (file+headline (concat org-directory "tasks.org") "TASKS")
-                       "* TODO [#C] %:description\nSCHEDULED: %t\n%:link\n%:initial\n")
+                       "* TODO [#C] %(downcase %:description)\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n")
                       ("h" "Habit" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                        "* TODO [#C] %?\nSCHEDULED: %t .+1d/3d\n:PROPERTIES:\n:STYLE: habit\n:END:\n"))))
   :config (progn
