@@ -12,7 +12,7 @@
 #+END_SRC
 ** introduction
 Good references: [[https://github.com/sachac/.emacs.d/blob/gh-pages/Sacha.org][Sacha Chua's Emacs configuration]], [[https://github.com/bbatsov/prelude][Emacs Prelude]]
-Use C-' to edit block
+Use "C-c '" to edit block
 ** ----------------------------------------------------------- [ el-get ]
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
@@ -250,10 +250,10 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
              (kbd "C-M-o")
              (defhydra hydra-window ()
                "window"
-               ("h" windmove-left "left")
-               ("j" windmove-down "down")
-               ("k" windmove-up "up")
-               ("l" windmove-right "right")
+               ("<left>" windmove-left "left")
+               ("<down>" windmove-down "down")
+               ("<up>" windmove-up "up")
+               ("<right>" windmove-right "right")
                ("a" (lambda ()
                       (interactive)
                       (ace-window 1)
