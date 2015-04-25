@@ -1063,30 +1063,47 @@ GET header should contain a path in form '/todo/ID'."
 (defun quicken-cleanup-uncategorized ()
   "Transform raw data pasted from quicken report into format suitable for email."
   (interactive)
+
   (goto-char (point-min))
-  (kill-line)(kill-line)(kill-line)(kill-line)
-  (beginning-of-line 2)
-  (kill-line)
-  (goto-char (point-max))
-  (beginning-of-line 0)
-  (kill-line)
-  (goto-char (point-min))
-  (re-search-forward ".*Date.*Account.*Num.*Description.*Amount")
-  (replace-match "Item | Date | Account | Num | Description | Amount | Category |
---+")
-  (replace-regexp "^[^/]+$" "")
-  (goto-char (point-min))
+
+  (save-excursion
+    (dotimes (number 4 nil) (kill-line))
+    (beginning-of-line 2)
+    (kill-line)
+    (goto-char (point-max))
+    (beginning-of-line 0)
+    (kill-line))
+
+  (save-excursion
+    (re-search-forward ".*Date.*Account.*Num.*Description.*Amount")
+    (replace-match "| Item | Date | Account | Num | Description | Amount | Category |
+|--+")
+    (replace-regexp "^[^/]+$" ""))
+
   (flush-lines "^$")
-  (goto-char (point-min))
-  (forward-line)(forward-line)
-  (number-lines-region (point) (point-max))
-  (goto-char (point-min))
-  (while (re-search-forward "\t" nil t) (replace-match "|"))
-  (goto-char (point-min))
-  (replace-regexp "^" "|")
-  (goto-char (point-min))
+
+  (save-excursion
+    (forward-line)(forward-line)
+    (number-lines-region (point) (point-max)))
+
+  (save-excursion
+    (while (re-search-forward "\t" nil t)
+    (replace-match "|")))
+
+  (save-excursion
+    (forward-line)(forward-line)
+    (while (re-search-forward "^" nil t)
+      (replace-match "|" nil nil)))
+
+  (save-excursion
+    (goto-char (point-max))
+    (beginning-of-line 1)
+    (kill-line))
+
   (org-mode)
   (org-table-align)
+  (clipboard-kill-ring-save (point-min) (point-max))
+  (message "table saved to clipboard")
   )
 
 ;; ----------------------------------------------------------- [ finish ]
