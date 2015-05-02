@@ -1074,8 +1074,8 @@ GET header should contain a path in form '/todo/ID'."
     (beginning-of-line 0)
     (kill-line))
 
-  (save-excursion
-    (re-search-forward ".*Date.*Account.*Num.*Description.*Amount")
+  (tsave-excursion
+    (re-search-forward ".*Date.*Account.*Num.*Description.*Amount" nil t)
     (replace-match "| Item | Date | Account | Num | Description | Amount | Category |
 |--+")
     (replace-regexp "^[^/]+$" ""))
@@ -1087,8 +1087,12 @@ GET header should contain a path in form '/todo/ID'."
     (number-lines-region (point) (point-max)))
 
   (save-excursion
-    (while (re-search-forward "\t" nil t)
-    (replace-match "|")))
+    (while (re-search-forward "^\\([0-9]+\.\\) " nil t)
+      (replace-match "\\1\t")))
+
+  (save-excursion
+     (while (re-search-forward "\t" nil t)
+     (replace-match "|")))
 
   (save-excursion
     (forward-line)(forward-line)
