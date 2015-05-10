@@ -21,3 +21,4 @@ session*
 tramp
 /var/pcache
 helm-adaptive-history
+elisp-objects/
