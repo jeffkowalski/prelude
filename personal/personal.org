@@ -196,11 +196,6 @@ FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
                             (setq show-trailing-whitespace nil))))
          '(eshell-mode-hook term-mode-hook))
 #+END_SRC
-*** psession
-#+BEGIN_SRC emacs-lisp
-  (req-package psession
-    :init (psession-mode 1))
-#+END_SRC
 *** compile
 #+BEGIN_SRC emacs-lisp
   (req-package compile
