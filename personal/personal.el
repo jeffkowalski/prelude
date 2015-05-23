@@ -1069,7 +1069,7 @@ GET header should contain a path in form '/todo/ID'."
     (beginning-of-line 0)
     (kill-line))
 
-  (tsave-excursion
+  (save-excursion
     (re-search-forward ".*Date.*Account.*Num.*Description.*Amount" nil t)
     (replace-match "| Item | Date | Account | Num | Description | Amount | Category |
 |--+")
