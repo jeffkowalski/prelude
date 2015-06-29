@@ -972,6 +972,22 @@ GET header should contain a path in form '/todo/ID'."
                (setq nyan-wavy-trail t)
                (setq nyan-animate-nyancat t)))
 
+;; ----------------------------------------------------------- [ edit-server ]
+
+(req-package edit-server
+  :require edit-server-htmlize
+  :config (progn
+            (setq edit-server-new-frame nil)
+            (autoload 'edit-server-maybe-dehtmlize-buffer "edit-server-htmlize" "edit-server-htmlize" t)
+            (autoload 'edit-server-maybe-htmlize-buffer   "edit-server-htmlize" "edit-server-htmlize" t)
+            (add-hook 'edit-server-start-hook 'edit-server-maybe-dehtmlize-buffer)
+            (add-hook 'edit-server-done-hook  'edit-server-maybe-htmlize-buffer)
+            (edit-server-start))
+  :init (add-hook 'edit-server-start-hook
+          (lambda ()
+            (when (string-match "github.com" (buffer-name))
+              (markdown-mode)))))
+
 ;; ----------------------------------------------------------- [ theme ]
 
 (req-package custom
