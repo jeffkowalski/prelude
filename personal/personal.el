@@ -437,18 +437,28 @@ recently selected windows nor the buffer list."
   :demand t
   :bind (("M-i" . helm-swoop)))
 
-;; ----------------------------------------------------------- [ guide-key ]
+;; ----------------------------------------------------------- [ time ]
 
-(req-package guide-key
+(req-package time
   :init (progn
-          (setq guide-key/guide-key-sequence
-                '("C-x r"
-                  "C-x 4"
-                  (flycheck-mode   "C-c !")
-                  (helm-mode       "C-c h")
-                  (projectile-mode "C-c p")
-                  (org-mode        "C-c C-x")))
-          (guide-key-mode 1)))
+          (setq display-time-world-list '(("America/Los_Angeles" "Berkeley")
+                                          ("America/New_York" "New York")
+                                          ("UTC" "UTC")
+                                          ("Europe/London" "London")
+                                          ("Asia/Calcutta" "India")
+                                          ("Asia/Shanghai" "China")))
+          (global-set-key (kbd "<f9> C") 'helm-world-time)))
+
+;; ----------------------------------------------------------- [ sunshine ]
+
+(req-package sunshine
+  :init (progn
+          (setq sunshine-location "Berkeley, California")
+          (setq sunshine-show-icons t)
+          (setq sunshine-units 'imperial)
+          (global-set-key (kbd "<f9> w") 'sunshine-forecast)
+          (global-set-key (kbd "<f9> W") 'sunshine-quick-forecast)
+          ))
 
 ;; ----------------------------------------------------------- [ company ]
 
