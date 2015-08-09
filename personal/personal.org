@@ -72,11 +72,17 @@ Set repositories
 #+BEGIN_SRC emacs-lisp
 (when (>= emacs-major-version 24)
   (setq package-archives '(("ELPA" . "http://tromey.com/elpa/")
+                           ("org" . "http://orgmode.org/elpa/")
                            ("gnu" . "http://elpa.gnu.org/packages/")
                            ("melpa" . "http://melpa.org/packages/")
                            ("melpa-stable" . "http://stable.melpa.org/packages/")
                            ("marmalade" . "http://marmalade-repo.org/packages/")
                            )))
+
+(setq package-pinned-archives '())
+(add-to-list 'package-pinned-archives '(org . "org"))
+(add-to-list 'package-pinned-archives '(org-plus-contrib . "org"))
+
 #+END_SRC
 
 Setup use-package
