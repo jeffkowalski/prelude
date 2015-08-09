@@ -77,7 +77,9 @@
                 use-package-minimum-reported-time 0))
 (use-package req-package
   :ensure t
-  :demand t)
+  :demand t
+  :config (progn (setq req-package-log-level 'trace)
+                 (req-package--log-set-level req-package-log-level)))
 
 ;; Override function defined in use-package, so that packages
 ;; from el-get are considered as well as those from the package manager.
@@ -682,6 +684,9 @@ recently selected windows nor the buffer list."
                                                   (dotimes (i (- org-agenda-tags-column)) (setq retval (concat retval "=")))
                                                   retval)
                      org-agenda-timegrid-use-ampm t
+                     org-agenda-time-grid '((daily weekly today require-timed remove-match)
+                                            #("----------------" 0 16 (org-heading t))
+                                            (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000))
                      org-agenda-search-headline-for-time nil
                      org-agenda-window-setup 'current-window
                      org-agenda-log-mode-items '(clock closed state)
@@ -704,16 +709,16 @@ recently selected windows nor the buffer list."
                          (org-agenda-entry-types '())))
 
                        ("s" "Startup View"
-                         ((agenda ""    ((org-agenda-ndays 3)
-                                         (org-agenda-start-on-weekday nil)
-                                         ;;(org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                                         (org-agenda-skip-scheduled-if-deadline-is-shown t)
-                                         (org-agenda-prefix-format "  %-10T %t")
-                                         (org-agenda-hide-tags-regexp "^@")
-                                         (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                                         (org-agenda-sorting-strategy '(time-up todo-state-down habit-up tag-up priority-down user-defined-up alpha-up))
-                                         ;;(org-agenda-todo-ignore-scheduled 'future)
-                                         (org-deadline-warning-days 0)))
+                        ((agenda ""    ((org-agenda-ndays 3)
+                                        (org-agenda-start-on-weekday nil)
+                                        ;;(org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                        (org-agenda-skip-scheduled-if-deadline-is-shown t)
+                                        (org-agenda-prefix-format "  %-10T %t")
+                                        (org-agenda-hide-tags-regexp "^@")
+                                        (org-agenda-cmp-user-defined 'my-org-cmp-tag)
+                                        (org-agenda-sorting-strategy '(time-up todo-state-down habit-up tag-up priority-down user-defined-up alpha-up))
+                                        ;;(org-agenda-todo-ignore-scheduled 'future)
+                                        (org-deadline-warning-days 0)))
                          (agenda "TODO" ((org-agenda-time-grid nil)
                                          (org-deadline-warning-days 365)
                                          (org-agenda-prefix-format "  %-10T %s")
@@ -746,6 +751,7 @@ recently selected windows nor the buffer list."
                                      (point-min) (point-max) '(mouse-face t))))
                (add-hook 'org-agenda-mode-hook
                          (lambda () (whitespace-mode -1)) t)
+
                (defun jeff/org-agenda-edit-headline ()
                  "Go to the Org-mode file containing the item at point, then mark headline for overwriting."
                  (interactive)
@@ -755,6 +761,55 @@ recently selected windows nor the buffer list."
                  (goto-char (match-end 0))
                  (activate-mark))
                (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)
+
+               ;; Remove from agenda time grid lines that are in an appointment The
+               ;; agenda shows lines for the time grid. Some people think that these
+               ;; lines are a distraction when there are appointments at those
+               ;; times. You can get rid of the lines which coincide exactly with the
+               ;; beginning of an appointment. Michael Ekstrand has written a piece of
+               ;; advice that also removes lines that are somewhere inside an
+               ;; appointment: see [[http://orgmode.org/worg/org-hacks.html][Org-hacks]]
+               (defun org-time-to-minutes (time)
+                 "Convert an HHMM time to minutes"
+                 (+ (* (/ time 100) 60) (% time 100)))
+
+               (defun org-time-from-minutes (minutes)
+                 "Convert a number of minutes to an HHMM time"
+                 (+ (* (/ minutes 60) 100) (% minutes 60)))
+
+               (defun org-extract-window (line)
+                 "Extract start and end times from org entries"
+                (let ((start (get-text-property 1 'time-of-day line))
+                      (dur (get-text-property 1 'duration line)))
+                  (cond
+                   ((and start dur)
+                    (cons start
+                          (org-time-from-minutes
+                           (+ dur (org-time-to-minutes start)))))
+                   (start start)
+                   (t nil))))
+
+               (defadvice org-agenda-add-time-grid-maybe (around mde-org-agenda-grid-tweakify
+                                                                 (list ndays todayp))
+                 (if (member 'remove-match (car org-agenda-time-grid))
+                     (let* ((windows (delq nil (mapcar 'org-extract-window list)))
+                            (org-agenda-time-grid
+                             (list (car org-agenda-time-grid)
+                                   (cadr org-agenda-time-grid)
+                                   (remove-if
+                                    (lambda (time)
+                                      (find-if (lambda (w)
+                                                 (if (numberp w)
+                                                     (equal w time)
+                                                   (and (>= time (car w))
+                                                        (< time (cdr w)))))
+                                               windows))
+                                    (caddr org-agenda-time-grid)))))
+                       ad-do-it)
+                   ad-do-it))
+
+               (ad-activate 'org-agenda-add-time-grid-maybe)
+
                ;; (defun kiwon/org-agenda-redo-in-other-window ()
                ;;   "Call org-agenda-redo function even in the non-agenda buffer."
                ;;   (interactive)
