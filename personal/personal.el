@@ -712,6 +712,8 @@ recently selected windows nor the buffer list."
                      org-agenda-search-headline-for-time nil
                      org-agenda-window-setup 'current-window
                      org-agenda-log-mode-items '(clock closed state)
+                     org-agenda-dim-blocked-tasks nil ; much faster!
+                     org-agenda-use-tag-inheritance nil
                      org-agenda-exporter-settings
                      '(
                        ;;(org-agenda-add-entry-text-maxlines 50)
