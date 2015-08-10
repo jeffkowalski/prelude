@@ -68,10 +68,6 @@
                            ("marmalade" . "http://marmalade-repo.org/packages/")
                            )))
 
-(setq package-pinned-archives '())
-(add-to-list 'package-pinned-archives '(org . "org"))
-(add-to-list 'package-pinned-archives '(org-plus-contrib . "org"))
-
 
 
 ;; Setup use-package
@@ -86,8 +82,6 @@
   :config (setq use-package-verbose t
                 use-package-minimum-reported-time 0))
 (use-package req-package
-  :ensure t
-  :demand t
   :config (progn (setq req-package-log-level 'trace)
                  (req-package--log-set-level req-package-log-level)))
 
@@ -139,10 +133,7 @@
   :init (cua-mode t)
   :config (setq cua-keep-region-after-copy nil))
 
-
-
-;; FIXME: workaround problem in CUA which doesn't seem to obey delete-selection
-;;        behavior on paste
+;; FIXME workaround problem in CUA which doesn't seem to obey delete-selection behavior on paste
 
 (defadvice cua-paste (before clobber-region (&optional arg))
   "Delete the region before pasting."
@@ -397,7 +388,6 @@
 ;; ----------------------------------------------------------- [ helm ]
 
 (req-package helm
-  :demand t
   :init (helm-mode 1)
   :bind (("C-x C-f" . helm-find-files)
          ("M-x"     . helm-M-x)
@@ -414,16 +404,15 @@
                 (find-file file)))
             (global-set-key (kbd "C-x F") 'jeff/find-file-as-root)))
 
-;; FIXME: workaround problem in
-;;        select-frame-set-input-focus(#<frame *Minibuf-1* * 0x6a44268>)
-;;        helm-frame-or-window-configuration(restore)
-;;        helm-cleanup()
-;;        ...
-;;        helm-internal(...)
-;;        ...
-;;
-;;        which throws error "progn: Not an in-range integer, float, or cons of integers"
-;;
+;; FIXME workaround problem in select-frame-set-input-focus
+;;   select-frame-set-input-focus(#<frame *Minibuf-1* * 0x6a44268>)
+;;   helm-frame-or-window-configuration(restore)
+;;   helm-cleanup()
+;;   ...
+;;   helm-internal(...)
+;;   ...
+;; which throws error "progn: Not an in-range integer, float, or cons of integers"
+
 (defun select-frame-set-input-focus (frame &optional norecord)
   "Select FRAME, raise it, and set input focus, if possible.
 If `mouse-autoselect-window' is non-nil, also move mouse pointer
@@ -451,10 +440,11 @@ recently selected windows nor the buffer list."
     ;; selected by the window manager.
     (set-mouse-position frame (1- (frame-width frame)) 0))))
 
+;; helm-swoop
+
 (req-package helm-swoop
   :require helm
   :defines (helm-swoop-last-prefix-number)
-  :demand t
   :bind (("M-i" . helm-swoop)))
 
 ;; ----------------------------------------------------------- [ time ]
@@ -623,7 +613,7 @@ recently selected windows nor the buffer list."
 ;; ----------------------------------------------------------- [ org ]
 
 (req-package org
-  :demand t
+  :pin gnu
   :init
   (setq org-directory "~/Dropbox/workspace/org/"
         ;;org-replace-disputed-keys t ; org-CUA-compatible
@@ -694,6 +684,19 @@ recently selected windows nor the buffer list."
 (req-package htmlize)
 
 ;; org agenda
+
+(defun my-org-cmp-tag (a b)
+  "Compare the non-context tags of A and B."
+  (let ((ta (car (get-text-property 1 'tags a)))
+        (tb (car (get-text-property 1 'tags b))))
+    (cond ((and (not ta) (not tb)) nil)
+          ((not ta) -1)
+          ((not tb) +1)
+          ;;((string-match-p "^@" tb) -1)
+          ;;((string-match-p "^@" ta) +1)
+          ((string-lessp ta tb) -1)
+          ((string-lessp tb ta) +1)
+          (t nil))))
 
 (req-package org-agenda
   :require (org htmlize)
@@ -854,25 +857,12 @@ recently selected windows nor the buffer list."
                   (org-set-property "Effort" effort)))))
           (add-hook 'org-clock-in-prepare-hook 'jeff/org-mode-ask-effort)))
 
-(defun my-org-cmp-tag (a b)
-  "Compare the non-context tags of A and B."
-  (let ((ta (car (get-text-property 1 'tags a)))
-        (tb (car (get-text-property 1 'tags b))))
-    (cond ((and (not ta) (not tb)) nil)
-          ((not ta) -1)
-          ((not tb) +1)
-          ;;((string-match-p "^@" tb) -1)
-          ;;((string-match-p "^@" ta) +1)
-          ((string-lessp ta tb) -1)
-          ((string-lessp tb ta) +1)
-          (t nil))))
-
-(req-package org-protocol)
-
 ;; org capture
 
+(req-package org-protocol
+  :require org)
 (req-package org-capture
-  :require org
+  :require (org org-protocol)
   :init (setq org-capture-templates
               (quote (("b" "entry.html" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                        "* TODO %:description\n%:initial\n" :immediate-finish t)
@@ -899,7 +889,6 @@ recently selected windows nor the buffer list."
 (req-package web-server)
 
 (req-package org-ehtml
-  :demand t
   :loader req-package-try-el-get
   :require (org web-server)
   :init (setq
@@ -1001,7 +990,6 @@ GET header should contain a path in form '/todo/ID'."
 ;; ----------------------------------------------------------- [ evernote ]
 
 (req-package evernote-mode
-  :demand t
   :loader req-package-try-el-get
   :init (progn
           (setq evernote-developer-token "S=s1:U=81f:E=1470997a804:C=13fb1e67c09:P=1cd:A=en-devtoken:V=2:H=0b3aafa546daa4a9b43c77a7574390d4"
@@ -1048,7 +1036,6 @@ GET header should contain a path in form '/todo/ID'."
 ;; nyan mode
 
 (req-package nyan-mode
-  :demand t
   :loader req-package-try-el-get
   :require smart-mode-line
   :init (progn (nyan-mode +1)
