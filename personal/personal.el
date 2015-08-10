@@ -626,6 +626,7 @@ recently selected windows nor the buffer list."
         org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m)
         org-startup-indented t
         org-enforce-todo-dependencies t
+        org-src-window-setup 'current-window
         org-babel-load-languages '((sh . t)))
   :config
   (progn
@@ -861,15 +862,27 @@ recently selected windows nor the buffer list."
 
 (req-package org-protocol
   :require org)
+
+(defun adjust-captured-headline (hl)
+  "Fixup headlines for amazon orders"
+  (if (string-match "amazon\\.com order of \\(.+?\\)\\(\\.\\.\\.\\)?\\( has shipped!\\)? :" hl)
+      (let ((item (match-string 1 hl)))
+        (cond ((string-match ":@quicken:" hl) (concat "order of " item " :amazon_visa:@quicken:"))
+              ((string-match ":@waiting:" hl) (concat "delivery of " item " :amazon:@waiting:"))
+              (t hl))
+        )
+    hl)
+  )
+
 (req-package org-capture
-  :require (org org-protocol)
+  :require (org org-protocol string-utils)
   :init (setq org-capture-templates
               (quote (("b" "entry.html" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                        "* TODO %:description\n%:initial\n" :immediate-finish t)
                       ("t" "todo" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                        "* TODO [#C] %?\n")
                       ("w" "org-protocol" entry (file+headline (concat org-directory "tasks.org") "TASKS")
-                       "* TODO [#C] %(downcase %:description)\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n")
+                       "* TODO [#C] %(adjust-captured-headline (downcase (string-utils-stringify-anything `(%:description))))\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n")
                       ("h" "Habit" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                        "* TODO [#C] %?\nSCHEDULED: %t .+1d/3d\n:PROPERTIES:\n:STYLE: habit\n:END:\n"))))
   :config (progn
