@@ -877,16 +877,18 @@ recently selected windows nor the buffer list."
   )
 
 (req-package org-capture
-  :require (org org-protocol string-utils)
+  :require (org org-protocol s)
   :init (setq org-capture-templates
               (quote (("b" "entry.html" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                        "* TODO %:description\n%:initial\n" :immediate-finish t)
                       ("t" "todo" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                        "* TODO [#C] %?\n")
+                      ;; capture this bookmarklet
+                      ;; javascript:capture('@agendas');function enc(s){return encodeURIComponent(typeof(s)=="string"?s.toLowerCase().replace(/"/g, "'"):s);};function capture(context){var re=new RegExp(/(.*) - \S+@gmail.com/);var m=re.exec(document.title);var t=m?m[1]:document.title;javascript:location.href='org-protocol://capture://w/'+encodeURIComponent(location.href)+'/'+enc(t)+' :'+context+':/'+enc(window.getSelection());}
                       ("w" "org-protocol" entry (file+headline (concat org-directory "tasks.org") "TASKS")
-                       "* TODO [#C] %(adjust-captured-headline (downcase (string-utils-stringify-anything `(%:description))))\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n")
+                       "* TODO [#C] %?%(adjust-captured-headline \"%:description\")\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n")
                       ("h" "Habit" entry (file+headline (concat org-directory "tasks.org") "TASKS")
-                       "* TODO [#C] %?\nSCHEDULED: %t .+1d/3d\n:PROPERTIES:\n:STYLE: habit\n:END:\n"))))
+                       "* TODO [#C] %?\nSCHEDULED: %(s-replace \">\" \" .+1d/3d>\" \"%t\")\n:PROPERTIES:\n:STYLE: habit\n:END:\n"))))
   :config (progn
             (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create))
   :bind (("C-M-r" . org-capture)
