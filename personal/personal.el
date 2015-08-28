@@ -309,6 +309,7 @@
  '((?p . "~/.emacs.d/personal/personal.org")
    (?i . "~/Dropbox/sync-linux/installation.txt")
    (?c . "~/.emacs.d/personal/custom.el")
+   (?f . "~/.config/fish/config.fish")
    (?m . "~/Dropbox/sync-linux/mac_addrs.org")
    (?z . "~/.zshrc")
    (?s . "~/bin/sauron.rb")))
