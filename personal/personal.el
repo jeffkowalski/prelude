@@ -1182,16 +1182,16 @@ GET header should contain a path in form '/todo/ID'."
   (flush-lines "^$")
 
   (save-excursion
+    (while (re-search-forward "\t" nil t)
+      (replace-match "|" nil nil)))
+
+  (save-excursion
     (forward-line)(forward-line)
     (number-lines-region (point) (point-max)))
 
-  (save-excursion
-    (while (re-search-forward "^\\([0-9]+\.\\) " nil t)
-      (replace-match "\\1\t")))
-
-  (save-excursion
-     (while (re-search-forward "\t" nil t)
-     (replace-match "|")))
+  ;; (save-excursion
+  ;;   (while (re-search-forward "^\\([0-9]+\.\\) " nil t)
+  ;;     (replace-match "\\1\|")))
 
   (save-excursion
     (forward-line)(forward-line)
