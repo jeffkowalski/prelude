@@ -683,14 +683,6 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
     :init (setq org-habit-following-days 1
                 org-habit-graph-column 46))
 #+END_SRC
-*** org mobile
-#+BEGIN_SRC emacs-lisp
-  (req-package org-mobile
-    :require org
-    :init (setq org-mobile-directory "~/Dropbox/mobileorg/"
-                org-mobile-agendas '("a")
-                org-mobile-inbox-for-pull (concat org-mobile-directory "flagged.org")))
-#+END_SRC
 *** htmlize
 #+BEGIN_SRC emacs-lisp
   (req-package htmlize)

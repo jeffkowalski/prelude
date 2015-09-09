@@ -673,14 +673,6 @@ recently selected windows nor the buffer list."
   :init (setq org-habit-following-days 1
               org-habit-graph-column 46))
 
-;; org mobile
-
-(req-package org-mobile
-  :require org
-  :init (setq org-mobile-directory "~/Dropbox/mobileorg/"
-              org-mobile-agendas '("a")
-              org-mobile-inbox-for-pull (concat org-mobile-directory "flagged.org")))
-
 ;; htmlize
 
 (req-package htmlize)
