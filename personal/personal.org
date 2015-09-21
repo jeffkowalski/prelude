@@ -207,7 +207,11 @@ Note my naive mapping removes the final properties (like :right-align) if presen
     :ensure t
     :init (defalias 'perl-mode 'cperl-mode))
 #+END_SRC
-*** mode mode
+*** fish mode
+#+BEGIN_SRC emacs-lisp
+  (req-package fish-mode)
+#+END_SRC
+*** make mode
 #+BEGIN_SRC emacs-lisp
   (req-package make-mode
     ;; re-tabbing during whitespace-cleanup would kill makefiles

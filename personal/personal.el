@@ -16,11 +16,8 @@
            (goto-char (point-max))
            (eval-print-last-sexp))))))
 
-
-
 ;; Now either el-get is `require'd already, or has been `load'ed by the
 ;; el-get installer.
-
 
 (eval-when-compile
   (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
@@ -68,8 +65,6 @@
                            ("marmalade" . "http://marmalade-repo.org/packages/")
                            )))
 
-
-
 ;; Setup use-package
 
 (dolist (p '(use-package
@@ -85,8 +80,6 @@
   :config (progn (setq req-package-log-level 'trace)
                  (req-package--log-set-level req-package-log-level)))
 
-
-
 ;; Override function defined in use-package, so that packages
 ;; from el-get are considered as well as those from the package manager.
 
@@ -94,8 +87,6 @@
   "Install PACKAGE if not installed by elpa package manager or el-get."
   (when (not (or (package-installed-p package) (el-get-package-exists-p package)))
     (package-install package)))
-
-
 
 ;; Override function defined in req-package, so that packages
 ;; from el-get-sources are considered as well as those from el-get-recipes
@@ -113,8 +104,6 @@
     nil))
 
 (el-get 'sync)
-
-
 
 ;; Enable sorting on all columns in package menu's tabular list.
 ;; Note my naive mapping removes the final properties (like :right-align) if present.
@@ -199,7 +188,11 @@
   :ensure t
   :init (defalias 'perl-mode 'cperl-mode))
 
-;; mode mode
+;; fish mode
+
+(req-package fish-mode)
+
+;; make mode
 
 (req-package make-mode
   ;; re-tabbing during whitespace-cleanup would kill makefiles
