@@ -95,6 +95,18 @@
 
 (define-key package-menu-mode-map "o" 'delete-other-windows)
 
+;; package-utils and upgrades
+
+(req-package package-utils
+  :init
+  (defun U nil
+    (interactive)
+    "Upgrade all packages"
+    (package-utils-upgrade-all)
+    (el-get-update-all t)
+    (message "upgrade complete"))
+)
+
 ;; ----------------------------------------------------------- [ cua ]
 
 (req-package cua-base
@@ -587,7 +599,10 @@ recently selected windows nor the buffer list."
 
 (req-package org
   :pin gnu
-  :loader elpa
+  :loader 'elpa
+  ;; NOTE: org must be manually installed from elpa / gnu since it's
+  ;; require'd from init.el in order to tangle personal.org
+
   :init
   (setq org-directory "~/Dropbox/workspace/org/"
         ;;org-replace-disputed-keys t ; org-CUA-compatible
@@ -633,11 +648,6 @@ recently selected windows nor the buffer list."
          ("C-c c" . org-capture)
          ("C-c a" . org-agenda)
          ("C-c b" . org-iswitchb)))
-
-(req-package ox
-  :require org
-  :init (setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
-)
 
 ;; org habit
 

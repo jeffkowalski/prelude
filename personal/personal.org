@@ -111,6 +111,18 @@ Note my naive mapping removes the final properties (like :right-align) if presen
 
   (define-key package-menu-mode-map "o" 'delete-other-windows)
 #+END_SRC
+*** package-utils and upgrades
+#+BEGIN_SRC emacs-lisp
+  (req-package package-utils
+    :init
+    (defun U nil
+      (interactive)
+      "Upgrade all packages"
+      (package-utils-upgrade-all)
+      (el-get-update-all t)
+      (message "upgrade complete"))
+  )
+#+END_SRC
 ** ----------------------------------------------------------- [ cua ]
 #+BEGIN_SRC emacs-lisp
   (req-package cua-base
@@ -606,7 +618,10 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
 #+BEGIN_SRC emacs-lisp
   (req-package org
     :pin gnu
-    :loader elpa
+    :loader 'elpa
+    ;; NOTE: org must be manually installed from elpa / gnu since it's
+    ;; require'd from init.el in order to tangle personal.org
+
     :init
     (setq org-directory "~/Dropbox/workspace/org/"
           ;;org-replace-disputed-keys t ; org-CUA-compatible
@@ -652,7 +667,9 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
            ("C-c c" . org-capture)
            ("C-c a" . org-agenda)
            ("C-c b" . org-iswitchb)))
-
+#+END_SRC
+*** ox
+#+BEGIN_SRC
   (req-package ox
     :require org
     :init (setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
