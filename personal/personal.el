@@ -3,57 +3,6 @@
 ;;; Code:
 ;;;
 
-;; ----------------------------------------------------------- [ el-get ]
-
-(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
-
-(unless (require 'el-get nil 'noerror)
-  (with-current-buffer
-      (url-retrieve
-       "https://raw.github.com/dimitri/el-get/master/el-get-install.el"
-       (lambda (s)
-         (let (el-get-master-branch)
-           (goto-char (point-max))
-           (eval-print-last-sexp))))))
-
-;; Now either el-get is `require'd already, or has been `load'ed by the
-;; el-get installer.
-
-(eval-when-compile
-  (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
-  (require 'el-get))
-
-;; set local recipes
-
-(setq el-get-sources
-      '((:name evernote-mode
-               :description "Functions for editing Evernote notes directly from Emacs"
-               :type git
-               :url "https://github.com/jeffkowalski/evernote-mode.git"
-               :features evernote-mode)
-        (:name nyan-mode
-               :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
-               :type git
-               :url "https://github.com/jeffkowalski/nyan-mode.git"
-               :features nyan-mode)
-        (:name org-cua-dwim
-               :description "Org-mode and CUA-mode compatibility layer"
-               :type git
-               :url "https://github.com/jeffkowalski/org-cua-dwim.git"
-               :features org-cua-dwim)
-        (:name org-ehtml
-               :description "Export Org-mode files as editable web pages"
-               :type git
-               :url "https://github.com/jeffkowalski/org-ehtml.git"
-               :load-path "src")
-        (:name org-reveal
-               :description "Exports Org-mode contents to Reveal.js HTML presentation"
-               :type git
-               :url "https://github.com/jeffkowalski/org-reveal.git"
-               :features ox-reveal)
-        ))
-
-;; ----------------------------------------------------------- [ packages ]
 ;; Set repositories
 
 (when (>= emacs-major-version 24)
@@ -80,16 +29,55 @@
   :config (progn (setq req-package-log-level 'trace)
                  (req-package--log-set-level req-package-log-level)))
 
-;; Override function defined in use-package, so that packages
-;; from el-get are considered as well as those from the package manager.
+;; Setup el-get first
 
-(defun use-package-ensure-elpa (package)
-  "Install PACKAGE if not installed by elpa package manager or el-get."
-  (when (not (or (package-installed-p package) (el-get-package-exists-p package)))
-    (package-install package)))
+(req-package el-get
+  :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+               (setq el-get-sources '(
+                                      (:name evernote-mode
+                                             :description "Functions for editing Evernote notes directly from Emacs"
+                                             :type github
+                                             :pkgname "jeffkowalski/evernote-mode"
+                                             :features evernote-mode)
+                                      (:name nyan-mode
+                                             :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
+                                             :type github
+                                             :pkgname "jeffkowalski/nyan-mode"
+                                             :features nyan-mode)
+                                      (:name org-cua-dwim
+                                             :description "Org-mode and CUA-mode compatibility layer"
+                                             :type github
+                                             :pkgname "jeffkowalski/org-cua-dwim"
+                                             :features org-cua-dwim)
+                                      (:name org-ehtml
+                                             :description "Export Org-mode files as editable web pages"
+                                             :type github
+                                             :pkgname "jeffkowalski/org-ehtml"
+                                             :load-path "src")
+                                      (:name org-reveal
+                                             :description "Exports Org-mode contents to Reveal.js HTML presentation"
+                                             :type github
+                                             :pkgname "jeffkowalski/org-reveal"
+                                             :features ox-reveal)
+                                      ))
+               (defun req-package-providers-present-el-get-local (package)
+                 "Return t if PACKAGE is available in el-get-sources."
+                 (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources)))
+               (add-to-list 'req-package-providers-map '('el-get-local '(req-package-providers-install-el-get
+                                                                         req-package-providers-install-el-get-local)))
+               ))
+(req-package-finish)
 
-;; Override function defined in req-package, so that packages
-;; from el-get-sources are considered as well as those from el-get-recipes
+;; Override function defined in use-package, so that packages from el-get are considered as well as those from the package manager.
+
+(defun use-package-ensure-elpa (package &optional no-refresh)
+  (if (or (package-installed-p package) (el-get-package-exists-p package))
+      t
+    (if (or (assoc package package-archive-contents) no-refresh)
+        (package-install package)
+      (progn
+        (package-refresh-contents)
+        (use-package-ensure-elpa package t)))))
 
 (defun req-package-try-el-get (package)
   "Install PACKAGE if available and not already installed."
@@ -102,8 +90,6 @@
             (or (el-get 'sync package) t) ;; TODO check for success
           INSTALLED))
     nil))
-
-(el-get 'sync)
 
 ;; Enable sorting on all columns in package menu's tabular list.
 ;; Note my naive mapping removes the final properties (like :right-align) if present.
