@@ -63,8 +63,10 @@
                (defun req-package-providers-present-el-get-local (package)
                  "Return t if PACKAGE is available in el-get-sources."
                  (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources)))
-               (add-to-list 'req-package-providers-map '('el-get-local '(req-package-providers-install-el-get
-                                                                         req-package-providers-install-el-get-local)))
+               (puthash 'el-get-local '(req-package-providers-install-el-get
+                                        req-package-providers-present-el-get-local)
+                        req-package-providers-map)
+               (el-get)
                ))
 (req-package-finish)
 
@@ -78,18 +80,6 @@
       (progn
         (package-refresh-contents)
         (use-package-ensure-elpa package t)))))
-
-(defun req-package-try-el-get (package)
-  "Install PACKAGE if available and not already installed."
-  (if req-package-el-get-present
-      (let* ((AVAIL (or (el-get-recipe-filename package)
-                        (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources))))
-             (INSTALLED (or (el-get-package-exists-p package)
-                            (package-installed-p package))))
-        (if (and AVAIL (not INSTALLED))
-            (or (el-get 'sync package) t) ;; TODO check for success
-          INSTALLED))
-    nil))
 
 ;; Enable sorting on all columns in package menu's tabular list.
 ;; Note my naive mapping removes the final properties (like :right-align) if present.
@@ -279,9 +269,9 @@
                  (define-key smartparens-strict-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)))
 
 ;; ----------------------------------------------------------- [ registers ]
-
 ;; Registers allow you to jump to a file or other location quickly.
 ;; To jump to a register, use C-x r j followed by the letter of the register.
+
 (mapc
  (lambda (r)
    (set-register (car r) (cons 'file (cdr r))))
@@ -869,7 +859,7 @@ recently selected windows nor the buffer list."
 ;; org cua dwim
 
 (req-package org-cua-dwim
-  :loader req-package-try-el-get
+  :loader el-get-local
   :require (cua-base org)
   :init (org-cua-dwim-activate))
 
@@ -878,7 +868,7 @@ recently selected windows nor the buffer list."
 (req-package web-server)
 
 (req-package org-ehtml
-  :loader req-package-try-el-get
+  :loader el-get-local
   :require (org web-server)
   :init (setq
          org-ehtml-everything-editable t
@@ -979,7 +969,7 @@ GET header should contain a path in form '/todo/ID'."
 ;; ----------------------------------------------------------- [ evernote ]
 
 (req-package evernote-mode
-  :loader req-package-try-el-get
+  :loader el-get-local
   :init (progn
           (setq evernote-developer-token "S=s1:U=81f:E=1470997a804:C=13fb1e67c09:P=1cd:A=en-devtoken:V=2:H=0b3aafa546daa4a9b43c77a7574390d4"
                 evernote-enml-formatter-command '("w3m" "-dump" "-I" "UTF8" "-O" "UTF8") ; optional
@@ -1025,7 +1015,7 @@ GET header should contain a path in form '/todo/ID'."
 ;; nyan mode
 
 (req-package nyan-mode
-  :loader req-package-try-el-get
+  :loader el-get-local
   :require smart-mode-line
   :init (progn (nyan-mode +1)
                (setq nyan-wavy-trail t)
