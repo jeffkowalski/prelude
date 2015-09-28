@@ -31,44 +31,47 @@
 
 ;; Setup el-get first
 
-(req-package el-get
-  :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-               (setq el-get-sources '(
-                                      (:name evernote-mode
-                                             :description "Functions for editing Evernote notes directly from Emacs"
-                                             :type github
-                                             :pkgname "jeffkowalski/evernote-mode"
-                                             :features evernote-mode)
-                                      (:name nyan-mode
-                                             :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
-                                             :type github
-                                             :pkgname "jeffkowalski/nyan-mode"
-                                             :features nyan-mode)
-                                      (:name org-cua-dwim
-                                             :description "Org-mode and CUA-mode compatibility layer"
-                                             :type github
-                                             :pkgname "jeffkowalski/org-cua-dwim"
-                                             :features org-cua-dwim)
-                                      (:name org-ehtml
-                                             :description "Export Org-mode files as editable web pages"
-                                             :type github
-                                             :pkgname "jeffkowalski/org-ehtml"
-                                             :load-path "src")
-                                      (:name org-reveal
-                                             :description "Exports Org-mode contents to Reveal.js HTML presentation"
-                                             :type github
-                                             :pkgname "jeffkowalski/org-reveal"
-                                             :features ox-reveal)
-                                      ))
-               (defun req-package-providers-present-el-get-local (package)
-                 "Return t if PACKAGE is available in el-get-sources."
-                 (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources)))
-               (puthash 'el-get-local '(req-package-providers-install-el-get
-                                        req-package-providers-present-el-get-local)
-                        req-package-providers-map)
-               (el-get)
-               ))
-(req-package-finish)
+(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+
+(when (not (require 'el-get))
+  (req-package-force el-get))
+
+(progn
+  (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+  (setq el-get-sources '(
+                         (:name evernote-mode
+                                :description "Functions for editing Evernote notes directly from Emacs"
+                                :type github
+                                :pkgname "jeffkowalski/evernote-mode"
+                                :features evernote-mode)
+                         (:name nyan-mode
+                                :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
+                                :type github
+                                :pkgname "jeffkowalski/nyan-mode"
+                                :features nyan-mode)
+                         (:name org-cua-dwim
+                                :description "Org-mode and CUA-mode compatibility layer"
+                                :type github
+                                :pkgname "jeffkowalski/org-cua-dwim"
+                                :features org-cua-dwim)
+                         (:name org-ehtml
+                                :description "Export Org-mode files as editable web pages"
+                                :type github
+                                :pkgname "jeffkowalski/org-ehtml"
+                                :load-path "src")
+                         (:name org-reveal
+                                :description "Exports Org-mode contents to Reveal.js HTML presentation"
+                                :type github
+                                :pkgname "jeffkowalski/org-reveal"
+                                :features ox-reveal)
+                         ))
+  (defun req-package-providers-present-el-get-local (package)
+    "Return t if PACKAGE is available in el-get-sources."
+    (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources)))
+  (puthash 'el-get-local '(req-package-providers-install-el-get
+                           req-package-providers-present-el-get-local)
+           req-package-providers-map))
+(el-get 'sync)
 
 ;; Override function defined in use-package, so that packages from el-get are considered as well as those from the package manager.
 
@@ -584,6 +587,7 @@ recently selected windows nor the buffer list."
 
 (req-package org
   :pin gnu
+  :loader elpa
   :init
   (setq org-directory "~/Dropbox/workspace/org/"
         ;;org-replace-disputed-keys t ; org-CUA-compatible
