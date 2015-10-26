@@ -1093,6 +1093,7 @@ GET header should contain a path in form '/todo/ID'."
   ;; :disabled t
   :require nyan-mode
   :init (progn
+          (defadvice load-theme (after reset-powerline-cache activate) (pl/reset-cache))
           (defun powerline-jeff-theme ()
             "Set to Jeff's theme."
             (interactive)
@@ -1186,8 +1187,7 @@ GET header should contain a path in form '/todo/ID'."
            (setq solarized-high-contrast-mode-line nil)
            (setq solarized-scale-org-headlines t)
            (load-theme 'solarized-dark t)
-           (sml/apply-theme 'automatic)
-           (pl/reset-cache)
+           (sml/apply-theme 'respectful)
            (setq x-underline-at-descent-line t)))
 
 (req-package zenburn-theme
@@ -1196,9 +1196,8 @@ GET header should contain a path in form '/todo/ID'."
           "Enable zenburn theme"
           (interactive)
           (disable-theme 'solarized-dark)
-          (sml/apply-theme 'automatic)
-          (pl/reset-cache)
-          (load-theme 'zenburn t)))
+          (load-theme 'zenburn t)
+          (sml/apply-theme 'respectful)))
 
 (deftheme jeff-theme "Jeff's theme.")
 (custom-theme-set-faces
