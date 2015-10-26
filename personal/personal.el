@@ -200,7 +200,7 @@
 ;; ----------------------------------------------------------- [ emacs prelude ]
 
 (req-package prelude-mode
-  :diminish " π"
+  :diminish (prelude-mode . " π")
   :defines (prelude-mode-map)
   :init (progn
           ;; fix keyboard behavior on terminals that send ^[O{ABCD} for arrows
