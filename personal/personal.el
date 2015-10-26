@@ -200,6 +200,7 @@
 ;; ----------------------------------------------------------- [ emacs prelude ]
 
 (req-package prelude-mode
+  :diminish " π"
   :defines (prelude-mode-map)
   :init (progn
           ;; fix keyboard behavior on terminals that send ^[O{ABCD} for arrows
@@ -373,6 +374,7 @@
 ;; ----------------------------------------------------------- [ helm ]
 
 (req-package helm
+  :diminish " H"
   :init (helm-mode 1)
   :bind (("C-x C-f" . helm-find-files)
          ("M-x"     . helm-M-x)
@@ -458,6 +460,7 @@ recently selected windows nor the buffer list."
 ;; ----------------------------------------------------------- [ company ]
 
 (req-package company
+  :diminish " Ψ"
   :config (progn
             (setq company-auto-complete t
                   company-idle-delay 0.5)
@@ -509,6 +512,7 @@ recently selected windows nor the buffer list."
 ;; ----------------------------------------------------------- [ magit ]
 
 (req-package magit
+  :diminish "ma"
   :init (setq magit-diff-options '("--ignore-all-space"))) ; ignore whitespace
 
 ;; ----------------------------------------------------------- [ ibuffer ]
@@ -598,6 +602,7 @@ recently selected windows nor the buffer list."
 ;; ----------------------------------------------------------- [ org ]
 
 (req-package org
+  :diminish "Ο"
   :pin gnu
   :loader 'elpa
   ;; NOTE: org must be manually installed from elpa / gnu since it's
@@ -1006,6 +1011,45 @@ GET header should contain a path in form '/todo/ID'."
          ("<M-left>"       . windmove-left)
          ("<M-right>"      . windmove-right)))
 
+;; ----------------------------------------------------------- [ diminished ]
+;; Better to put these in the mode-specific sections.
+;; These diminish strings are only for those modes not mentioned elsewhere.
+
+
+(req-package emacs-lisp          :diminish "eλ")
+(req-package abbrev              :diminish "")
+;(req-package auto-complete       :diminish " α")
+;(req-package auto-fill-function  :diminish " φ")
+;(req-package autopair            :diminish "")
+;(req-package cider-interaction   :diminish " ηζ")
+;(req-package cider               :diminish " ηζ")
+;(req-package clojure             :diminish "cλ")
+;(req-package eldoc               :diminish "")
+;(req-package elisp-slime-nav     :diminish " δ")
+(req-package flycheck            :diminish " φc")
+(req-package flymake             :diminish " φm")
+(req-package flyspell            :diminish " φs")
+(req-package guide-key           :diminish "")
+;(req-package guru                :diminish "")
+;(req-package haskell             :diminish "hλ")
+;(req-package hi-lock             :diminish "")
+(req-package js2                 :diminish "jλ")
+;(req-package kibit               :diminish " κ")
+;(req-package lambda              :diminish "")
+(req-package markdown            :diminish "md")
+;(req-package nrepl-interaction   :diminish " ηζ")
+;(req-package nrepl               :diminish " ηζ")
+(req-package org-indent          :diminish " Οι")
+(req-package paredit             :diminish " Φ")
+;(req-package processing          :diminish "P5")
+;(req-package python              :diminish "pλ")
+(req-package smartparens         :diminish " Φ")
+;(req-package tuareg              :diminish "mλ")
+(req-package undo-tree           :diminish " τ")
+(req-package volatile-highlights :diminish " υ")
+;(req-package wrap-region         :diminish "")
+;(req-package yas-minor           :diminish " γ")
+
 ;; smart mode line
 
 (req-package smart-mode-line
@@ -1023,17 +1067,99 @@ GET header should contain a path in form '/todo/ID'."
             (add-to-list 'sml/replacer-regexp-list '("^:WS:/autodesk" ":ADSK:") t)
             (setq sml/col-number-format "%03c")
             (setq sml/use-projectile-p 'before-prefixes)
-            (setq projectile-mode-line '(:eval (format " Proj[%s]" (projectile-project-name))))
             ))
 
 ;; nyan mode
 
 (req-package nyan-mode
   :loader el-get-local
-  :require smart-mode-line
   :init (progn (nyan-mode +1)
                (setq nyan-wavy-trail t)
                (setq nyan-animate-nyancat t)))
+
+;; projectile mode
+
+(req-package projectile
+   :init (setq projectile-mode-line '(:eval (format " Π[%s]" (projectile-project-name))))
+)
+
+;; powerline
+;; see https://github.com/11111000000/emacs-d/blob/master/init.el
+
+;; (set-face-attribute 'mode-line nil
+;;                     :family "Terminus"
+;;                     :height 100)
+(req-package powerline
+  ;; :disabled t
+  :require nyan-mode
+  :init (progn
+          (setq powerline-default-separator 'wave
+                powerline-height 20
+                powerline-default-separator-dir '(left . right))
+
+          (setq mode-line-format
+                '("%e"
+                  (:eval
+                   (let* ((active (powerline-selected-window-active))
+                          (mode-line (if active 'mode-line 'mode-line-inactive))
+                          (face1 (if active 'powerline-active1 'powerline-inactive1))
+                          (face2 (if active 'powerline-active2 'powerline-inactive2))
+
+                          (separator-left (intern (format "powerline-%s-%s"
+                                                          'wave
+                                                          (car powerline-default-separator-dir))))
+
+                          (separator-right (intern (format "powerline-%s-%s"
+                                                           'wave
+                                                           (cdr powerline-default-separator-dir))))
+
+                          (lhs (list
+                                (powerline-raw "%*" face2 'l)
+                                (powerline-buffer-size face2 'l)
+                                (funcall separator-right face2 face1)
+                                ;;;
+                                (powerline-buffer-id face1 'l)
+                                (powerline-raw " " face1)
+                                (funcall separator-right face1 face2)
+                                ;;;
+                                (powerline-vc face2)
+                                (powerline-raw " " face2)
+                                (powerline-narrow face1 'l)
+                                (funcall separator-right face2 face1)
+                                ;; (when (boundp 'erc-modified-channels-object)
+                                ;;   (powerline-raw erc-modified-channels-object face2 'l))
+                                ))
+
+                          (center (list
+                                   (funcall separator-right face1 face2)
+                                   (powerline-major-mode nil 'l)
+                                   (powerline-process nil)
+                                   (powerline-minor-modes nil 'l)
+                                   (powerline-raw " " nil)
+                                   (funcall separator-right face2 face1)
+                                   ))
+
+                          (rhs (list
+                                ;;;(powerline-raw "%6p" face1 'r)
+                                (when (bound-and-true-p nyan-mode)
+                                  (powerline-raw (list (nyan-create)) face1 'r))
+                                (powerline-raw "%4l" face1 'r)
+                                (powerline-raw ":" face1)
+                                (powerline-raw "%3c" face1 'r)
+                                (funcall separator-right face1 face2)
+                                ;;;
+                                ;;(powerline-raw " ")
+                                ;;(powerline-hud face2 face1)
+                                ;;(powerline-raw " ")
+                                (powerline-raw global-mode-string face2 'r)
+                                ))
+                          )
+
+                     (concat (powerline-render lhs)
+                             (powerline-fill-center face1 (/ (powerline-width center) 2.0))
+                             (powerline-render center)
+                             (powerline-fill face1 (powerline-width rhs))
+                             (powerline-render rhs))))))))
 
 ;; ----------------------------------------------------------- [ edit-server ]
 
