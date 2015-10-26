@@ -1093,73 +1093,68 @@ GET header should contain a path in form '/todo/ID'."
   ;; :disabled t
   :require nyan-mode
   :init (progn
-          (setq powerline-default-separator 'wave
-                powerline-height 20
-                powerline-default-separator-dir '(left . right))
+          (defun powerline-jeff-theme ()
+            "Set to Jeff's theme."
+            (interactive)
+            (setq powerline-default-separator 'wave
+                  powerline-height 20
+                  powerline-default-separator-dir '(left . right))
 
-          (setq mode-line-format
-                '("%e"
-                  (:eval
-                   (let* ((active (powerline-selected-window-active))
-                          (mode-line (if active 'mode-line 'mode-line-inactive))
-                          (face1 (if active 'powerline-active1 'powerline-inactive1))
-                          (face2 (if active 'powerline-active2 'powerline-inactive2))
+            (setq-default mode-line-format
+                          '("%e"
+                            (:eval
+                             (let* ((active (powerline-selected-window-active))
+                                    (mode-line (if active 'mode-line 'mode-line-inactive))
+                                    (face1 (if active 'powerline-active1 'powerline-inactive1))
+                                    (face2 (if active 'powerline-active2 'powerline-inactive2))
 
-                          (separator-left (intern (format "powerline-%s-%s"
-                                                          'wave
-                                                          (car powerline-default-separator-dir))))
+                                    (separator-left (intern (format "powerline-%s-%s"
+                                                                    'wave
+                                                                    (car powerline-default-separator-dir))))
 
-                          (separator-right (intern (format "powerline-%s-%s"
-                                                           'wave
-                                                           (cdr powerline-default-separator-dir))))
+                                    (separator-right (intern (format "powerline-%s-%s"
+                                                                     'wave
+                                                                     (cdr powerline-default-separator-dir))))
 
-                          (lhs (list
-                                (powerline-raw "%*" face2 'l)
-                                (powerline-buffer-size face2 'l)
-                                (funcall separator-right face2 face1)
-                                ;;;
-                                (powerline-buffer-id face1 'l)
-                                (powerline-raw " " face1)
-                                (funcall separator-right face1 face2)
-                                ;;;
-                                (powerline-vc face2)
-                                (powerline-raw " " face2)
-                                (powerline-narrow face1 'l)
-                                (funcall separator-right face2 face1)
-                                ;; (when (boundp 'erc-modified-channels-object)
-                                ;;   (powerline-raw erc-modified-channels-object face2 'l))
-                                ))
+                                    (lhs (list
+                                          (powerline-raw "%*" nil 'l)
+                                          (powerline-buffer-size nil 'l)
+                                          (powerline-buffer-id nil 'l)
+                                          (powerline-raw " ")
+                                          (funcall separator-left mode-line face1)
+                                          (powerline-narrow face1 'l)
+                                          (powerline-vc face1)))
+                                    (rhs (list
+                                          (when (bound-and-true-p nyan-mode)
+                                            (powerline-raw (list (nyan-create)) face1 'r))
+                                          (powerline-raw "%4l" face1 'r)
+                                          (powerline-raw ":" face1)
+                                          (powerline-raw "%3c" face1 'r)
+                                          (funcall separator-right face1 mode-line)
+                                          (powerline-raw " ")
+                                          (powerline-raw global-mode-string nil 'r)
+                                          ;;(powerline-raw "%6p" nil 'r)
+                                          ;;(powerline-hud face2 face1)
+                                          ))
+                                    (ctr (list
+                                          (powerline-raw " " face1)
+                                          (funcall separator-left face1 face2)
+                                          (when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
+                                            (powerline-raw erc-modified-channels-object face2 'l))
+                                          (powerline-major-mode face2 'l)
+                                          (powerline-process face2)
+                                          (powerline-raw " :" face2)
+                                          (powerline-minor-modes face2 'l)
+                                          (powerline-raw " " face2)
+                                          (funcall separator-right face2 face1))))
 
-                          (center (list
-                                   (funcall separator-right face1 face2)
-                                   (powerline-major-mode nil 'l)
-                                   (powerline-process nil)
-                                   (powerline-minor-modes nil 'l)
-                                   (powerline-raw " " nil)
-                                   (funcall separator-right face2 face1)
-                                   ))
-
-                          (rhs (list
-                                ;;;(powerline-raw "%6p" face1 'r)
-                                (when (bound-and-true-p nyan-mode)
-                                  (powerline-raw (list (nyan-create)) face1 'r))
-                                (powerline-raw "%4l" face1 'r)
-                                (powerline-raw ":" face1)
-                                (powerline-raw "%3c" face1 'r)
-                                (funcall separator-right face1 face2)
-                                ;;;
-                                ;;(powerline-raw " ")
-                                ;;(powerline-hud face2 face1)
-                                ;;(powerline-raw " ")
-                                (powerline-raw global-mode-string face2 'r)
-                                ))
-                          )
-
-                     (concat (powerline-render lhs)
-                             (powerline-fill-center face1 (/ (powerline-width center) 2.0))
-                             (powerline-render center)
-                             (powerline-fill face1 (powerline-width rhs))
-                             (powerline-render rhs))))))))
+                               (concat (powerline-render lhs)
+                                       (powerline-fill-center face1 (/ (powerline-width ctr) 2.0))
+                                       (powerline-render ctr)
+                                       (powerline-fill face1 (powerline-width rhs))
+                                       (powerline-render rhs)))))))
+          (powerline-jeff-theme)
+          ))
 
 ;; ----------------------------------------------------------- [ edit-server ]
 
@@ -1192,6 +1187,7 @@ GET header should contain a path in form '/todo/ID'."
            (setq solarized-scale-org-headlines t)
            (load-theme 'solarized-dark t)
            (sml/apply-theme 'automatic)
+           (pl/reset-cache)
            (setq x-underline-at-descent-line t)))
 
 (req-package zenburn-theme
@@ -1200,7 +1196,8 @@ GET header should contain a path in form '/todo/ID'."
           "Enable zenburn theme"
           (interactive)
           (disable-theme 'solarized-dark)
-          (sml/apply-theme 'dark)
+          (sml/apply-theme 'automatic)
+          (pl/reset-cache)
           (load-theme 'zenburn t)))
 
 (deftheme jeff-theme "Jeff's theme.")
