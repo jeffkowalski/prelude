@@ -281,6 +281,7 @@
 ;; ----------------------------------------------------------- [ smartparens ]
 
 (req-package smartparens
+  :diminish " Φ"
   :config (progn (define-key smartparens-strict-mode-map (kbd "M-<delete>")    'sp-unwrap-sexp)
                  (define-key smartparens-strict-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)))
 
@@ -330,6 +331,7 @@
 ;; ----------------------------------------------------------- [ undo-tree ]
 
 (req-package undo-tree
+  :diminish " τ"
   :bind* (("C-z" . undo-tree-undo))
   :init (progn
           (global-undo-tree-mode)))
@@ -1043,9 +1045,7 @@ GET header should contain a path in form '/todo/ID'."
 (req-package paredit             :diminish " Φ")
 ;(req-package processing          :diminish "P5")
 ;(req-package python              :diminish "pλ")
-(req-package smartparens         :diminish " Φ")
 ;(req-package tuareg              :diminish "mλ")
-(req-package undo-tree           :diminish " τ")
 (req-package volatile-highlights :diminish " υ")
 ;(req-package wrap-region         :diminish "")
 ;(req-package yas-minor           :diminish " γ")
@@ -1138,7 +1138,7 @@ GET header should contain a path in form '/todo/ID'."
                                           ;;(powerline-hud face2 face1)
                                           ))
                                     (ctr (list
-                                          (powerline-raw " " face1)
+                                          ;;(powerline-raw " " face1)
                                           (funcall separator-left face1 face2)
                                           (when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
                                             (powerline-raw erc-modified-channels-object face2 'l))

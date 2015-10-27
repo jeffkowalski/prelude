@@ -298,6 +298,7 @@ Note my naive mapping removes the final properties (like :right-align) if presen
 ** ----------------------------------------------------------- [ smartparens ]
 #+BEGIN_SRC emacs-lisp
   (req-package smartparens
+    :diminish " Φ"
     :config (progn (define-key smartparens-strict-mode-map (kbd "M-<delete>")    'sp-unwrap-sexp)
                    (define-key smartparens-strict-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)))
 #+END_SRC
@@ -347,6 +348,7 @@ To jump to a register, use C-x r j followed by the letter of the register.
 ** ----------------------------------------------------------- [ undo-tree ]
 #+BEGIN_SRC emacs-lisp
   (req-package undo-tree
+    :diminish " τ"
     :bind* (("C-z" . undo-tree-undo))
     :init (progn
             (global-undo-tree-mode)))
@@ -1069,9 +1071,7 @@ These diminish strings are only for those modes not mentioned elsewhere.
 (req-package paredit             :diminish " Φ")
 ;(req-package processing          :diminish "P5")
 ;(req-package python              :diminish "pλ")
-(req-package smartparens         :diminish " Φ")
 ;(req-package tuareg              :diminish "mλ")
-(req-package undo-tree           :diminish " τ")
 (req-package volatile-highlights :diminish " υ")
 ;(req-package wrap-region         :diminish "")
 ;(req-package yas-minor           :diminish " γ")
@@ -1166,7 +1166,7 @@ see https://github.com/11111000000/emacs-d/blob/master/init.el
                                             ;;(powerline-hud face2 face1)
                                             ))
                                       (ctr (list
-                                            (powerline-raw " " face1)
+                                            ;;(powerline-raw " " face1)
                                             (funcall separator-left face1 face2)
                                             (when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
                                               (powerline-raw erc-modified-channels-object face2 'l))
