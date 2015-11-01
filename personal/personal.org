@@ -168,8 +168,6 @@ Note my naive mapping removes the final properties (like :right-align) if presen
   ;; Enable all commands
   (setq disabled-command-function nil)
 
-  (auto-revert-mode)
-
   (setq
    auto-save-list-file-prefix nil ;; startup
    auto-save-default nil ;; files
@@ -184,6 +182,12 @@ Note my naive mapping removes the final properties (like :right-align) if presen
            (add-hook hook (lambda ()
                             (setq show-trailing-whitespace nil))))
          '(eshell-mode-hook term-mode-hook))
+#+END_SRC
+*** auto-revert
+#+BEGIN_SRC emacs-lisp
+  (req-package auto-revert
+    :diminish ""
+    :config (auto-revert-mode))
 #+END_SRC
 *** clang-format
 #+BEGIN_SRC emacs-lisp
@@ -682,7 +686,7 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
            ("C-c b" . org-iswitchb)))
 #+END_SRC
 *** ox
-#+BEGIN_SRC
+#+BEGIN_SRC emacs-lisp
   (req-package ox
     :require org
     :init (setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
@@ -1055,6 +1059,7 @@ These diminish strings are only for those modes not mentioned elsewhere.
 ;(req-package auto-complete       :diminish " α")
 ;(req-package auto-fill-function  :diminish " φ")
 ;(req-package autopair            :diminish "")
+(req-package beacon              :diminish "")
 ;(req-package cider-interaction   :diminish " ηζ")
 ;(req-package cider               :diminish " ηζ")
 ;(req-package clojure             :diminish "cλ")

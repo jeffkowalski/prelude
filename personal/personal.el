@@ -151,8 +151,6 @@
 ;; Enable all commands
 (setq disabled-command-function nil)
 
-(auto-revert-mode)
-
 (setq
  auto-save-list-file-prefix nil ;; startup
  auto-save-default nil ;; files
@@ -167,6 +165,12 @@
          (add-hook hook (lambda ()
                           (setq show-trailing-whitespace nil))))
        '(eshell-mode-hook term-mode-hook))
+
+;; auto-revert
+
+(req-package auto-revert
+  :diminish ""
+  :config (auto-revert-mode))
 
 ;; clang-format
 
@@ -662,6 +666,13 @@ recently selected windows nor the buffer list."
          ("C-c a" . org-agenda)
          ("C-c b" . org-iswitchb)))
 
+;; ox
+
+(req-package ox
+  :require org
+  :init (setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
+)
+
 ;; org habit
 
 (req-package org-habit
@@ -1029,6 +1040,7 @@ GET header should contain a path in form '/todo/ID'."
 ;(req-package auto-complete       :diminish " α")
 ;(req-package auto-fill-function  :diminish " φ")
 ;(req-package autopair            :diminish "")
+(req-package beacon              :diminish "")
 ;(req-package cider-interaction   :diminish " ηζ")
 ;(req-package cider               :diminish " ηζ")
 ;(req-package clojure             :diminish "cλ")
