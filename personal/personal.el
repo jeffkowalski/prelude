@@ -179,6 +179,12 @@
   :ensure t
   :init (defalias 'perl-mode 'cperl-mode))
 
+;; clang-format mode
+
+(req-package clang-format
+  :bind (("C-M-\\" . clang-format-buffer))
+  :config (setq clang-format-executable "clang-format-3.8"))
+
 ;; fish mode
 
 (req-package fish-mode)
