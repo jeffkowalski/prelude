@@ -168,10 +168,11 @@
                           (setq show-trailing-whitespace nil))))
        '(eshell-mode-hook term-mode-hook))
 
-;; compile
+;; clang-format
 
-(req-package compile
-  :bind (("<f5>" . recompile)))
+(req-package clang-format
+  :bind (("C-M-\\" . clang-format-buffer))
+  :config (setq clang-format-executable "clang-format-3.8"))
 
 ;; cperl mode
 
@@ -179,11 +180,17 @@
   :ensure t
   :init (defalias 'perl-mode 'cperl-mode))
 
-;; clang-format mode
+;; compile
 
-(req-package clang-format
-  :bind (("C-M-\\" . clang-format-buffer))
-  :config (setq clang-format-executable "clang-format-3.8"))
+(req-package compile
+  :bind (("<f5>" . recompile)))
+
+;; doc view
+
+(req-package doc-view
+  :config (setq doc-view-ghostscript-options
+                '("-dMaxBitmap=2147483647" "-dSAFER" "-dNOPAUSE" "-sDEVICE=png16m" "-dTextAlphaBits=4" "-dBATCH" "-dGraphicsAlphaBits=4" "-dQUIET")
+                doc-view-resolution 300))
 
 ;; fish mode
 
@@ -195,13 +202,6 @@
   ;; re-tabbing during whitespace-cleanup would kill makefiles
   :config (add-hook 'makefile-mode-hook
                     (lambda () (remove-hook 'before-save-hook 'whitespace-cleanup t))))
-
-;; doc view
-
-(req-package doc-view
-  :config (setq doc-view-ghostscript-options
-                '("-dMaxBitmap=2147483647" "-dSAFER" "-dNOPAUSE" "-sDEVICE=png16m" "-dTextAlphaBits=4" "-dBATCH" "-dGraphicsAlphaBits=4" "-dQUIET")
-                doc-view-resolution 300))
 
 ;; ----------------------------------------------------------- [ emacs prelude ]
 

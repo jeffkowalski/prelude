@@ -185,10 +185,11 @@ Note my naive mapping removes the final properties (like :right-align) if presen
                             (setq show-trailing-whitespace nil))))
          '(eshell-mode-hook term-mode-hook))
 #+END_SRC
-*** compile
+*** clang-format
 #+BEGIN_SRC emacs-lisp
-  (req-package compile
-    :bind (("<f5>" . recompile)))
+  (req-package clang-format
+    :bind (("C-M-\\" . clang-format-buffer))
+    :config (setq clang-format-executable "clang-format-3.8"))
 #+END_SRC
 *** cperl mode
 #+BEGIN_SRC emacs-lisp
@@ -196,11 +197,17 @@ Note my naive mapping removes the final properties (like :right-align) if presen
     :ensure t
     :init (defalias 'perl-mode 'cperl-mode))
 #+END_SRC
-*** clang-format mode
+*** compile
 #+BEGIN_SRC emacs-lisp
-  (req-package clang-format
-    :bind (("C-M-\\" . clang-format-buffer))
-    :config (setq clang-format-executable "clang-format-3.8"))
+  (req-package compile
+    :bind (("<f5>" . recompile)))
+#+END_SRC
+*** doc view
+#+BEGIN_SRC emacs-lisp
+  (req-package doc-view
+    :config (setq doc-view-ghostscript-options
+                  '("-dMaxBitmap=2147483647" "-dSAFER" "-dNOPAUSE" "-sDEVICE=png16m" "-dTextAlphaBits=4" "-dBATCH" "-dGraphicsAlphaBits=4" "-dQUIET")
+                  doc-view-resolution 300))
 #+END_SRC
 *** fish mode
 #+BEGIN_SRC emacs-lisp
@@ -212,13 +219,6 @@ Note my naive mapping removes the final properties (like :right-align) if presen
     ;; re-tabbing during whitespace-cleanup would kill makefiles
     :config (add-hook 'makefile-mode-hook
                       (lambda () (remove-hook 'before-save-hook 'whitespace-cleanup t))))
-#+END_SRC
-*** doc view
-#+BEGIN_SRC emacs-lisp
-  (req-package doc-view
-    :config (setq doc-view-ghostscript-options
-                  '("-dMaxBitmap=2147483647" "-dSAFER" "-dNOPAUSE" "-sDEVICE=png16m" "-dTextAlphaBits=4" "-dBATCH" "-dGraphicsAlphaBits=4" "-dQUIET")
-                  doc-view-resolution 300))
 #+END_SRC
 ** ----------------------------------------------------------- [ emacs prelude ]
 #+BEGIN_SRC emacs-lisp
