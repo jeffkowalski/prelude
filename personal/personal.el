@@ -611,6 +611,12 @@ recently selected windows nor the buffer list."
 (req-package ace-window
   :config '(setq aw-scope 'frame))
 
+;; ----------------------------------------------------------- [key-chord]
+
+(req-package key-chord
+  :config (progn (key-chord-define-global "xf"     'prelude-fullscreen)
+                 (key-chord-mode +1)))
+
 ;; ----------------------------------------------------------- [ org ]
 
 (req-package org
