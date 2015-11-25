@@ -693,161 +693,162 @@ recently selected windows nor the buffer list."
 ;; org agenda
 
 (defun my-org-cmp-tag (a b)
-  "Compare the non-context tags of A and B."
-  (let ((ta (car (get-text-property 1 'tags a)))
-        (tb (car (get-text-property 1 'tags b))))
-    (cond ((and (not ta) (not tb)) nil)
-          ((not ta) -1)
-          ((not tb) +1)
-          ;;((string-match-p "^@" tb) -1)
-          ;;((string-match-p "^@" ta) +1)
-          ((string-lessp ta tb) -1)
-          ((string-lessp tb ta) +1)
-          (t nil))))
+    "Compare the non-context tags of A and B."
+    (let ((ta (mapconcat 'identity (reverse (get-text-property 1 'tags a)) ":"))
+          (tb (mapconcat 'identity (reverse (get-text-property 1 'tags b)) ":")))
+(message ta)
+      (cond ((and (not ta) (not tb)) nil)
+            ((not ta) -1)
+            ((not tb) +1)
+            ;;((string-match-p "^@" tb) -1)
+            ;;((string-match-p "^@" ta) +1)
+            ((string-lessp ta tb) -1)
+            ((string-lessp tb ta) +1)
+            (t nil))))
 
-(req-package org-agenda
-  :require (org htmlize)
-  :init (progn (setq org-agenda-tags-column -97
-                     org-agenda-block-separator (let ((retval ""))
-                                                  (dotimes (i (- org-agenda-tags-column)) (setq retval (concat retval "=")))
-                                                  retval)
-                     org-agenda-timegrid-use-ampm t
-                     org-agenda-time-grid '((daily weekly today require-timed remove-match)
-                                            #("----------------" 0 16 (org-heading t))
-                                            (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000))
-                     org-agenda-search-headline-for-time nil
-                     org-agenda-window-setup 'current-window
-                     org-agenda-log-mode-items '(clock closed state)
-                     org-agenda-dim-blocked-tasks nil ; much faster!
-                     org-agenda-use-tag-inheritance nil
-                     org-agenda-exporter-settings
-                     '(
-                       ;;(org-agenda-add-entry-text-maxlines 50)
-                       ;;(org-agenda-with-colors nil)
-                       (org-agenda-write-buffer-name "Agenda")
-                       ;;(ps-number-of-columns 2)
-                       (ps-landscape-mode nil)
-                       (ps-print-color-p (quote black-white))
-                       (htmlize-output-type (quote css)))
+  (req-package org-agenda
+    :require (org htmlize)
+    :init (progn (setq org-agenda-tags-column -97
+                       org-agenda-block-separator (let ((retval ""))
+                                                    (dotimes (i (- org-agenda-tags-column)) (setq retval (concat retval "=")))
+                                                    retval)
+                       org-agenda-timegrid-use-ampm t
+                       org-agenda-time-grid '((daily weekly today require-timed remove-match)
+                                              #("----------------" 0 16 (org-heading t))
+                                              (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000))
+                       org-agenda-search-headline-for-time nil
+                       org-agenda-window-setup 'current-window
+                       org-agenda-log-mode-items '(clock closed state)
+                       org-agenda-dim-blocked-tasks nil ; much faster!
+                       org-agenda-use-tag-inheritance nil
+                       org-agenda-exporter-settings
+                       '(
+                         ;;(org-agenda-add-entry-text-maxlines 50)
+                         ;;(org-agenda-with-colors nil)
+                         (org-agenda-write-buffer-name "Agenda")
+                         ;;(ps-number-of-columns 2)
+                         (ps-landscape-mode nil)
+                         (ps-print-color-p (quote black-white))
+                         (htmlize-output-type (quote css)))
 
-                     org-agenda-custom-commands
-                     '(("d" "Timeline for today" ((agenda "" ))
-                        ((org-agenda-ndays 1)
-                         (org-agenda-show-log t)
-                         (org-agenda-log-mode-items '(clock closed state))
-                         (org-agenda-clockreport-mode t)
-                         (org-agenda-entry-types '())))
+                       org-agenda-custom-commands
+                       '(("d" "Timeline for today" ((agenda "" ))
+                          ((org-agenda-ndays 1)
+                           (org-agenda-show-log t)
+                           (org-agenda-log-mode-items '(clock closed state))
+                           (org-agenda-clockreport-mode t)
+                           (org-agenda-entry-types '())))
 
-                       ("s" "Startup View"
-                        ((agenda ""    ((org-agenda-ndays 3)
-                                        (org-agenda-start-on-weekday nil)
-                                        ;;(org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                                        (org-agenda-skip-scheduled-if-deadline-is-shown t)
-                                        (org-agenda-prefix-format "  %-10T %t")
-                                        (org-agenda-hide-tags-regexp "^@")
-                                        (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                                        (org-agenda-sorting-strategy '(time-up todo-state-down habit-up tag-up priority-down user-defined-up alpha-up))
-                                        ;;(org-agenda-todo-ignore-scheduled 'future)
-                                        (org-deadline-warning-days 0)))
-                         (agenda "TODO" ((org-agenda-time-grid nil)
-                                         (org-deadline-warning-days 365)
-                                         (org-agenda-prefix-format "  %-10T %s")
-                                         (org-agenda-hide-tags-regexp "^@")
-                                         (org-agenda-entry-types '(:deadline))
-                                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
-                                         (org-agenda-start-on-weekday nil)
-                                         (org-agenda-ndays 1)
-                                         (org-agenda-overriding-header "Unscheduled upcoming deadlines:")))
-                         (todo "TODO"   ((org-agenda-time-grid nil)
-                                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexp "#[A-C]" 'scheduled 'deadline))
-                                         ;;(org-agenda-todo-keyword-format "")
-                                         (org-agenda-prefix-format "  %-10T %t")
-                                         (org-agenda-hide-tags-regexp "^@")
-                                         ;;(org-agenda-show-inherited-tags nil)
-                                         (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                                         (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
-                                         (org-agenda-overriding-header "Unscheduled, no deadline:")))
-                         (todo "TODO"   ((org-agenda-time-grid nil)
-                                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'regexp "#[A-C]" 'scheduled 'deadline))
-                                         ;;(org-agenda-todo-keyword-format "")
-                                         (org-agenda-prefix-format "  %-10T %t")
-                                         (org-agenda-hide-tags-regexp "^@")
-                                         ;;(org-agenda-show-inherited-tags nil)
-                                         (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                                         (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
-                                         (org-agenda-overriding-header "Someday:")))))))
-               (add-hook 'org-finalize-agenda-hook
-                         (lambda () (remove-text-properties
-                                     (point-min) (point-max) '(mouse-face t))))
-               (add-hook 'org-agenda-mode-hook
-                         (lambda () (whitespace-mode -1)) t)
+                         ("s" "Startup View"
+                          ((agenda ""    ((org-agenda-ndays 3)
+                                          (org-agenda-start-on-weekday nil)
+                                          ;;(org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                          (org-agenda-skip-scheduled-if-deadline-is-shown t)
+                                          (org-agenda-prefix-format "  %-10T %t")
+                                          (org-agenda-hide-tags-regexp "^@")
+                                          (org-agenda-cmp-user-defined 'my-org-cmp-tag)
+                                          (org-agenda-sorting-strategy '(time-up todo-state-down habit-up tag-up priority-down user-defined-up alpha-up))
+                                          ;;(org-agenda-todo-ignore-scheduled 'future)
+                                          (org-deadline-warning-days 0)))
+                           (agenda "TODO" ((org-agenda-time-grid nil)
+                                           (org-deadline-warning-days 365)
+                                           (org-agenda-prefix-format "  %-10T %s")
+                                           (org-agenda-hide-tags-regexp "^@")
+                                           (org-agenda-entry-types '(:deadline))
+                                           (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
+                                           (org-agenda-start-on-weekday nil)
+                                           (org-agenda-ndays 1)
+                                           (org-agenda-overriding-header "Unscheduled upcoming deadlines:")))
+                           (todo "TODO"   ((org-agenda-time-grid nil)
+                                           (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexp "#[A-C]" 'scheduled 'deadline))
+                                           ;;(org-agenda-todo-keyword-format "")
+                                           (org-agenda-prefix-format "  %-10T %t")
+                                           (org-agenda-hide-tags-regexp "^@")
+                                           ;;(org-agenda-show-inherited-tags nil)
+                                           (org-agenda-cmp-user-defined 'my-org-cmp-tag)
+                                           (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
+                                           (org-agenda-overriding-header "Unscheduled, no deadline:")))
+                           (todo "TODO"   ((org-agenda-time-grid nil)
+                                           (org-agenda-skip-function '(org-agenda-skip-entry-if 'regexp "#[A-C]" 'scheduled 'deadline))
+                                           ;;(org-agenda-todo-keyword-format "")
+                                           (org-agenda-prefix-format "  %-10T %t")
+                                           (org-agenda-hide-tags-regexp "^@")
+                                           ;;(org-agenda-show-inherited-tags nil)
+                                           (org-agenda-cmp-user-defined 'my-org-cmp-tag)
+                                           (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
+                                           (org-agenda-overriding-header "Someday:")))))))
+                 (add-hook 'org-finalize-agenda-hook
+                           (lambda () (remove-text-properties
+                                       (point-min) (point-max) '(mouse-face t))))
+                 (add-hook 'org-agenda-mode-hook
+                           (lambda () (whitespace-mode -1)) t)
 
-               (defun jeff/org-agenda-edit-headline ()
-                 "Go to the Org-mode file containing the item at point, then mark headline for overwriting."
-                 (interactive)
-                 (org-agenda-goto)
-                 (search-backward (org-get-heading t t))
-                 (push-mark)
-                 (goto-char (match-end 0))
-                 (activate-mark))
-               (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)
+                 (defun jeff/org-agenda-edit-headline ()
+                   "Go to the Org-mode file containing the item at point, then mark headline for overwriting."
+                   (interactive)
+                   (org-agenda-goto)
+                   (search-backward (org-get-heading t t))
+                   (push-mark)
+                   (goto-char (match-end 0))
+                   (activate-mark))
+                 (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)
 
-               ;; Remove from agenda time grid lines that are in an appointment The
-               ;; agenda shows lines for the time grid. Some people think that these
-               ;; lines are a distraction when there are appointments at those
-               ;; times. You can get rid of the lines which coincide exactly with the
-               ;; beginning of an appointment. Michael Ekstrand has written a piece of
-               ;; advice that also removes lines that are somewhere inside an
-               ;; appointment: see [[http://orgmode.org/worg/org-hacks.html][Org-hacks]]
-               (defun org-time-to-minutes (time)
-                 "Convert an HHMM time to minutes"
-                 (+ (* (/ time 100) 60) (% time 100)))
+                 ;; Remove from agenda time grid lines that are in an appointment The
+                 ;; agenda shows lines for the time grid. Some people think that these
+                 ;; lines are a distraction when there are appointments at those
+                 ;; times. You can get rid of the lines which coincide exactly with the
+                 ;; beginning of an appointment. Michael Ekstrand has written a piece of
+                 ;; advice that also removes lines that are somewhere inside an
+                 ;; appointment: see [[http://orgmode.org/worg/org-hacks.html][Org-hacks]]
+                 (defun org-time-to-minutes (time)
+                   "Convert an HHMM time to minutes"
+                   (+ (* (/ time 100) 60) (% time 100)))
 
-               (defun org-time-from-minutes (minutes)
-                 "Convert a number of minutes to an HHMM time"
-                 (+ (* (/ minutes 60) 100) (% minutes 60)))
+                 (defun org-time-from-minutes (minutes)
+                   "Convert a number of minutes to an HHMM time"
+                   (+ (* (/ minutes 60) 100) (% minutes 60)))
 
-               (defun org-extract-window (line)
-                 "Extract start and end times from org entries"
-                (let ((start (get-text-property 1 'time-of-day line))
-                      (dur (get-text-property 1 'duration line)))
-                  (cond
-                   ((and start dur)
-                    (cons start
-                          (org-time-from-minutes
-                           (+ dur (org-time-to-minutes start)))))
-                   (start start)
-                   (t nil))))
+                 (defun org-extract-window (line)
+                   "Extract start and end times from org entries"
+                  (let ((start (get-text-property 1 'time-of-day line))
+                        (dur (get-text-property 1 'duration line)))
+                    (cond
+                     ((and start dur)
+                      (cons start
+                            (org-time-from-minutes
+                             (+ dur (org-time-to-minutes start)))))
+                     (start start)
+                     (t nil))))
 
-               (defadvice org-agenda-add-time-grid-maybe (around mde-org-agenda-grid-tweakify
-                                                                 (list ndays todayp))
-                 (if (member 'remove-match (car org-agenda-time-grid))
-                     (let* ((windows (delq nil (mapcar 'org-extract-window list)))
-                            (org-agenda-time-grid
-                             (list (car org-agenda-time-grid)
-                                   (cadr org-agenda-time-grid)
-                                   (remove-if
-                                    (lambda (time)
-                                      (find-if (lambda (w)
-                                                 (if (numberp w)
-                                                     (equal w time)
-                                                   (and (>= time (car w))
-                                                        (< time (cdr w)))))
-                                               windows))
-                                    (caddr org-agenda-time-grid)))))
-                       ad-do-it)
-                   ad-do-it))
+                 (defadvice org-agenda-add-time-grid-maybe (around mde-org-agenda-grid-tweakify
+                                                                   (list ndays todayp))
+                   (if (member 'remove-match (car org-agenda-time-grid))
+                       (let* ((windows (delq nil (mapcar 'org-extract-window list)))
+                              (org-agenda-time-grid
+                               (list (car org-agenda-time-grid)
+                                     (cadr org-agenda-time-grid)
+                                     (remove-if
+                                      (lambda (time)
+                                        (find-if (lambda (w)
+                                                   (if (numberp w)
+                                                       (equal w time)
+                                                     (and (>= time (car w))
+                                                          (< time (cdr w)))))
+                                                 windows))
+                                      (caddr org-agenda-time-grid)))))
+                         ad-do-it)
+                     ad-do-it))
 
-               (ad-activate 'org-agenda-add-time-grid-maybe)
+                 (ad-activate 'org-agenda-add-time-grid-maybe)
 
-               ;; (defun kiwon/org-agenda-redo-in-other-window ()
-               ;;   "Call org-agenda-redo function even in the non-agenda buffer."
-               ;;   (interactive)
-               ;;   (let ((agenda-window (get-buffer-window org-agenda-buffer-name t)))
-               ;;     (when agenda-window
-               ;;       (with-selected-window agenda-window (org-agenda-redo)))))
-               ;;(run-at-time nil 60 'kiwon/org-agenda-redo-in-other-window)
-               ))
+                 ;; (defun kiwon/org-agenda-redo-in-other-window ()
+                 ;;   "Call org-agenda-redo function even in the non-agenda buffer."
+                 ;;   (interactive)
+                 ;;   (let ((agenda-window (get-buffer-window org-agenda-buffer-name t)))
+                 ;;     (when agenda-window
+                 ;;       (with-selected-window agenda-window (org-agenda-redo)))))
+                 ;;(run-at-time nil 60 'kiwon/org-agenda-redo-in-other-window)
+                 ))
 
 ;; org clock
 
