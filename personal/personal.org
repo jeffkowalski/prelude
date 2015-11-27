@@ -630,10 +630,12 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
   (req-package ace-window
     :config '(setq aw-scope 'frame))
 #+END_SRC
-** ----------------------------------------------------------- [key-chord]
+** ----------------------------------------------------------- [ key-chord ]
 #+BEGIN_SRC emacs-lisp
   (req-package key-chord
-    :config (progn (key-chord-define-global "xf"     'prelude-fullscreen)
+    :config (progn (key-chord-define-global "xf" 'prelude-fullscreen)
+                   (key-chord-define-global "xd" '(lambda () (interactive) (load-theme 'solarized-dark)))
+                   (key-chord-define-global "xl" '(lambda () (interactive) (load-theme 'solarized-light)))
                    (key-chord-mode +1)))
 #+END_SRC
 ** ----------------------------------------------------------- [ org ]
