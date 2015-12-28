@@ -892,28 +892,28 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
 
   (defun adjust-captured-headline (hl)
     "Fixup headlines for amazon orders"
-    (if (string-match "amazon\\.com order of \\(.+?\\)\\(\\.\\.\\.\\)?\\( has shipped!\\)? :" hl)
+    (downcase (if (string-match "amazon\\.com order of \\(.+?\\)\\(\\.\\.\\.\\)?\\( has shipped!\\)? :" hl)
         (let ((item (match-string 1 hl)))
           (cond ((string-match ":@quicken:" hl) (concat "order of " item " :amazon_visa:@quicken:"))
                 ((string-match ":@waiting:" hl) (concat "delivery of " item " :amazon:@waiting:"))
                 (t hl))
           )
-      hl)
+      hl))
     )
 
   (req-package org-capture
     :require (org org-protocol s)
     :init (setq org-capture-templates
                 (quote (("b" "entry.html" entry (file+headline (concat org-directory "tasks.org") "TASKS")
-                         "* TODO %:description\n%:initial\n" :immediate-finish t)
+                         "* TODO %(downcase \"%:description\")\n%:initial\n" :immediate-finish t)
+                        ("h" "habit" entry (file+headline (concat org-directory "tasks.org") "TASKS")
+                         "* TODO [#C] %?\nSCHEDULED: %(s-replace \">\" \" .+1d/3d>\" \"%t\")\n:PROPERTIES:\n:STYLE: habit\n:END:\n")
                         ("t" "todo" entry (file+headline (concat org-directory "tasks.org") "TASKS")
                          "* TODO [#C] %?\n")
                         ;; capture this bookmarklet
                         ;; javascript:capture('@agendas');function enc(s){return encodeURIComponent(typeof(s)=="string"?s.toLowerCase().replace(/"/g, "'"):s);};function capture(context){var re=new RegExp(/(.*) - \S+@gmail.com/);var m=re.exec(document.title);var t=m?m[1]:document.title;javascript:location.href='org-protocol://capture://w/'+encodeURIComponent(location.href)+'/'+enc(t)+' :'+context+':/'+enc(window.getSelection());}
                         ("w" "org-protocol" entry (file+headline (concat org-directory "tasks.org") "TASKS")
-                         "* TODO [#C] %?%(adjust-captured-headline \"%:description\")\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n")
-                        ("h" "Habit" entry (file+headline (concat org-directory "tasks.org") "TASKS")
-                         "* TODO [#C] %?\nSCHEDULED: %(s-replace \">\" \" .+1d/3d>\" \"%t\")\n:PROPERTIES:\n:STYLE: habit\n:END:\n"))))
+                         "* TODO [#C] %?%(adjust-captured-headline \"%:description\")\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n"))))
     :config (progn
               (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create))
     :bind (("C-M-r" . org-capture)
