@@ -367,6 +367,10 @@
   :config (add-hook 'cmake-mode-hook
                     (lambda () (setq cmake-tab-width 4))))
 
+(req-package cmake-ide ; https://github.com/atilaneves/cmake-ide
+  :require rtags       ; https://github.com/Andersbakken/rtags
+  :config (cmake-ide-setup))
+
 ;; ----------------------------------------------------------- [ dired ]
 
 (req-package dired-single
