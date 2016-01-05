@@ -889,15 +889,15 @@ recently selected windows nor the buffer list."
 (req-package org-capture
   :require (org org-protocol s)
   :init (setq org-capture-templates
-              (quote (("b" "entry.html" entry (file+headline (concat org-directory "tasks.org") "TASKS")
+              (quote (("b" "entry.html" entry (file+headline (concat org-directory "tasks.org") "SINGLETON")
                        "* TODO %:description\n%:initial\n" :immediate-finish t)
-                      ("h" "habit" entry (file+headline (concat org-directory "tasks.org") "TASKS")
+                      ("h" "habit" entry (file+headline (concat org-directory "tasks.org") "SINGLETON")
                        "* TODO [#C] %?\nSCHEDULED: %(s-replace \">\" \" .+1d/3d>\" \"%t\")\n:PROPERTIES:\n:STYLE: habit\n:END:\n")
-                      ("t" "todo" entry (file+headline (concat org-directory "tasks.org") "TASKS")
+                      ("t" "todo" entry (file+headline (concat org-directory "tasks.org") "SINGLETON")
                        "* TODO [#C] %?\n")
                       ;; capture bookmarklet
                       ;; javascript:capture('@agendas');function enc(s){return encodeURIComponent(typeof(s)=="string"?s.toLowerCase().replace(/"/g, "'"):s);};function capture(context){var re=new RegExp(/(.*) - \S+@gmail.com/);var m=re.exec(document.title);var t=m?m[1]:document.title;javascript:location.href='org-protocol://capture://w/'+encodeURIComponent(location.href)+'/'+enc(t)+' :'+context+':/'+enc(window.getSelection());}
-                      ("w" "org-protocol" entry (file+headline (concat org-directory "tasks.org") "TASKS")
+                      ("w" "org-protocol" entry (file+headline (concat org-directory "tasks.org") "SINGLETON")
                        "* TODO [#C] %?%(adjust-captured-headline \"%:description\")\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n"))))
   :config (progn
             (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create))
