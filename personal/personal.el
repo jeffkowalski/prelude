@@ -1196,10 +1196,19 @@ GET header should contain a path in form '/todo/ID'."
             (add-hook 'edit-server-start-hook 'edit-server-maybe-dehtmlize-buffer)
             (add-hook 'edit-server-done-hook  'edit-server-maybe-htmlize-buffer)
             (edit-server-start))
-  :init (add-hook 'edit-server-start-hook
-          (lambda ()
-            (when (string-match "github.com" (buffer-name))
-              (markdown-mode)))))
+  :init (progn
+          (add-hook 'edit-server-start-hook
+                    (lambda ()
+                      (when (string-match "github.com" (buffer-name))
+                        (markdown-mode))))
+          (defun kill-window-with-current-buffer nil
+            "Delete all windows representing the current buffer."
+            (interactive)
+            (remove-hook 'kill-buffer-hook 'kill-window-with-current-buffer)
+            (delete-window))
+          (add-hook 'edit-server-done-hook
+                    (lambda ()
+                      (progn (add-hook 'kill-buffer-hook 'kill-window-with-current-buffer))))))
 
 ;; ----------------------------------------------------------- [ theme ]
 
