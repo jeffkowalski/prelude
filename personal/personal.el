@@ -527,6 +527,7 @@ recently selected windows nor the buffer list."
 
 ;; ----------------------------------------------------------- [ magit ]
 
+
 (req-package magit
   :diminish "ma"
   :init (setq magit-diff-options '("--ignore-all-space"))) ; ignore whitespace
@@ -622,6 +623,36 @@ recently selected windows nor the buffer list."
                  (key-chord-define-global "xd" '(lambda () (interactive) (load-theme 'solarized-dark)))
                  (key-chord-define-global "xl" '(lambda () (interactive) (load-theme 'solarized-light)))
                  (key-chord-mode +1)))
+
+;; ----------------------------------------------------------- [ abbrev ]
+
+(req-package abbrev
+  :diminish ""
+  :require key-chord
+  :init (progn
+          (defun endless/ispell-word-then-abbrev (p)
+            "Call `ispell-word', then create an abbrev for it.
+With prefix P, create local abbrev. Otherwise it will
+be global."
+            (interactive "P")
+            (let (bef aft)
+              (save-excursion
+                (while (progn
+                         (backward-word)
+                         (and (setq bef (thing-at-point 'word))
+                              (not (ispell-word nil 'quiet)))))
+                (setq aft (thing-at-point 'word)))
+              (when (and aft bef (not (equal aft bef)))
+                (setq aft (downcase aft))
+                (setq bef (downcase bef))
+                (define-abbrev
+                  (if p local-abbrev-table global-abbrev-table)
+                  bef aft)
+                (message "\"%s\" now expands to \"%s\" %sally"
+                         bef aft (if p "loc" "glob")))))
+          (setq save-abbrevs 'silently)
+          (setq-default abbrev-mode t)
+          (key-chord-define-global "xi" 'endless/ispell-word-then-abbrev)))
 
 ;; ----------------------------------------------------------- [ org ]
 
@@ -1046,7 +1077,6 @@ GET header should contain a path in form '/todo/ID'."
 
 
 (req-package emacs-lisp          :diminish "eλ")
-(req-package abbrev              :diminish "")
 ;(req-package auto-complete       :diminish " α")
 ;(req-package auto-fill-function  :diminish " φ")
 ;(req-package autopair            :diminish "")
