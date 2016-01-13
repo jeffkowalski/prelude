@@ -650,6 +650,7 @@ be global."
                   bef aft)
                 (message "\"%s\" now expands to \"%s\" %sally"
                          bef aft (if p "loc" "glob")))))
+          (setq abbrev-file-name "~/.abbrev_defs")
           (setq save-abbrevs 'silently)
           (setq-default abbrev-mode t)
           (key-chord-define-global "xi" 'endless/ispell-word-then-abbrev)))
