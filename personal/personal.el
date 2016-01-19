@@ -450,6 +450,17 @@ recently selected windows nor the buffer list."
   :defines (helm-swoop-last-prefix-number)
   :bind (("M-i" . helm-swoop)))
 
+;; ----------------------------------------------------------- [ robe ]
+
+(req-package robe
+  :require (helm-robe company)
+  :init (progn
+          (add-hook 'ruby-mode-hook 'robe-mode)
+          (eval-after-load 'company '(push 'company-robe company-backends))
+          ;; (add-hook 'robe-mode-hook 'ac-robe-setup)
+          ;; (defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate) (rvm-activate-corresponding-ruby))
+          ))
+
 ;; ----------------------------------------------------------- [ time ]
 
 (req-package time
