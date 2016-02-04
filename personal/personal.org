@@ -44,48 +44,53 @@ Use "C-c '" to edit block
 
 *** Setup el-get first
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+    (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
-  (when (not (require 'el-get))
-    (req-package-force el-get))
+    (when (not (require 'el-get))
+      (req-package-force el-get))
 
-  (progn
-    (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-    (setq el-get-sources '(
-                           (:name evernote-mode
-                                  :description "Functions for editing Evernote notes directly from Emacs"
-                                  :type github
-                                  :pkgname "jeffkowalski/evernote-mode"
-                                  :features evernote-mode)
-                           (:name nyan-mode
-                                  :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
-                                  :type github
-                                  :pkgname "jeffkowalski/nyan-mode"
-                                  :features nyan-mode)
-                           (:name org-cua-dwim
-                                  :description "Org-mode and CUA-mode compatibility layer"
-                                  :type github
-                                  :pkgname "jeffkowalski/org-cua-dwim"
-                                  :features org-cua-dwim)
-                           (:name org-ehtml
-                                  :description "Export Org-mode files as editable web pages"
-                                  :type github
-                                  :pkgname "jeffkowalski/org-ehtml"
-                                  :load-path "src")
-                           (:name org-reveal
-                                  :description "Exports Org-mode contents to Reveal.js HTML presentation"
-                                  :type github
-                                  :pkgname "jeffkowalski/org-reveal"
-                                  :features ox-reveal)
-                           ))
-    (defun req-package-providers-present-el-get-local (package)
-      "Return t if PACKAGE is available in el-get-sources."
-      (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources)))
-    (puthash 'el-get-local '(req-package-providers-install-el-get
-                             req-package-providers-present-el-get-local)
-             req-package-providers-map))
-  (el-get 'sync)
-
+    (progn
+      (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+      (setq el-get-sources '(
+                             (:name org-expiry
+                                    :description "Expiry mechanism for Org entries"
+                                    :type http
+                                    :url "http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-expiry.el;hb=HEAD"
+                                    :localname "org-expiry.el"
+                                    :features org-expiry)
+                             (:name evernote-mode
+                                    :description "Functions for editing Evernote notes directly from Emacs"
+                                    :type github
+                                    :pkgname "jeffkowalski/evernote-mode"
+                                    :features evernote-mode)
+                             (:name nyan-mode
+                                    :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
+                                    :type github
+                                    :pkgname "jeffkowalski/nyan-mode"
+                                    :features nyan-mode)
+                             (:name org-cua-dwim
+                                    :description "Org-mode and CUA-mode compatibility layer"
+                                    :type github
+                                    :pkgname "jeffkowalski/org-cua-dwim"
+                                    :features org-cua-dwim)
+                             (:name org-ehtml
+                                    :description "Export Org-mode files as editable web pages"
+                                    :type github
+                                    :pkgname "jeffkowalski/org-ehtml"
+                                    :load-path "src")
+                             (:name org-reveal
+                                    :description "Exports Org-mode contents to Reveal.js HTML presentation"
+                                    :type github
+                                    :pkgname "jeffkowalski/org-reveal"
+                                    :features ox-reveal)
+                             ))
+      (defun req-package-providers-present-el-get-local (package)
+        "Return t if PACKAGE is available in el-get-sources."
+        (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources)))
+      (puthash 'el-get-local '(req-package-providers-install-el-get
+                               req-package-providers-present-el-get-local)
+               req-package-providers-map))
+    (el-get 'sync)
 #+END_SRC
 
 *** Override function defined in use-package, so that packages from el-get are considered as well as those from the package manager.
@@ -972,6 +977,57 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
     :loader el-get-local
     :require (cua-base org)
     :init (org-cua-dwim-activate))
+#+END_SRC
+*** org expiry
+#+BEGIN_SRC emacs-lisp
+  (req-package org-expiry
+    :loader el-get-local
+    :require org-capture
+    :init (progn
+            (org-expiry-insinuate)
+            ;;
+            ;; Allow automatically handing of created/expired meta data.
+            ;;
+            ;; Configure it a bit to my liking
+            (setq
+             org-expiry-created-property-name "CREATED" ; Name of property when an item is created
+             org-expiry-inactive-timestamps   t         ; Don't have everything in the agenda view
+             )
+
+            (defun mrb/insert-created-timestamp()
+              "Insert a CREATED property using org-expiry.el for TODO entries"
+              (org-expiry-insert-created)
+              (org-back-to-heading)
+              (org-end-of-line)
+              (insert " ")
+              )
+
+            ;; Whenever a TODO entry is created, I want a timestamp
+            ;; Advice org-insert-todo-heading to insert a created timestamp using org-expiry
+            (defadvice org-insert-todo-heading (after mrb/created-timestamp-advice activate)
+              "Insert a CREATED property using org-expiry.el for TODO entries"
+              (mrb/insert-created-timestamp)
+              )
+            ;; Make it active
+            (ad-activate 'org-insert-todo-heading)
+
+            (defadvice org-capture (after mrb/created-timestamp-advice activate)
+              "Insert a CREATED property using org-expiry.el for TODO entries"
+                                          ; Test if the captured entry is a TODO, if so insert the created
+                                          ; timestamp property, otherwise ignore
+              (when (member (org-get-todo-state) org-todo-keywords-1)
+                (mrb/insert-created-timestamp)))
+            (ad-activate 'org-capture)
+
+            ;; Add feature to allow easy adding of tags in a capture window
+            (defun mrb/add-tags-in-capture()
+              (interactive)
+              "Insert tags in a capture window without losing the point"
+              (save-excursion
+                (org-back-to-heading)
+                (org-set-tags)))
+            ;; Bind this to a reasonable key
+            (define-key org-capture-mode-map "\C-c\C-t" 'mrb/add-tags-in-capture)))
 #+END_SRC
 ** ----------------------------------------------------------- [ org-ehtml ]
 #+BEGIN_SRC emacs-lisp
