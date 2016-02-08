@@ -659,6 +659,15 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
                    (key-chord-define-global "xl" '(lambda () (interactive) (load-theme 'solarized-light)))
                    (key-chord-mode +1)))
 #+END_SRC
+** ----------------------------------------------------------- [ guide-key ]
+#+BEGIN_SRC emacs-lisp
+  (req-package guide-key
+    :diminish "γ"
+    :init (progn
+              (setq guide-key/guide-key-sequence '("C-x" "C-c"))
+              (setq guide-key/recursive-key-sequence-flag t)
+              (guide-key-mode 1)))
+#+END_SRC
 ** ----------------------------------------------------------- [ abbrev ]
 #+BEGIN_SRC emacs-lisp
   (req-package abbrev
@@ -1138,7 +1147,6 @@ These diminish strings are only for those modes not mentioned elsewhere.
 (req-package flycheck            :diminish " φc")
 (req-package flymake             :diminish " φm")
 (req-package flyspell            :diminish " φs")
-(req-package guide-key           :diminish "")
 ;(req-package guru                :diminish "")
 ;(req-package haskell             :diminish "hλ")
 ;(req-package hi-lock             :diminish "")

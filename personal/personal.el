@@ -641,6 +641,15 @@ recently selected windows nor the buffer list."
                  (key-chord-define-global "xl" '(lambda () (interactive) (load-theme 'solarized-light)))
                  (key-chord-mode +1)))
 
+;; ----------------------------------------------------------- [ guide-key ]
+
+(req-package guide-key
+  :diminish "γ"
+  :init (progn
+            (setq guide-key/guide-key-sequence '("C-x" "C-c"))
+            (setq guide-key/recursive-key-sequence-flag t)
+            (guide-key-mode 1)))
+
 ;; ----------------------------------------------------------- [ abbrev ]
 
 (req-package abbrev
@@ -1120,7 +1129,6 @@ GET header should contain a path in form '/todo/ID'."
 (req-package flycheck            :diminish " φc")
 (req-package flymake             :diminish " φm")
 (req-package flyspell            :diminish " φs")
-(req-package guide-key           :diminish "")
 ;(req-package guru                :diminish "")
 ;(req-package haskell             :diminish "hλ")
 ;(req-package hi-lock             :diminish "")
