@@ -174,9 +174,13 @@
 
 ;; auto-revert
 
-(req-package auto-revert
-  :diminish ""
-  :config (auto-revert-mode))
+(req-package autorevert
+  :diminish "αΡ"
+  :init (progn
+            (auto-revert-mode)
+            (global-auto-revert-mode)
+            (setq global-auto-revert-non-file-buffers t)
+            (setq-default auto-revert-interval 1)))
 
 ;; clang-format
 
@@ -187,7 +191,6 @@
 ;; cperl mode
 
 (req-package cperl-mode
-  :ensure t
   :init (defalias 'perl-mode 'cperl-mode))
 
 ;; compile
@@ -380,9 +383,8 @@
 ;; ----------------------------------------------------------- [ dired ]
 
 (req-package dired-single
-  :require (dired dired+)
+  :require (autorevert dired dired+)
   :config (progn
-            (setq-default auto-revert-interval 1)
             (setq-default dired-omit-files-p t)
             (setq font-lock-maximum-decoration (quote ((dired-mode) (t . t)))
                   dired-omit-files (concat dired-omit-files "\\."))
@@ -706,6 +708,7 @@ be global."
         org-babel-load-languages '((sh . t)))
   :config
   (progn
+    (add-hook 'org-mode-hook (lambda () (auto-revert-mode 1)))
     (defun jeff/org-add-ids-to-headlines-in-file ()
       "Add ID properties to all headlines in the current file which do not already have one."
       (interactive)

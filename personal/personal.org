@@ -190,9 +190,13 @@ Note my naive mapping removes the final properties (like :right-align) if presen
 #+END_SRC
 *** auto-revert
 #+BEGIN_SRC emacs-lisp
-  (req-package auto-revert
-    :diminish ""
-    :config (auto-revert-mode))
+    (req-package autorevert
+      :diminish "αΡ"
+      :init (progn
+                (auto-revert-mode)
+                (global-auto-revert-mode)
+                (setq global-auto-revert-non-file-buffers t)
+                (setq-default auto-revert-interval 1)))
 #+END_SRC
 *** clang-format
 #+BEGIN_SRC emacs-lisp
@@ -203,7 +207,6 @@ Note my naive mapping removes the final properties (like :right-align) if presen
 *** cperl mode
 #+BEGIN_SRC emacs-lisp
   (req-package cperl-mode
-    :ensure t
     :init (defalias 'perl-mode 'cperl-mode))
 #+END_SRC
 *** compile
@@ -396,9 +399,8 @@ To jump to a register, use C-x r j followed by the letter of the register.
 ** ----------------------------------------------------------- [ dired ]
 #+BEGIN_SRC emacs-lisp
   (req-package dired-single
-    :require (dired dired+)
+    :require (autorevert dired dired+)
     :config (progn
-              (setq-default auto-revert-interval 1)
               (setq-default dired-omit-files-p t)
               (setq font-lock-maximum-decoration (quote ((dired-mode) (t . t)))
                     dired-omit-files (concat dired-omit-files "\\."))
@@ -724,6 +726,7 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
           org-babel-load-languages '((sh . t)))
     :config
     (progn
+      (add-hook 'org-mode-hook (lambda () (auto-revert-mode 1)))
       (defun jeff/org-add-ids-to-headlines-in-file ()
         "Add ID properties to all headlines in the current file which do not already have one."
         (interactive)
