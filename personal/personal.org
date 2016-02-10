@@ -957,12 +957,12 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
   (defun adjust-captured-headline (hl)
     "Fixup headlines for amazon orders"
     (downcase (if (string-match "amazon\\.com order of \\(.+?\\)\\(\\.\\.\\.\\)?\\( has shipped!\\)? :" hl)
-        (let ((item (match-string 1 hl)))
-          (cond ((string-match ":@quicken:" hl) (concat "order of " item " :amazon_visa:@quicken:"))
-                ((string-match ":@waiting:" hl) (concat "delivery of " item " :amazon:@waiting:"))
-                (t hl))
-          )
-      hl))
+                  (let ((item (match-string 1 hl)))
+                    (cond ((string-match ":@quicken:" hl) (concat "order of " item " :amazon_visa:@quicken:"))
+                          ((string-match ":@waiting:" hl) (concat "delivery of " item " :amazon:@waiting:"))
+                          (t hl))
+                    )
+                hl))
     )
 
   (req-package org-capture
@@ -980,7 +980,20 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
                          "* TODO [#C] %?%(adjust-captured-headline \"%:description\")\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n"))))
     :config (progn
               (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create)
-              (add-hook 'org-capture-prepare-finalize-hook 'org-expiry-insert-created))
+              (add-hook 'org-capture-prepare-finalize-hook 'org-expiry-insert-created)
+
+              (defun my/save-all-agenda-buffers ()
+                "Function used to save all agenda buffers that are currently open, based on `org-agenda-files'."
+                (interactive)
+                (save-current-buffer
+                  (dolist (buffer (buffer-list t))
+                    (set-buffer buffer)
+                    (when (member (buffer-file-name)
+                                  (mapcar 'expand-file-name (org-agenda-files t)))
+                      (save-buffer)))))
+
+              ;; save all the agenda files after each capture
+              (add-hook 'org-capture-after-finalize-hook 'my/save-all-agenda-buffers))
     :bind (("C-M-r" . org-capture)
            ("C-c r" . org-capture)))
 #+END_SRC
