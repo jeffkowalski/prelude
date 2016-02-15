@@ -333,7 +333,7 @@ To jump to a register, use C-x r j followed by the letter of the register.
      (?f . "~/.config/fish/config.fish")
      (?m . "~/Dropbox/sync-linux/mac_addrs.org")
      (?z . "~/.zshrc")
-     (?s . "~/bin/sauron.rb")))
+     (?s . "~/Dropbox/workspace/sauron/sauron.rb")))
 #+END_SRC
 ** ----------------------------------------------------------- [ shell / eshell ]
 #+BEGIN_SRC emacs-lisp

@@ -317,7 +317,7 @@
    (?f . "~/.config/fish/config.fish")
    (?m . "~/Dropbox/sync-linux/mac_addrs.org")
    (?z . "~/.zshrc")
-   (?s . "~/bin/sauron.rb")))
+   (?s . "~/Dropbox/workspace/sauron/sauron.rb")))
 
 ;; ----------------------------------------------------------- [ shell / eshell ]
 
