@@ -476,7 +476,8 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
     :defines (helm-swoop-last-prefix-number)
     :bind (("M-i" . helm-swoop)))
 #+END_SRC
-** ----------------------------------------------------------- [ robe ]
+** ----------------------------------------------------------- [ ruby ]
+*** robe
 #+BEGIN_SRC emacs-lisp
   (req-package robe
     :require (helm-robe company)
@@ -486,6 +487,13 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
             ;; (add-hook 'robe-mode-hook 'ac-robe-setup)
             ;; (defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate) (rvm-activate-corresponding-ruby))
             ))
+#+END_SRC
+*** rbenv
+#+BEGIN_SRC emacs-lisp
+  (req-package rbenv
+    :init (progn
+            (setq rbenv-show-active-ruby-in-modeline nil)
+            (global-rbenv-mode)))
 #+END_SRC
 ** ----------------------------------------------------------- [ time ]
 #+BEGIN_SRC emacs-lisp
