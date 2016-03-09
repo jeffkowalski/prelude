@@ -765,6 +765,15 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
            ("C-c a" . org-agenda)
            ("C-c b" . org-iswitchb)))
 #+END_SRC
+*** org bullets, indent
+#+BEGIN_SRC emacs-lisp
+    (req-package org-bullets
+      :diminish " Οι"
+      :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+    (req-package org-indent
+      :require org-bullets
+      :diminish " Οβ")
+#+END_SRC
 *** ox
 #+BEGIN_SRC emacs-lisp
   (req-package ox
@@ -1180,7 +1189,6 @@ These diminish strings are only for those modes not mentioned elsewhere.
 (req-package markdown            :diminish "md")
 ;(req-package nrepl-interaction   :diminish " ηζ")
 ;(req-package nrepl               :diminish " ηζ")
-(req-package org-indent          :diminish " Οι")
 (req-package paredit             :diminish " Φ")
 ;(req-package processing          :diminish "P5")
 ;(req-package python              :diminish "pλ")

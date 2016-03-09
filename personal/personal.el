@@ -746,6 +746,15 @@ be global."
          ("C-c a" . org-agenda)
          ("C-c b" . org-iswitchb)))
 
+;; org bullets, indent
+
+(req-package org-bullets
+  :diminish " Οι"
+  :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+(req-package org-indent
+  :require org-bullets
+  :diminish " Οβ")
+
 ;; ox
 
 (req-package ox
@@ -1161,7 +1170,6 @@ GET header should contain a path in form '/todo/ID'."
 (req-package markdown            :diminish "md")
 ;(req-package nrepl-interaction   :diminish " ηζ")
 ;(req-package nrepl               :diminish " ηζ")
-(req-package org-indent          :diminish " Οι")
 (req-package paredit             :diminish " Φ")
 ;(req-package processing          :diminish "P5")
 ;(req-package python              :diminish "pλ")
