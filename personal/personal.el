@@ -699,52 +699,53 @@ be global."
   ;; NOTE: org must be manually installed from elpa / gnu since it's
   ;; require'd from init.el in order to tangle personal.org
 
-  :init
-  (setq org-directory "~/Dropbox/workspace/org/"
-        ;;org-replace-disputed-keys t ; org-CUA-compatible
-        org-log-into-drawer t
-        org-support-shift-select 'always
-        org-default-notes-file (concat org-directory "refile.org")
-        org-agenda-files (list (concat org-directory "tasks.org")
-                               (concat org-directory "sauron.org")
-                               (concat org-directory "gcal.org"))
-        org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m)
-        org-startup-indented t
-        org-enforce-todo-dependencies t
-        org-src-window-setup 'current-window
-        org-babel-load-languages '((sh . t)))
-  :config
-  (progn
-    (add-hook 'org-mode-hook (lambda () (auto-revert-mode 1)))
-    (defun jeff/org-add-ids-to-headlines-in-file ()
-      "Add ID properties to all headlines in the current file which do not already have one."
-      (interactive)
-      (org-map-entries 'org-id-get-create))
-    ;; (add-hook 'org-mode-hook
-    ;;           (lambda ()
-    ;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
+  :init (progn
+          (setq org-directory "~/Dropbox/workspace/org/"
+                ;;org-replace-disputed-keys t ; org-CUA-compatible
+                org-log-into-drawer t
+                org-support-shift-select 'always
+                org-default-notes-file (concat org-directory "refile.org")
+                org-agenda-files (list (concat org-directory "tasks.org")
+                                       (concat org-directory "sauron.org")
+                                       (concat org-directory "gcal.org"))
+                org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m)
+                org-startup-indented t
+                org-enforce-todo-dependencies t
+                org-src-window-setup 'current-window)
+          (org-babel-do-load-languages
+           'org-babel-load-languages '((sh . t)
+                                       (emacs-lisp . t))))
+  :config (progn
+            (add-hook 'org-mode-hook (lambda () (auto-revert-mode 1)))
+            (defun jeff/org-add-ids-to-headlines-in-file ()
+              "Add ID properties to all headlines in the current file which do not already have one."
+              (interactive)
+              (org-map-entries 'org-id-get-create))
+            ;; (add-hook 'org-mode-hook
+            ;;           (lambda ()
+            ;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
 
-    (defun org-check-misformatted-subtree ()
-      "Check misformatted entries in the current buffer."
-      (interactive)
-      (show-all)
-      (org-map-entries
-       (lambda ()
-         (when (and (move-beginning-of-line 2)
-                    (not (looking-at org-heading-regexp)))
-           (if (or (and (org-get-scheduled-time (point))
-                        (not (looking-at (concat "^.*" org-scheduled-regexp))))
-                   (and (org-get-deadline-time (point))
-                        (not (looking-at (concat "^.*" org-deadline-regexp)))))
-               (when (y-or-n-p "Fix this subtree? ")
-                 (message "Call the function again when you're done fixing this subtree.")
-                 (recursive-edit))
-             (message "All subtrees checked.")))))))
+            (defun org-check-misformatted-subtree ()
+              "Check misformatted entries in the current buffer."
+              (interactive)
+              (show-all)
+              (org-map-entries
+               (lambda ()
+                 (when (and (move-beginning-of-line 2)
+                            (not (looking-at org-heading-regexp)))
+                   (if (or (and (org-get-scheduled-time (point))
+                                (not (looking-at (concat "^.*" org-scheduled-regexp))))
+                           (and (org-get-deadline-time (point))
+                                (not (looking-at (concat "^.*" org-deadline-regexp)))))
+                       (when (y-or-n-p "Fix this subtree? ")
+                         (message "Call the function again when you're done fixing this subtree.")
+                         (recursive-edit))
+                     (message "All subtrees checked.")))))))
 
-  :bind (("C-c l" . org-store-link)
-         ("C-c c" . org-capture)
-         ("C-c a" . org-agenda)
-         ("C-c b" . org-iswitchb)))
+  :bind  (("C-c l" . org-store-link)
+          ("C-c c" . org-capture)
+          ("C-c a" . org-agenda)
+          ("C-c b" . org-iswitchb)))
 
 ;; org bullets, indent
 
