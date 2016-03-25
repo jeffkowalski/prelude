@@ -177,9 +177,10 @@
 (req-package autorevert
   :diminish "αΡ"
   :init (progn
-            (auto-revert-mode)
-            (global-auto-revert-mode)
+            (auto-revert-mode 1)
+            (global-auto-revert-mode 1)
             (setq global-auto-revert-non-file-buffers t)
+            (setq auto-revert-use-notify nil)
             (setq-default auto-revert-interval 1)))
 
 ;; clang-format

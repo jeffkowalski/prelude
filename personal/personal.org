@@ -190,13 +190,14 @@ Note my naive mapping removes the final properties (like :right-align) if presen
 #+END_SRC
 *** auto-revert
 #+BEGIN_SRC emacs-lisp
-    (req-package autorevert
-      :diminish "αΡ"
-      :init (progn
-                (auto-revert-mode)
-                (global-auto-revert-mode)
-                (setq global-auto-revert-non-file-buffers t)
-                (setq-default auto-revert-interval 1)))
+  (req-package autorevert
+    :diminish "αΡ"
+    :init (progn
+              (auto-revert-mode 1)
+              (global-auto-revert-mode 1)
+              (setq global-auto-revert-non-file-buffers t)
+              (setq auto-revert-use-notify nil)
+              (setq-default auto-revert-interval 1)))
 #+END_SRC
 *** clang-format
 #+BEGIN_SRC emacs-lisp
