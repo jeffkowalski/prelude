@@ -689,7 +689,7 @@ be global."
           (setq abbrev-file-name "~/.abbrev_defs")
           (setq save-abbrevs 'silently)
           (setq-default abbrev-mode t)
-          (key-chord-define-global "xi" 'endless/ispell-word-then-abbrev)))
+          (key-chord-define-global "sx" 'endless/ispell-word-then-abbrev)))
 
 ;; ----------------------------------------------------------- [ org ]
 
