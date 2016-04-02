@@ -649,6 +649,7 @@ recently selected windows nor the buffer list."
   :config (progn (key-chord-define-global "xf" 'prelude-fullscreen)
                  (key-chord-define-global "xd" '(lambda () (interactive) (load-theme 'solarized-dark)))
                  (key-chord-define-global "xl" '(lambda () (interactive) (load-theme 'solarized-light)))
+                 (key-chord-define-global "xx" 'helm-M-x)
                  (key-chord-mode +1)))
 
 ;; ----------------------------------------------------------- [ guide-key ]
