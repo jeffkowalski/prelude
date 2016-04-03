@@ -998,6 +998,12 @@ be global."
   :bind (("C-M-r" . org-capture)
          ("C-c r" . org-capture)))
 
+;; org reveal
+
+(req-package ox-reveal
+  :loader el-get-local
+  :init (setq org-reveal-root "file:///home/jeff/workspace/reveal.js"))
+
 ;; org cua dwim
 
 (req-package org-cua-dwim

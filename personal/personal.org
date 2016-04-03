@@ -1017,6 +1017,12 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
     :bind (("C-M-r" . org-capture)
            ("C-c r" . org-capture)))
 #+END_SRC
+*** org reveal
+#+BEGIN_SRC emacs-lisp
+  (req-package ox-reveal
+    :loader el-get-local
+    :init (setq org-reveal-root "file:///home/jeff/workspace/reveal.js"))
+#+END_SRC
 *** org cua dwim
 #+BEGIN_SRC emacs-lisp
   (req-package org-cua-dwim
