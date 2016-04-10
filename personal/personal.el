@@ -233,51 +233,6 @@
                     (guru-mode -1)
                     (whitespace-mode -1)) t))
 
-;; ----------------------------------------------------------- [ hydra ]
-
-(req-package hydra
-  :require (windmove ace-window)
-  :init (progn
-          (global-set-key
-           (kbd "C-M-o")
-           (defhydra hydra-window ()
-             "window"
-             ("<left>" windmove-left "left")
-             ("<down>" windmove-down "down")
-             ("<up>" windmove-up "up")
-             ("<right>" windmove-right "right")
-             ("a" (lambda ()
-                    (interactive)
-                    (ace-window 1)
-                    (add-hook 'ace-window-end-once-hook
-                              'hydra-window/body))
-              "ace")
-             ("v" (lambda ()
-                    (interactive)
-                    (split-window-right)
-                    (windmove-right))
-              "vert")
-             ("x" (lambda ()
-                    (interactive)
-                    (split-window-below)
-                    (windmove-down))
-              "horz")
-             ("s" (lambda ()
-                    (interactive)
-                    (ace-window 4)
-                    (add-hook 'ace-window-end-once-hook
-                              'hydra-window/body))
-              "swap")
-             ("d" (lambda ()
-                    (interactive)
-                    (ace-window 16)
-                    (add-hook 'ace-window-end-once-hook
-                              'hydra-window/body))
-              "del")
-             ("o" delete-other-windows "1" :color blue)
-             ("i" ace-maximize-window "a1" :color blue)
-             ("q" nil "cancel")))))
-
 ;; ----------------------------------------------------------- [ keyboard macros ]
 
 (defvar defining-key)
@@ -642,15 +597,6 @@ recently selected windows nor the buffer list."
 
 (req-package ace-window
   :config '(setq aw-scope 'frame))
-
-;; ----------------------------------------------------------- [ key-chord ]
-
-(req-package key-chord
-  :config (progn (key-chord-define-global "xf" 'prelude-fullscreen)
-                 (key-chord-define-global "xd" '(lambda () (interactive) (load-theme 'solarized-dark)))
-                 (key-chord-define-global "xl" '(lambda () (interactive) (load-theme 'solarized-light)))
-                 (key-chord-define-global "xx" 'helm-M-x)
-                 (key-chord-mode +1)))
 
 ;; ----------------------------------------------------------- [ guide-key ]
 
@@ -1381,6 +1327,123 @@ GET header should contain a path in form '/todo/ID'."
 
 (global-set-key (kbd "<mouse-8>")       'switch-to-prev-buffer)
 (global-set-key (kbd "<mouse-9>")       'switch-to-next-buffer)
+
+;; ----------------------------------------------------------- [ hydra ]
+
+(req-package hydra
+  :require windmove ace-window org-agenda
+  :ensure t
+  :config
+  (eval-and-compile
+    (defhydra hydra-window ()
+      "window"
+      ("<left>" windmove-left "left")
+      ("<down>" windmove-down "down")
+      ("<up>" windmove-up "up")
+      ("<right>" windmove-right "right")
+      ("a" (lambda ()
+             (interactive)
+             (ace-window 1)
+             (add-hook 'ace-window-end-once-hook
+                       'hydra-window/body))
+       "ace")
+      ("v" (lambda ()
+             (interactive)
+             (split-window-right)
+             (windmove-right))
+       "vert")
+      ("x" (lambda ()
+             (interactive)
+             (split-window-below)
+             (windmove-down))
+       "horz")
+      ("s" (lambda ()
+             (interactive)
+             (ace-window 4)
+             (add-hook 'ace-window-end-once-hook
+                       'hydra-window/body))
+       "swap")
+      ("d" (lambda ()
+             (interactive)
+             (ace-window 16)
+             (add-hook 'ace-window-end-once-hook
+                       'hydra-window/body))
+       "del")
+      ("o" delete-other-windows "1" :color blue)
+      ("i" ace-maximize-window "a1" :color blue)
+      ("q" nil "cancel")))
+
+  (define-key global-map
+    (kbd "C-M-O") 'hydra-window/body)
+
+
+  ;; from http://oremacs.com/2016/04/04/hydra-doc-syntax/
+
+  (defun org-agenda-cts ()
+    (if (bound-and-true-p org-mode)
+        (let ((args (get-text-property
+                     (min (1- (point-max)) (point))
+                     'org-last-args)))
+          (nth 2 args))
+      nil))
+
+  (eval-and-compile
+    (defhydra hydra-org-agenda-view (:hint nil)
+      "
+  _d_: ?d? day        _g_: time grid=?g? _a_: arch-trees
+  _w_: ?w? week       _[_: inactive      _A_: arch-files
+  _t_: ?t? fortnight  _f_: follow=?f?    _r_: report=?r?
+  _m_: ?m? month      _e_: entry =?e?    _D_: diary=?D?
+  _y_: ?y? year       _q_: quit          _L__l__c_: ?l?"
+      ("SPC" org-agenda-reset-view)
+      ("d" org-agenda-day-view
+       (if (eq 'day (org-agenda-cts))
+           "[x]" "[ ]"))
+      ("w" org-agenda-week-view
+       (if (eq 'week (org-agenda-cts))
+           "[x]" "[ ]"))
+      ("t" org-agenda-fortnight-view
+       (if (eq 'fortnight (org-agenda-cts))
+           "[x]" "[ ]"))
+      ("m" org-agenda-month-view
+       (if (eq 'month (org-agenda-cts)) "[x]" "[ ]"))
+      ("y" org-agenda-year-view
+       (if (eq 'year (org-agenda-cts)) "[x]" "[ ]"))
+      ("l" org-agenda-log-mode
+       (format "% -3S" org-agenda-show-log))
+      ("L" (org-agenda-log-mode '(4)))
+      ("c" (org-agenda-log-mode 'clockcheck))
+      ("f" org-agenda-follow-mode
+       (format "% -3S" org-agenda-follow-mode))
+      ("a" org-agenda-archives-mode)
+      ("A" (org-agenda-archives-mode 'files))
+      ("r" org-agenda-clockreport-mode
+       (format "% -3S" org-agenda-clockreport-mode))
+      ("e" org-agenda-entry-text-mode
+       (format "% -3S" org-agenda-entry-text-mode))
+      ("g" org-agenda-toggle-time-grid
+       (format "% -3S" org-agenda-use-time-grid))
+      ("D" org-agenda-toggle-diary
+       (format "% -3S" org-agenda-include-diary))
+      ("!" org-agenda-toggle-deadlines)
+      ("["
+       (let ((org-agenda-include-inactive-timestamps t))
+         (org-agenda-check-type t 'timeline 'agenda)
+         (org-agenda-redo)))
+      ("q" (message "Abort") :exit t)))
+
+  (define-key org-agenda-mode-map
+    "v" 'hydra-org-agenda-view/body)
+  )
+
+;; ----------------------------------------------------------- [ key-chord ]
+
+(req-package key-chord
+  :config (progn (key-chord-define-global "xf" 'prelude-fullscreen)
+                 (key-chord-define-global "xd" '(lambda () (interactive) (load-theme 'solarized-dark)))
+                 (key-chord-define-global "xl" '(lambda () (interactive) (load-theme 'solarized-light)))
+                 (key-chord-define-global "xx" 'helm-M-x)
+                 (key-chord-mode +1)))
 
 ;; ----------------------------------------------------------- [ quicken ]
 
