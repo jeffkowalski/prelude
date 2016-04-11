@@ -681,6 +681,7 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
                   org-src-window-setup 'current-window)
             (org-babel-do-load-languages
              'org-babel-load-languages '((sh . t)
+                                         (latex . t)
                                          (emacs-lisp . t))))
     :config (progn
               (add-hook 'org-mode-hook (lambda () (auto-revert-mode 1)))

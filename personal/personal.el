@@ -662,6 +662,7 @@ be global."
                 org-src-window-setup 'current-window)
           (org-babel-do-load-languages
            'org-babel-load-languages '((sh . t)
+                                       (latex . t)
                                        (emacs-lisp . t))))
   :config (progn
             (add-hook 'org-mode-hook (lambda () (auto-revert-mode 1)))
