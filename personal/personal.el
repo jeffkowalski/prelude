@@ -14,20 +14,14 @@
                            ("marmalade" . "http://marmalade-repo.org/packages/")
                            )))
 
-;; Setup use-package
+;; Setup req-package
 
-(dolist (p '(use-package
-             ))
-  (unless (package-installed-p p)
-    (package-install p)))
-
-(require 'use-package)
-(use-package use-package
-  :config (setq use-package-verbose t
-                use-package-minimum-reported-time 0))
-(use-package req-package
-  :config (progn (setq req-package-log-level 'trace)
-                 (req-package--log-set-level req-package-log-level)))
+(unless (package-installed-p 'req-package) (package-install 'req-package))
+(require 'req-package)
+(setq use-package-verbose t
+      use-package-minimum-reported-time 0
+      req-package-log-level 'trace)
+(req-package--log-set-level req-package-log-level)
 
 ;; Setup el-get first
 
@@ -74,10 +68,10 @@
   (defun req-package-providers-present-el-get-local (package)
     "Return t if PACKAGE is available in el-get-sources."
     (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources)))
-  (puthash 'el-get-local '(req-package-providers-install-el-get
+  (puthash :el-get-local '(req-package-providers-install-el-get
                            req-package-providers-present-el-get-local)
            req-package-providers-map))
-(el-get 'sync)
+(el-get 'sync (mapcar (lambda (x) (plist-get x :name)) el-get-sources))
 
 ;; Override function defined in use-package, so that packages from el-get are considered as well as those from the package manager.
 
@@ -643,7 +637,7 @@ be global."
 (req-package org
   :diminish "Ο"
   :pin gnu
-  :loader 'elpa
+  :loader :elpa
   ;; NOTE: org must be manually installed from elpa / gnu since it's
   ;; require'd from init.el in order to tangle personal.org
 
@@ -948,20 +942,20 @@ be global."
 ;; org reveal
 
 (req-package ox-reveal
-  :loader el-get-local
+  :loader :el-get-local
   :init (setq org-reveal-root "file:///home/jeff/workspace/reveal.js"))
 
 ;; org cua dwim
 
 (req-package org-cua-dwim
-  :loader el-get-local
+  :loader :el-get-local
   :require (cua-base org)
   :init (org-cua-dwim-activate))
 
 ;; org expiry
 
 (req-package org-expiry
-  :loader el-get-local
+  :loader :el-get-local
   :require org-capture
   :init (progn
           (org-expiry-insinuate)
@@ -975,7 +969,7 @@ be global."
 (req-package web-server)
 
 (req-package org-ehtml
-  :loader el-get-local
+  :loader :el-get-local
   :require (org web-server)
   :init (setq
          org-ehtml-everything-editable t
@@ -1076,7 +1070,7 @@ GET header should contain a path in form '/todo/ID'."
 ;; ----------------------------------------------------------- [ evernote ]
 
 (req-package evernote-mode
-  :loader el-get-local
+  :loader :el-get-local
   :init (progn
           (setq evernote-developer-token "S=s1:U=81f:E=1470997a804:C=13fb1e67c09:P=1cd:A=en-devtoken:V=2:H=0b3aafa546daa4a9b43c77a7574390d4"
                 evernote-enml-formatter-command '("w3m" "-dump" "-I" "UTF8" "-O" "UTF8") ; optional
@@ -1156,7 +1150,7 @@ GET header should contain a path in form '/todo/ID'."
 ;; nyan mode
 
 (req-package nyan-mode
-  :loader el-get-local
+  :loader :el-get-local
   :init (progn (nyan-mode +1)
                (setq nyan-wavy-trail t)
                (setq nyan-animate-nyancat t)))
