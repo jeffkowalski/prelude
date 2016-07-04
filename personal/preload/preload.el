@@ -4,6 +4,9 @@
 ;;;
 
 
+(or (fboundp 'scroll-bar-mode) (defun scroll-bar-mode (&optional args) "" nil))
+
+
 (setq ad-redefinition-action (quote accept))
 
 
