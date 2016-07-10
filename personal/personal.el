@@ -656,6 +656,7 @@ be global."
                 org-src-window-setup 'current-window)
           (org-babel-do-load-languages
            'org-babel-load-languages '((sh . t)
+                                       (ruby . t)
                                        (dot . t)
                                        (latex . t)
                                        (emacs-lisp . t))))
