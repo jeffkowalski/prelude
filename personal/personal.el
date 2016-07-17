@@ -653,6 +653,7 @@ be global."
                 org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m)
                 org-startup-indented t
                 org-enforce-todo-dependencies t
+                org-confirm-elisp-link-function nil
                 org-src-window-setup 'current-window)
           (org-babel-do-load-languages
            'org-babel-load-languages '((sh . t)
