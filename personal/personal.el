@@ -408,23 +408,35 @@ recently selected windows nor the buffer list."
   :defines (helm-swoop-last-prefix-number)
   :bind (("M-i" . helm-swoop)))
 
+;; ruby-tools
+
+(req-package ruby-tools
+  :diminish " ρ")
+
+;; rbenv
+
+(req-package rbenv
+  :init (progn
+          (setq rbenv-executable (concat (getenv "HOME") "/.linuxbrew/bin/rbenv"))
+          (setq rbenv-show-active-ruby-in-modeline nil)
+          (global-rbenv-mode)))
+
+;; inf-ruby
+
+(req-package inf-ruby
+  :require rbenv
+  :init (setq inf-ruby-default-implementation "pry"))
+
 ;; robe
 
 (req-package robe
-  :require (helm-robe company)
+  :require (helm-robe company inf-ruby)
   :init (progn
           (add-hook 'ruby-mode-hook 'robe-mode)
           (eval-after-load 'company '(push 'company-robe company-backends))
           ;; (add-hook 'robe-mode-hook 'ac-robe-setup)
           ;; (defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate) (rvm-activate-corresponding-ruby))
           ))
-
-;; rbenv
-
-(req-package rbenv
-  :init (progn
-          (setq rbenv-show-active-ruby-in-modeline nil)
-          (global-rbenv-mode)))
 
 ;; ----------------------------------------------------------- [ time ]
 
@@ -595,7 +607,7 @@ recently selected windows nor the buffer list."
 ;; ----------------------------------------------------------- [ guide-key ]
 
 (req-package guide-key
-  :diminish "γ"
+  :diminish " γ"
   :init (progn
             (setq guide-key/guide-key-sequence '("C-x" "C-c"))
             (setq guide-key/recursive-key-sequence-flag t)

@@ -427,23 +427,35 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
     :bind (("M-i" . helm-swoop)))
 #+END_SRC
 ** ----------------------------------------------------------- [ ruby ]
+*** ruby-tools
+#+BEGIN_SRC emacs-lisp
+  (req-package ruby-tools
+    :diminish " ρ")
+#+END_SRC
+*** rbenv
+#+BEGIN_SRC emacs-lisp
+  (req-package rbenv
+    :init (progn
+            (setq rbenv-executable (concat (getenv "HOME") "/.linuxbrew/bin/rbenv"))
+            (setq rbenv-show-active-ruby-in-modeline nil)
+            (global-rbenv-mode)))
+#+END_SRC
+*** inf-ruby
+#+BEGIN_SRC emacs-lisp
+  (req-package inf-ruby
+    :require rbenv
+    :init (setq inf-ruby-default-implementation "pry"))
+#+END_SRC
 *** robe
 #+BEGIN_SRC emacs-lisp
   (req-package robe
-    :require (helm-robe company)
+    :require (helm-robe company inf-ruby)
     :init (progn
             (add-hook 'ruby-mode-hook 'robe-mode)
             (eval-after-load 'company '(push 'company-robe company-backends))
             ;; (add-hook 'robe-mode-hook 'ac-robe-setup)
             ;; (defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate) (rvm-activate-corresponding-ruby))
             ))
-#+END_SRC
-*** rbenv
-#+BEGIN_SRC emacs-lisp
-  (req-package rbenv
-    :init (progn
-            (setq rbenv-show-active-ruby-in-modeline nil)
-            (global-rbenv-mode)))
 #+END_SRC
 ** ----------------------------------------------------------- [ time ]
 #+BEGIN_SRC emacs-lisp
@@ -614,7 +626,7 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
 ** ----------------------------------------------------------- [ guide-key ]
 #+BEGIN_SRC emacs-lisp
   (req-package guide-key
-    :diminish "γ"
+    :diminish " γ"
     :init (progn
               (setq guide-key/guide-key-sequence '("C-x" "C-c"))
               (setq guide-key/recursive-key-sequence-flag t)
