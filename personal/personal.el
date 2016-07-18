@@ -39,6 +39,10 @@
                                 :url "http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-expiry.el;hb=HEAD"
                                 :localname "org-expiry.el"
                                 :features org-expiry)
+                         (:name flymake
+                                :description "Continuous syntax checking for Emacs"
+                                :type github
+                                :pkgname "jeffkowalski/emacs-flymake")
                          (:name evernote-mode
                                 :description "Functions for editing Evernote notes directly from Emacs"
                                 :type github
