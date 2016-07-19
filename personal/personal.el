@@ -1112,6 +1112,11 @@ GET header should contain a path in form '/todo/ID'."
          ("<M-left>"       . windmove-left)
          ("<M-right>"      . windmove-right)))
 
+;; ----------------------------------------------------------- [ shackle ]
+
+(req-package shackle
+  :init (setq shackle-rules '(("\\`\\*helm.*?\\*\\'" :regexp t :align t :size 0.4))))
+
 ;; ----------------------------------------------------------- [ diminished ]
 ;; Better to put these in the mode-specific sections.
 ;; These diminish strings are only for those modes not mentioned elsewhere.

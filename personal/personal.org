@@ -1131,6 +1131,13 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
            ("<M-left>"       . windmove-left)
            ("<M-right>"      . windmove-right)))
 #+END_SRC
+
+** ----------------------------------------------------------- [ shackle ]
+#+BEGIN_SRC emacs-lisp
+  (req-package shackle
+    :init (setq shackle-rules '(("\\`\\*helm.*?\\*\\'" :regexp t :align t :size 0.4))))
+#+END_SRC
+
 ** ----------------------------------------------------------- [ diminished ]
 Better to put these in the mode-specific sections.
 These diminish strings are only for those modes not mentioned elsewhere.
