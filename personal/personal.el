@@ -155,6 +155,8 @@
 ;; Enable all commands
 (setq disabled-command-function nil)
 
+(setq user-mail-address "jeff.kowalski@gmail.com")
+
 (setq
  auto-save-list-file-prefix nil ;; startup
  auto-save-default nil ;; files
@@ -1492,6 +1494,13 @@ Currently only mini buffer, echo areas, and helm are ignored."
       (insert (format (concat "%" (int-to-string width) "d. ") n))
       (forward-line))))
 
+(defun try-send-email (to subject body)
+  "simple wrapper around message to send an email"
+  (message-mail to subject)
+  (message-goto-body)
+  (insert body)
+  (message-send-and-exit))
+
 (defun quicken-cleanup-uncategorized ()
   "Transform raw data pasted from quicken report into format suitable for email."
   (interactive)
@@ -1538,9 +1547,18 @@ Currently only mini buffer, echo areas, and helm are ignored."
 
   (org-mode)
   (org-table-align)
+
   (clipboard-kill-ring-save (point-min) (point-max))
   (message "table saved to clipboard")
-  )
+
+  (setq to (url-encode-url "Michelle Bowen <bowen.kowalski@gmail.com>")
+        subject "quicken quiz"
+        body (url-encode-url (buffer-string)))
+
+  (browse-url (concat "https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1"
+                      "&to=" to
+                      "&su=" subject
+                      "&body=" body)) )
 
 ;; ----------------------------------------------------------- [ finish ]
 
