@@ -314,60 +314,9 @@ To jump to a register, use C-x r j followed by the letter of the register.
                     '(("git" "log" "l" "diff" "show")))))
 
   (req-package eshell-git-prompt
+    :require eshell
     :config (progn
-              (set-fontset-font t 'unicode "PowerlineSymbols" nil 'prepend)
-
-              ;; Define a pretty prompt.
-              (defconst eshell-git-prompt-powerline2-regexp "^[^$\n]*\\\$ ")
-              (defun eshell-git-prompt-powerline2 ()
-                (let ((segment-separator "\xe0b0")
-                      (plusminus         "\x00b1")
-                      (branch            "\xe0a0")
-                      (detached          "\x27a6")
-                      (cross             "\x2718")
-                      git git-bg)
-                  (setq git
-                        (when (eshell-git-prompt--git-root-dir)
-                          (setq git-bg
-                                (if (eshell-git-prompt--collect-status)
-                                    (face-attribute 'error :foreground)
-                                  (face-attribute 'success :foreground)))
-                          (setq eshell-git-prompt-branch-name (eshell-git-prompt--branch-name))
-                          (with-face
-                              (concat " "
-                                      (-if-let (branch-name eshell-git-prompt-branch-name)
-                                          (concat branch " " branch-name)
-                                        (concat detached " "(eshell-git-prompt--commit-short-sha)))
-                                      " ")
-                            :foreground git-bg)))
-                  (concat (if git
-                              (concat
-                               (with-face segment-separator
-                                 :background git-bg
-                                 :foreground "steel blue")
-                               git
-                               (with-face segment-separator
-                                 :foreground git-bg))
-                            (with-face segment-separator
-                              :foreground "steel blue"))
-                          (with-face (concat
-                                      " "
-                                      (unless (eshell-git-prompt-exit-success-p)
-                                        (concat cross " "))
-                                      (abbreviate-file-name (eshell/pwd))
-                                      " ")
-                            :background (face-attribute 'shadow :foreground))
-                          (with-face segment-separator
-                            :background (face-attribute 'default :background)
-                            :foreground (face-attribute 'shadow :foreground))
-                          (propertize "$" 'invisible t) " ")
-                  ))
-
-              (add-to-list 'eshell-git-prompt-themes
-                           '(powerline2
-                             eshell-git-prompt-powerline2
-                             eshell-git-prompt-powerline2-regexp))
-              (eshell-git-prompt-use-theme 'powerline2)))
+              (set-fontset-font t 'unicode "PowerlineSymbols" nil 'prepend)))
 
   ;; (add-hook 'eshell-mode-hook
   ;;           (lambda ()
