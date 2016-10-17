@@ -58,6 +58,11 @@
                                 :type github
                                 :pkgname "jeffkowalski/org-cua-dwim"
                                 :features org-cua-dwim)
+                         (:name eshell-git-prompt
+                                :description "Some Eshell prompts for Git users"
+                                :type github
+                                :pkgname "jeffkowalski/eshell-git-prompt"
+                                :features eshell-git-prompt)
                          (:name org-ehtml
                                 :description "Export Org-mode files as editable web pages"
                                 :type github
@@ -277,11 +282,76 @@
 
 ;; ----------------------------------------------------------- [ shell / eshell ]
 
-(add-hook 'emacs-startup-hook
-          (lambda ()
-              (let ((default-directory (getenv "HOME")))
-                (command-execute 'eshell)
-                (bury-buffer))))
+(req-package eshell
+  :config (progn
+            (add-hook 'emacs-startup-hook
+                      (lambda ()
+                        (let ((default-directory (getenv "HOME")))
+                          (command-execute 'eshell)
+                          (bury-buffer))))
+
+            ;; Visual commands are commands which require a proper terminal.
+            ;; eshell will run them in a term buffer when you invoke them.
+            (setq eshell-visual-commands
+                  '("less" "tmux" "htop" "top" "bash" "zsh" "fish"))
+            (setq eshell-visual-subcommands
+                  '(("git" "log" "l" "diff" "show")))))
+
+(req-package eshell-git-prompt
+  :config (progn
+            (set-fontset-font t 'unicode "PowerlineSymbols" nil 'prepend)
+
+            ;; Define a pretty prompt.
+            (defconst eshell-git-prompt-powerline2-regexp "^[^$\n]*\\\$ ")
+            (defun eshell-git-prompt-powerline2 ()
+              (let ((segment-separator "\xe0b0")
+                    (plusminus         "\x00b1")
+                    (branch            "\xe0a0")
+                    (detached          "\x27a6")
+                    (cross             "\x2718")
+                    git git-bg)
+                (setq git
+                      (when (eshell-git-prompt--git-root-dir)
+                        (setq git-bg
+                              (if (eshell-git-prompt--collect-status)
+                                  (face-attribute 'error :foreground)
+                                (face-attribute 'success :foreground)))
+                        (setq eshell-git-prompt-branch-name (eshell-git-prompt--branch-name))
+                        (with-face
+                            (concat " "
+                                    (-if-let (branch-name eshell-git-prompt-branch-name)
+                                        (concat branch " " branch-name)
+                                      (concat detached " "(eshell-git-prompt--commit-short-sha)))
+                                    " ")
+                          :foreground git-bg)))
+                (concat (if git
+                            (concat
+                             (with-face segment-separator
+                               :background git-bg
+                               :foreground "steel blue")
+                             git
+                             (with-face segment-separator
+                               :foreground git-bg))
+                          (with-face segment-separator
+                            :foreground "steel blue"))
+                        (with-face (concat
+                                    " "
+                                    (unless (eshell-git-prompt-exit-success-p)
+                                      (concat cross " "))
+                                    (abbreviate-file-name (eshell/pwd))
+                                    " ")
+                          :background (face-attribute 'shadow :foreground))
+                        (with-face segment-separator
+                          :background (face-attribute 'default :background)
+                          :foreground (face-attribute 'shadow :foreground))
+                        (propertize "$" 'invisible t) " ")
+                ))
+
+            (add-to-list 'eshell-git-prompt-themes
+                         '(powerline2
+                           eshell-git-prompt-powerline2
+                           eshell-git-prompt-powerline2-regexp))
+            (eshell-git-prompt-use-theme 'powerline2)))
 
 ;; (add-hook 'eshell-mode-hook
 ;;           (lambda ()
@@ -1193,7 +1263,7 @@ GET header should contain a path in form '/todo/ID'."
             "Set to Jeff's theme."
             (interactive)
             (setq powerline-default-separator 'wave
-                  powerline-height 20
+                  powerline-height 14
                   powerline-default-separator-dir '(left . right))
 
             (setq-default mode-line-format
@@ -1213,10 +1283,10 @@ GET header should contain a path in form '/todo/ID'."
                                                                      (cdr powerline-default-separator-dir))))
 
                                     (lhs (list
-                                          (powerline-raw "%*" nil 'l)
-                                          (powerline-buffer-size nil 'l)
-                                          (powerline-buffer-id nil 'l)
-                                          (powerline-raw " ")
+                                          (powerline-raw "%*" face2 'l)
+                                          (powerline-buffer-size face2 'l)
+                                          (powerline-buffer-id face2 'l)
+                                          (powerline-raw " " face2)
                                           (funcall separator-left mode-line face1)
                                           (powerline-narrow face1 'l)
                                           (powerline-vc face1)))
@@ -1227,8 +1297,8 @@ GET header should contain a path in form '/todo/ID'."
                                           (powerline-raw ":" face1)
                                           (powerline-raw "%3c" face1 'r)
                                           (funcall separator-right face1 mode-line)
-                                          (powerline-raw " ")
-                                          (powerline-raw global-mode-string nil 'r)
+                                          (powerline-raw " " face2)
+                                          (powerline-raw global-mode-string face2)
                                           ;;(powerline-raw "%6p" nil 'r)
                                           ;;(powerline-hud face2 face1)
                                           ))
@@ -1247,7 +1317,7 @@ GET header should contain a path in form '/todo/ID'."
                                (concat (powerline-render lhs)
                                        (powerline-fill-center face1 (/ (powerline-width ctr) 2.0))
                                        (powerline-render ctr)
-                                       (powerline-fill face1 (powerline-width rhs))
+                                       ;;(powerline-fill face1 (powerline-width rhs))
                                        (powerline-render rhs)))))))
           (powerline-jeff-theme)
           ))
@@ -1568,13 +1638,14 @@ Currently only mini buffer, echo areas, and helm are ignored."
   "Show schedule in fullscreen."
   (interactive)
   (toggle-frame-fullscreen)
-  (run-with-idle-timer 1 nil (lambda () (org-agenda nil "s"))))
+  (run-with-idle-timer 1 nil (lambda () (org-agenda nil "s")))
+  (if (tty-type (frame-terminal)) (zenburn) (solarized)))
 
 (add-hook 'emacs-startup-hook
           '(lambda ()
              (progn
                (advice-add 'load-theme :after #'adjust-dim-face)
-               (if (tty-type (frame-terminal)) (zenburn) (solarized) ))))
+               (if (tty-type (frame-terminal)) (zenburn) (solarized)))))
 
 (provide 'personal)
 ;;; personal.el ends here

@@ -1,4 +1,4 @@
-#+TITLE: Jeff Kowalski's Emacs configuration
+o#+TITLE: Jeff Kowalski's Emacs configuration
 #+AUTHOR: Jeff Kowalski
 #+PROPERTY: header-args :tangle yes :comments org
 #+OPTIONS: toc:4 h:4
@@ -38,57 +38,62 @@ Use "C-c '" to edit block
 
 *** Setup el-get first
 #+BEGIN_SRC emacs-lisp
-    (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+  (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
-    (when (not (require 'el-get))
-      (req-package-force el-get))
+  (when (not (require 'el-get))
+    (req-package-force el-get))
 
-    (progn
-      (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-      (setq el-get-sources '(
-                             (:name org-expiry
-                                    :description "Expiry mechanism for Org entries"
-                                    :type http
-                                    :url "http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-expiry.el;hb=HEAD"
-                                    :localname "org-expiry.el"
-                                    :features org-expiry)
-                             (:name flymake
-                                    :description "Continuous syntax checking for Emacs"
-                                    :type github
-                                    :pkgname "jeffkowalski/emacs-flymake")
-                             (:name evernote-mode
-                                    :description "Functions for editing Evernote notes directly from Emacs"
-                                    :type github
-                                    :pkgname "jeffkowalski/evernote-mode"
-                                    :features evernote-mode)
-                             (:name nyan-mode
-                                    :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
-                                    :type github
-                                    :pkgname "jeffkowalski/nyan-mode"
-                                    :features nyan-mode)
-                             (:name org-cua-dwim
-                                    :description "Org-mode and CUA-mode compatibility layer"
-                                    :type github
-                                    :pkgname "jeffkowalski/org-cua-dwim"
-                                    :features org-cua-dwim)
-                             (:name org-ehtml
-                                    :description "Export Org-mode files as editable web pages"
-                                    :type github
-                                    :pkgname "jeffkowalski/org-ehtml"
-                                    :load-path "src")
-                             (:name org-reveal
-                                    :description "Exports Org-mode contents to Reveal.js HTML presentation"
-                                    :type github
-                                    :pkgname "jeffkowalski/org-reveal"
-                                    :features ox-reveal)
-                             ))
-      (defun req-package-providers-present-el-get-local (package)
-        "Return t if PACKAGE is available in el-get-sources."
-        (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources)))
-      (puthash :el-get-local '(req-package-providers-install-el-get
-                               req-package-providers-present-el-get-local)
-               req-package-providers-map))
-    (el-get 'sync (mapcar (lambda (x) (plist-get x :name)) el-get-sources))
+  (progn
+    (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+    (setq el-get-sources '(
+                           (:name org-expiry
+                                  :description "Expiry mechanism for Org entries"
+                                  :type http
+                                  :url "http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-expiry.el;hb=HEAD"
+                                  :localname "org-expiry.el"
+                                  :features org-expiry)
+                           (:name flymake
+                                  :description "Continuous syntax checking for Emacs"
+                                  :type github
+                                  :pkgname "jeffkowalski/emacs-flymake")
+                           (:name evernote-mode
+                                  :description "Functions for editing Evernote notes directly from Emacs"
+                                  :type github
+                                  :pkgname "jeffkowalski/evernote-mode"
+                                  :features evernote-mode)
+                           (:name nyan-mode
+                                  :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
+                                  :type github
+                                  :pkgname "jeffkowalski/nyan-mode"
+                                  :features nyan-mode)
+                           (:name org-cua-dwim
+                                  :description "Org-mode and CUA-mode compatibility layer"
+                                  :type github
+                                  :pkgname "jeffkowalski/org-cua-dwim"
+                                  :features org-cua-dwim)
+                           (:name eshell-git-prompt
+                                  :description "Some Eshell prompts for Git users"
+                                  :type github
+                                  :pkgname "jeffkowalski/eshell-git-prompt"
+                                  :features eshell-git-prompt)
+                           (:name org-ehtml
+                                  :description "Export Org-mode files as editable web pages"
+                                  :type github
+                                  :pkgname "jeffkowalski/org-ehtml"
+                                  :load-path "src")
+                           (:name org-reveal
+                                  :description "Exports Org-mode contents to Reveal.js HTML presentation"
+                                  :type github
+                                  :pkgname "jeffkowalski/org-reveal"
+                                  :features ox-reveal)
+                           ))
+    (defun req-package-providers-present-el-get-local (package)
+      "Return t if PACKAGE is available in el-get-sources."
+      (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources)))
+    (puthash :el-get-local '(req-package-providers-install-el-get
+                             req-package-providers-present-el-get-local)
+             req-package-providers-map))
+  (el-get 'sync (mapcar (lambda (x) (plist-get x :name)) el-get-sources))
 #+END_SRC
 
 *** Override function defined in use-package, so that packages from el-get are considered as well as those from the package manager.
@@ -293,11 +298,76 @@ To jump to a register, use C-x r j followed by the letter of the register.
 #+END_SRC
 ** ----------------------------------------------------------- [ shell / eshell ]
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'emacs-startup-hook
-            (lambda ()
-                (let ((default-directory (getenv "HOME")))
-                  (command-execute 'eshell)
-                  (bury-buffer))))
+  (req-package eshell
+    :config (progn
+              (add-hook 'emacs-startup-hook
+                        (lambda ()
+                          (let ((default-directory (getenv "HOME")))
+                            (command-execute 'eshell)
+                            (bury-buffer))))
+
+              ;; Visual commands are commands which require a proper terminal.
+              ;; eshell will run them in a term buffer when you invoke them.
+              (setq eshell-visual-commands
+                    '("less" "tmux" "htop" "top" "bash" "zsh" "fish"))
+              (setq eshell-visual-subcommands
+                    '(("git" "log" "l" "diff" "show")))))
+
+  (req-package eshell-git-prompt
+    :config (progn
+              (set-fontset-font t 'unicode "PowerlineSymbols" nil 'prepend)
+
+              ;; Define a pretty prompt.
+              (defconst eshell-git-prompt-powerline2-regexp "^[^$\n]*\\\$ ")
+              (defun eshell-git-prompt-powerline2 ()
+                (let ((segment-separator "\xe0b0")
+                      (plusminus         "\x00b1")
+                      (branch            "\xe0a0")
+                      (detached          "\x27a6")
+                      (cross             "\x2718")
+                      git git-bg)
+                  (setq git
+                        (when (eshell-git-prompt--git-root-dir)
+                          (setq git-bg
+                                (if (eshell-git-prompt--collect-status)
+                                    (face-attribute 'error :foreground)
+                                  (face-attribute 'success :foreground)))
+                          (setq eshell-git-prompt-branch-name (eshell-git-prompt--branch-name))
+                          (with-face
+                              (concat " "
+                                      (-if-let (branch-name eshell-git-prompt-branch-name)
+                                          (concat branch " " branch-name)
+                                        (concat detached " "(eshell-git-prompt--commit-short-sha)))
+                                      " ")
+                            :foreground git-bg)))
+                  (concat (if git
+                              (concat
+                               (with-face segment-separator
+                                 :background git-bg
+                                 :foreground "steel blue")
+                               git
+                               (with-face segment-separator
+                                 :foreground git-bg))
+                            (with-face segment-separator
+                              :foreground "steel blue"))
+                          (with-face (concat
+                                      " "
+                                      (unless (eshell-git-prompt-exit-success-p)
+                                        (concat cross " "))
+                                      (abbreviate-file-name (eshell/pwd))
+                                      " ")
+                            :background (face-attribute 'shadow :foreground))
+                          (with-face segment-separator
+                            :background (face-attribute 'default :background)
+                            :foreground (face-attribute 'shadow :foreground))
+                          (propertize "$" 'invisible t) " ")
+                  ))
+
+              (add-to-list 'eshell-git-prompt-themes
+                           '(powerline2
+                             eshell-git-prompt-powerline2
+                             eshell-git-prompt-powerline2-regexp))
+              (eshell-git-prompt-use-theme 'powerline2)))
 
   ;; (add-hook 'eshell-mode-hook
   ;;           (lambda ()
@@ -1216,7 +1286,7 @@ see https://github.com/11111000000/emacs-d/blob/master/init.el
               "Set to Jeff's theme."
               (interactive)
               (setq powerline-default-separator 'wave
-                    powerline-height 20
+                    powerline-height 14
                     powerline-default-separator-dir '(left . right))
 
               (setq-default mode-line-format
@@ -1236,10 +1306,10 @@ see https://github.com/11111000000/emacs-d/blob/master/init.el
                                                                        (cdr powerline-default-separator-dir))))
 
                                       (lhs (list
-                                            (powerline-raw "%*" nil 'l)
-                                            (powerline-buffer-size nil 'l)
-                                            (powerline-buffer-id nil 'l)
-                                            (powerline-raw " ")
+                                            (powerline-raw "%*" face2 'l)
+                                            (powerline-buffer-size face2 'l)
+                                            (powerline-buffer-id face2 'l)
+                                            (powerline-raw " " face2)
                                             (funcall separator-left mode-line face1)
                                             (powerline-narrow face1 'l)
                                             (powerline-vc face1)))
@@ -1250,8 +1320,8 @@ see https://github.com/11111000000/emacs-d/blob/master/init.el
                                             (powerline-raw ":" face1)
                                             (powerline-raw "%3c" face1 'r)
                                             (funcall separator-right face1 mode-line)
-                                            (powerline-raw " ")
-                                            (powerline-raw global-mode-string nil 'r)
+                                            (powerline-raw " " face2)
+                                            (powerline-raw global-mode-string face2)
                                             ;;(powerline-raw "%6p" nil 'r)
                                             ;;(powerline-hud face2 face1)
                                             ))
@@ -1270,7 +1340,7 @@ see https://github.com/11111000000/emacs-d/blob/master/init.el
                                  (concat (powerline-render lhs)
                                          (powerline-fill-center face1 (/ (powerline-width ctr) 2.0))
                                          (powerline-render ctr)
-                                         (powerline-fill face1 (powerline-width rhs))
+                                         ;;(powerline-fill face1 (powerline-width rhs))
                                          (powerline-render rhs)))))))
             (powerline-jeff-theme)
             ))
@@ -1591,13 +1661,14 @@ see https://github.com/11111000000/emacs-d/blob/master/init.el
     "Show schedule in fullscreen."
     (interactive)
     (toggle-frame-fullscreen)
-    (run-with-idle-timer 1 nil (lambda () (org-agenda nil "s"))))
+    (run-with-idle-timer 1 nil (lambda () (org-agenda nil "s")))
+    (if (tty-type (frame-terminal)) (zenburn) (solarized)))
 
   (add-hook 'emacs-startup-hook
             '(lambda ()
                (progn
                  (advice-add 'load-theme :after #'adjust-dim-face)
-                 (if (tty-type (frame-terminal)) (zenburn) (solarized) ))))
+                 (if (tty-type (frame-terminal)) (zenburn) (solarized)))))
 
   (provide 'personal)
   ;;; personal.el ends here
