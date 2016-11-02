@@ -25,3 +25,5 @@ elisp-objects/
 anaconda-mode/
 .org-id-locations
 network-security.data
+.emacs.desktop
+.emacs.desktop.lock
