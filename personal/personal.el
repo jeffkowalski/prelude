@@ -788,14 +788,14 @@ be global."
 
                      org-agenda-custom-commands
                      '(("d" "Timeline for today" ((agenda "" ))
-                        ((org-agenda-ndays 1)
+                        ((org-agenda-span 1)
                          (org-agenda-show-log t)
                          (org-agenda-log-mode-items '(clock closed state))
                          (org-agenda-clockreport-mode t)
                          (org-agenda-entry-types '())))
 
                        ("s" "Startup View"
-                        ((agenda ""    ((org-agenda-ndays 3)
+                        ((agenda ""    ((org-agenda-span 3)
                                         (org-agenda-start-on-weekday nil)
                                         ;;(org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
                                         (org-agenda-skip-scheduled-if-deadline-is-shown t)
@@ -812,7 +812,7 @@ be global."
                                          (org-agenda-entry-types '(:deadline))
                                          (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
                                          (org-agenda-start-on-weekday nil)
-                                         (org-agenda-ndays 1)
+                                         (org-agenda-span 1)
                                          (org-agenda-overriding-header "Unscheduled upcoming deadlines:")))
                          (todo "TODO"   ((org-agenda-time-grid nil)
                                          (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexp "#[A-C]" 'scheduled 'deadline))
