@@ -3,18 +3,15 @@
 ;;; Code:
 ;;;
 
-
 (or (fboundp 'scroll-bar-mode) (defun scroll-bar-mode (&optional args) "" nil))
-
 
 (setq ad-redefinition-action (quote accept))
 
-
-(require 'windmove)
-(defun windmove-default-keybindings (&optional modifier)
+(eval-after-load "windmove"
+  '(defun windmove-default-keybindings (&optional modifier)
     "Override keybindings for `windmove', Ignore MODIFIER."
-  nil)
-
+    (interactive)
+    nil))
 
 (provide 'preload)
 ;;; preload.el ends here
