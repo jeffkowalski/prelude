@@ -232,12 +232,45 @@ Note my naive mapping removes the final properties (like :right-align) if presen
   (req-package fish-mode)
 #+END_SRC
 *** make mode
+
 #+BEGIN_SRC emacs-lisp
   (req-package make-mode
     ;; re-tabbing during whitespace-cleanup would kill makefiles
     :config (add-hook 'makefile-mode-hook
                       (lambda () (remove-hook 'before-save-hook 'whitespace-cleanup t))))
 #+END_SRC
+
+*** whitespace
+#+BEGIN_SRC emacs-lisp
+  (defun modi/just-one-space-post-kill-word (&rest _)
+    "Function to manage white space after `kill-word' operations.
+
+  1. If point is at the beginning of the line after possibly some white space,
+     remove that white space and re-indent that line.
+  2. If there is space before or after the point, ensure that there is only
+     one white space around the point.
+  3. Otherwise, do nothing.
+
+  During the whole operation do not change the point position with respect to the
+  surrounding white space.
+
+  abc|   def  ghi <-- point on the left of white space after 'abc'
+  abc| ghi        <-- point still before white space after calling this function
+  abc   |def  ghi <-- point on the right of white space before 'def'
+  abc |ghi        <-- point still after white space after calling this function."
+    (save-excursion ; maintain the initial position of the pt with respect to space
+      (cond ((looking-back "^ *") ; remove extra space at beginning of line
+             (just-one-space 0)
+             (indent-according-to-mode))
+            ((or (looking-at   " ")
+                 (looking-back " ")) ; adjust space only if it exists
+             (just-one-space 1))
+            (t ; do nothing otherwise, includes case where the point is at EOL
+             ))))
+  ;; Delete extra horizontal white space after `kill-word' and `backward-kill-word'
+  (advice-add 'kill-word :after #'modi/just-one-space-post-kill-word)
+#+END_SRC
+
 ** ----------------------------------------------------------- [ emacs prelude ]
 #+BEGIN_SRC emacs-lisp
   (req-package prelude-mode
