@@ -1,4 +1,4 @@
-o#+TITLE: Jeff Kowalski's Emacs configuration
+#+TITLE: Jeff Kowalski's Emacs configuration
 #+AUTHOR: Jeff Kowalski
 #+PROPERTY: header-args :tangle yes :comments org
 #+OPTIONS: toc:4 h:4
@@ -13,6 +13,7 @@ o#+TITLE: Jeff Kowalski's Emacs configuration
 ** introduction
 Good references: [[https://github.com/sachac/.emacs.d/blob/gh-pages/Sacha.org][Sacha Chua's Emacs configuration]], [[https://github.com/bbatsov/prelude][Emacs Prelude]], [[http://doc.rix.si/org/fsem.html][Hardcore Freestyle Emacs]]
 Use "C-c '" to edit block
+Use "C-c C-v t" to tangle
 ** ----------------------------------------------------------- [ packages ]
 *** Set repositories
 #+BEGIN_SRC emacs-lisp
