@@ -6,22 +6,28 @@
 ;; Set repositories
 
 (when (>= emacs-major-version 24)
-  (setq package-archives '(("ELPA" . "http://tromey.com/elpa/")
-                           ("org" . "http://orgmode.org/elpa/")
-                           ("gnu" . "http://elpa.gnu.org/packages/")
-                           ("melpa" . "http://melpa.org/packages/")
-                           ("melpa-stable" . "http://stable.melpa.org/packages/")
-                           ("marmalade" . "http://marmalade-repo.org/packages/")
-                           )))
+  (customize-set-variable 'package-archives '(("ELPA" . "http://tromey.com/elpa/")
+                                              ("org" . "http://orgmode.org/elpa/")
+                                              ("gnu" . "http://elpa.gnu.org/packages/")
+                                              ("melpa" . "http://melpa.org/packages/")
+                                              ("melpa-stable" . "http://stable.melpa.org/packages/")
+                                              ("marmalade" . "http://marmalade-repo.org/packages/")
+                                              )))
 
 ;; Setup req-package
 
 (unless (package-installed-p 'req-package) (package-install 'req-package))
 (require 'req-package)
-(setq use-package-verbose t
-      use-package-minimum-reported-time 0
-      req-package-log-level 'trace)
+(customize-set-variable 'use-package-verbose t)
+(customize-set-variable 'use-package-minimum-reported-time 0)
+(customize-set-variable 'req-package-log-level 'trace)
 (req-package--log-set-level req-package-log-level)
+
+;; Setup validate package, useful for checking setq symbols and values
+
+(unless (package-installed-p 'validate) (package-install 'validate))
+(require 'validate)
+;;(defalias 'validate-setq 'setq)
 
 ;; Setup el-get first
 
@@ -32,7 +38,7 @@
 
 (progn
   (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-  (setq el-get-sources '(
+  (customize-set-variable 'el-get-sources '(
                          (:name org-expiry
                                 :description "Expiry mechanism for Org entries"
                                 :type http
@@ -80,6 +86,7 @@
   (puthash :el-get-local '(req-package-providers-install-el-get
                            req-package-providers-present-el-get-local)
            req-package-providers-map))
+
 (el-get 'sync (mapcar (lambda (x) (plist-get x :name)) el-get-sources))
 
 ;; Override function defined in use-package, so that packages from el-get are considered as well as those from the package manager.
@@ -97,7 +104,7 @@
 ;; Note my naive mapping removes the final properties (like :right-align) if present.
 
 (add-hook 'package-menu-mode-hook
-          (lambda () (setq tabulated-list-format
+          (lambda () (validate-setq tabulated-list-format
                              (vconcat (mapcar (lambda (arg) (list (nth 0 arg) (nth 1 arg)
                                                             (or (nth 2 arg) t)))
                                        tabulated-list-format)))))
@@ -120,7 +127,7 @@
 
 (req-package cua-base
   :init (cua-mode t)
-  :config (setq cua-keep-region-after-copy nil))
+  :config (customize-set-variable 'cua-keep-region-after-copy nil))
 
 ;; FIXME workaround problem in CUA which doesn't seem to obey delete-selection behavior on paste
 
@@ -143,56 +150,55 @@
 (global-hl-line-mode t)
 (show-paren-mode t)
 (display-time)
-(set-default 'cursor-type '(bar . 2))
 
-(setq frame-title-format '(buffer-file-name "emacs - %f %*" ("%b %*"))
-      icon-title-format  '(buffer-file-name "emacs - %f %*" ("%b %*"))
-      indicate-empty-lines t
-      inhibit-startup-echo-area-message "jeff"
-      inhibit-startup-screen t
-      initial-scratch-message nil
-      show-trailing-whitespace t
-      indent-tabs-mode nil
-      redisplay-dont-pause t)
+(customize-set-variable 'cursor-type '(bar . 2)) ; local
+(customize-set-variable 'indicate-empty-lines t) ; local
+(customize-set-variable 'inhibit-startup-echo-area-message "jeff")
+(customize-set-variable 'inhibit-startup-screen t)
+(customize-set-variable 'initial-scratch-message nil)
+(customize-set-variable 'show-trailing-whitespace t)
+(customize-set-variable 'indent-tabs-mode nil)
+
+(validate-setq frame-title-format '(buffer-file-name "emacs - %f %*" ("%b %*"))
+               icon-title-format  '(buffer-file-name "emacs - %f %*" ("%b %*"))
+               redisplay-dont-pause t)
 
 ;; ----------------------------------------------------------- [ miscellaneous ]
 
-;; Enable all commands
-(setq disabled-command-function nil)
+;;(validate-setq disabled-command-function nil)   ; enable all commands
 
-(setq user-mail-address "jeff.kowalski@gmail.com")
-
-(setq
- auto-save-list-file-prefix nil ;; startup
- auto-save-default nil ;; files
- kill-whole-line t ;; simple
- make-backup-files nil ;; files
- help-window-select t ;; help
- enable-recursive-minibuffers t
- password-cache-expiry 900) ;; password-cache
+(customize-set-variable 'user-mail-address "jeff.kowalski@gmail.com")
+(customize-set-variable 'auto-save-list-file-prefix nil)
+(customize-set-variable 'auto-save-default nil)
+(customize-set-variable 'kill-whole-line t)
+(customize-set-variable 'make-backup-files nil)
+(customize-set-variable 'help-window-select t)
+(customize-set-variable 'enable-recursive-minibuffers t)
+(customize-set-variable 'password-cache-expiry 900)
 
  ;; hide trailing whitespaces in some programming modes:
  (mapc (lambda (hook)
          (add-hook hook (lambda ()
-                          (setq show-trailing-whitespace nil))))
+                          (validate-setq show-trailing-whitespace nil))))
        '(eshell-mode-hook term-mode-hook))
 
 ;; auto-revert
 
 (req-package autorevert
   :diminish "αΡ"
-  :init (progn
-            (auto-revert-mode 1)
-            (global-auto-revert-mode 1)
-            (setq global-auto-revert-non-file-buffers t)
-            (setq auto-revert-use-notify nil)
-            (setq-default auto-revert-interval 1)))
+  :init
+  (auto-revert-mode 1)
+  (global-auto-revert-mode 1)
+  :config
+  (customize-set-variable 'global-auto-revert-non-file-buffers t)
+  (customize-set-variable 'auto-revert-use-notify nil)
+  (customize-set-variable 'auto-revert-interval 1))
 
 ;; clang-format
 
 (req-package clang-format
   :bind (("C-M-\\" . clang-format-buffer))
-  :config (setq clang-format-executable "clang-format-3.8"))
+  :config (customize-set-variable 'clang-format-executable "clang-format-3.8"))
 
 ;; cperl mode
 
@@ -207,7 +213,7 @@
 ;; doc view
 
 (req-package doc-view
-  :config (setq doc-view-ghostscript-options
+  :config (customize-set-variable 'doc-view-ghostscript-options
                 '("-dMaxBitmap=2147483647" "-dSAFER" "-dNOPAUSE" "-sDEVICE=png16m" "-dTextAlphaBits=4" "-dBATCH" "-dGraphicsAlphaBits=4" "-dQUIET")
                 doc-view-resolution 300))
 
@@ -217,11 +223,11 @@
 
 ;; make mode
 
-
 (req-package make-mode
   ;; re-tabbing during whitespace-cleanup would kill makefiles
-  :config (add-hook 'makefile-mode-hook
-                    (lambda () (remove-hook 'before-save-hook 'whitespace-cleanup t))))
+  :config
+  (add-hook 'makefile-mode-hook
+            (lambda () (remove-hook 'before-save-hook 'whitespace-cleanup t))))
 
 ;; whitespace
 
@@ -258,16 +264,17 @@ abc |ghi        <-- point still after white space after calling this function."
 (req-package prelude-mode
   :diminish (prelude-mode . " π")
   :defines (prelude-mode-map)
-  :init (progn
-          ;; fix keyboard behavior on terminals that send ^[O{ABCD} for arrows
-          (defvar ALT-O-map (make-sparse-keymap) "ALT-O keymap.")
-          (define-key prelude-mode-map (kbd "M-O") ALT-O-map)))
+  :config
+  ;; fix keyboard behavior on terminals that send ^[O{ABCD} for arrows
+  (defvar ALT-O-map (make-sparse-keymap) "ALT-O keymap.")
+  (define-key prelude-mode-map (kbd "M-O") ALT-O-map))
 
 (req-package prelude-programming
-  :init (add-hook 'prelude-prog-mode-hook
-                  (lambda ()
-                    (guru-mode -1)
-                    (whitespace-mode -1)) t))
+  :config
+  (add-hook 'prelude-prog-mode-hook
+            (lambda ()
+              (guru-mode -1)
+              (whitespace-mode -1)) t))
 
 ;; ----------------------------------------------------------- [ keyboard macros ]
 
@@ -293,8 +300,9 @@ abc |ghi        <-- point still after white space after calling this function."
 
 (req-package smartparens
   :diminish " Φ"
-  :config (progn (define-key smartparens-strict-mode-map (kbd "M-<delete>")    'sp-unwrap-sexp)
-                 (define-key smartparens-strict-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)))
+  :config
+  (define-key smartparens-strict-mode-map (kbd "M-<delete>")    'sp-unwrap-sexp)
+  (define-key smartparens-strict-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp))
 
 ;; ----------------------------------------------------------- [ registers ]
 ;; Registers allow you to jump to a file or other location quickly.
@@ -314,24 +322,24 @@ abc |ghi        <-- point still after white space after calling this function."
 ;; ----------------------------------------------------------- [ shell / eshell ]
 
 (req-package eshell
-  :config (progn
-            (add-hook 'emacs-startup-hook
-                      (lambda ()
-                        (let ((default-directory (getenv "HOME")))
-                          (command-execute 'eshell)
-                          (bury-buffer))))
+  :config
+  (add-hook 'emacs-startup-hook
+            (lambda ()
+              (let ((default-directory (getenv "HOME")))
+                (command-execute 'eshell)
+                (bury-buffer))))
 
-            ;; Visual commands are commands which require a proper terminal.
-            ;; eshell will run them in a term buffer when you invoke them.
-            (setq eshell-visual-commands
-                  '("less" "tmux" "htop" "top" "bash" "zsh" "fish"))
-            (setq eshell-visual-subcommands
-                  '(("git" "log" "l" "diff" "show")))))
+  ;; Visual commands are commands which require a proper terminal.
+  ;; eshell will run them in a term buffer when you invoke them.
+  (customize-set-variable 'eshell-visual-commands
+                 '("less" "tmux" "htop" "top" "bash" "zsh" "fish"))
+  (customize-set-variable 'eshell-visual-subcommands
+                 '(("git" "log" "l" "diff" "show"))))
 
 (req-package eshell-git-prompt
   :require eshell
-  :config (progn
-            (set-fontset-font t 'unicode "PowerlineSymbols" nil 'prepend)))
+  :config
+  (set-fontset-font t 'unicode "PowerlineSymbols" nil 'prepend))
 
 ;; (add-hook 'eshell-mode-hook
 ;;           (lambda ()
@@ -348,39 +356,39 @@ abc |ghi        <-- point still after white space after calling this function."
 
 (req-package multi-term
   :bind* (("C-c t" . multi-term-dedicated-toggle))
-  :config (progn (setq multi-term-dedicated-close-back-to-open-buffer-p t
-                       multi-term-dedicated-select-after-open-p t
-                       multi-term-program-switches "--login")
-                 (bind-key "C-c t" 'multi-term-dedicated-toggle prelude-mode-map)))
+  :config
+  (customize-set-variable 'multi-term-dedicated-close-back-to-open-buffer-p t)
+  (customize-set-variable 'multi-term-dedicated-select-after-open-p t)
+  (customize-set-variable 'multi-term-program-switches "--login")
+  (bind-key "C-c t" 'multi-term-dedicated-toggle prelude-mode-map))
 
 ;; ----------------------------------------------------------- [ undo-tree ]
 
 (req-package undo-tree
   :diminish " τ"
   :bind* (("C-z" . undo-tree-undo))
-  :init (progn
-          (global-undo-tree-mode)))
+  :init (global-undo-tree-mode))
 
 ;; ----------------------------------------------------------- [ image+ ]
 
 (req-package image+
-  :init (progn
-          (imagex-global-sticky-mode)
-          (imagex-auto-adjust-mode)
-          (let ((map imagex-sticky-mode-map))
-            (define-key map "+" 'imagex-sticky-zoom-in)
-            (define-key map "-" 'imagex-sticky-zoom-out)
-            (define-key map "l" 'imagex-sticky-rotate-left)
-            (define-key map "r" 'imagex-sticky-rotate-right)
-            (define-key map "m" 'imagex-sticky-maximize)
-            (define-key map "o" 'imagex-sticky-restore-original)
-            (define-key map "\C-x\C-s" 'imagex-sticky-save-image))))
+  :config
+  (imagex-global-sticky-mode)
+  (imagex-auto-adjust-mode)
+  (let ((map imagex-sticky-mode-map))
+    (define-key map "+" 'imagex-sticky-zoom-in)
+    (define-key map "-" 'imagex-sticky-zoom-out)
+    (define-key map "l" 'imagex-sticky-rotate-left)
+    (define-key map "r" 'imagex-sticky-rotate-right)
+    (define-key map "m" 'imagex-sticky-maximize)
+    (define-key map "o" 'imagex-sticky-restore-original)
+    (define-key map "\C-x\C-s" 'imagex-sticky-save-image)))
 
 ;; ----------------------------------------------------------- [ cmake ]
 
 (req-package cmake-mode
   :config (add-hook 'cmake-mode-hook
-                    (lambda () (setq cmake-tab-width 4))))
+                    (lambda () (customize-set-variable 'cmake-tab-width 4))))
 
 (req-package cmake-ide ; https://github.com/atilaneves/cmake-ide
   :require rtags       ; https://github.com/Andersbakken/rtags
@@ -390,16 +398,15 @@ abc |ghi        <-- point still after white space after calling this function."
 
 (req-package dired-single
   :require (autorevert dired dired+)
-  :config (progn
-            (setq-default dired-omit-files-p t)
-            (setq font-lock-maximum-decoration (quote ((dired-mode) (t . t)))
-                  dired-omit-files (concat dired-omit-files "\\."))
-            (define-key dired-mode-map [return] 'dired-single-buffer)
-            (define-key dired-mode-map [down-mouse-1] 'dired-single-buffer-mouse)
-            (define-key dired-mode-map [^]
-              (lambda ()
-                (interactive)
-                (dired-single-buffer "..")))))
+  :config
+  (customize-set-variable 'font-lock-maximum-decoration (quote ((dired-mode) (t . t))))
+  (customize-set-variable 'dired-omit-files (concat dired-omit-files "\\."))
+  (add-hook 'dired-mode-hook (lambda () (dired-omit-mode)))
+  (define-key dired-mode-map [return] 'dired-single-buffer)
+  (define-key dired-mode-map [down-mouse-1] 'dired-single-buffer-mouse)
+  (define-key dired-mode-map [^]
+    (lambda ()
+      (dired-single-buffer ".."))))
 
 ;; ----------------------------------------------------------- [ helm ]
 
@@ -410,16 +417,16 @@ abc |ghi        <-- point still after white space after calling this function."
          ("M-x"     . helm-M-x)
          ("C-x b"   . helm-buffers-list)
          ("C-M-g"   . helm-do-grep))
-  :config (progn
-            (helm-adaptive-mode t)
-            (defun jeff/find-file-as-root ()
-              "Like 'helm-find-file', but automatically edit the file with root-privileges (using tramp/sudo), if the file is not writable by user."
-              (interactive)
-              (let ((file (helm-read-file-name "Edit as root: ")))
-                (unless (file-writable-p file)
-                  (setq file (concat "/sudo:root@localhost:" file)))
-                (find-file file)))
-            (global-set-key (kbd "C-x F") 'jeff/find-file-as-root)))
+  :config
+  (helm-adaptive-mode t)
+  (defun jeff/find-file-as-root ()
+    "Like 'helm-find-file', but automatically edit the file with root-privileges (using tramp/sudo), if the file is not writable by user."
+    (interactive)
+    (let ((file (helm-read-file-name "Edit as root: ")))
+      (unless (file-writable-p file)
+        (setq file (concat "/sudo:root@localhost:" file)))
+      (find-file file)))
+  (global-set-key (kbd "C-x F") 'jeff/find-file-as-root))
 
 ;; FIXME workaround problem in select-frame-set-input-focus
 ;;   select-frame-set-input-focus(#<frame *Minibuf-1* * 0x6a44268>)
@@ -472,62 +479,61 @@ recently selected windows nor the buffer list."
 ;; rbenv
 
 (req-package rbenv
-  :init (progn
-          (setq rbenv-executable (concat (getenv "HOME") "/.linuxbrew/bin/rbenv"))
-          (setq rbenv-show-active-ruby-in-modeline nil)
-          (global-rbenv-mode)))
+  :config
+  (validate-setq rbenv-executable (concat (getenv "HOME") "/.linuxbrew/bin/rbenv"))
+  (customize-set-variable 'rbenv-show-active-ruby-in-modeline nil)
+  (global-rbenv-mode))
 
 ;; inf-ruby
 
 (req-package inf-ruby
   :require rbenv
-  :init (setq inf-ruby-default-implementation "pry"))
+  :config (customize-set-variable 'inf-ruby-default-implementation "pry"))
 
 ;; robe
 
 (req-package robe
   :require (helm-robe company inf-ruby)
-  :init (progn
-          (add-hook 'ruby-mode-hook 'robe-mode)
-          (eval-after-load 'company '(push 'company-robe company-backends))
-          ;; (add-hook 'robe-mode-hook 'ac-robe-setup)
-          ;; (defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate) (rvm-activate-corresponding-ruby))
-          ))
+  :config
+  (add-hook 'ruby-mode-hook 'robe-mode)
+  (eval-after-load 'company '(push 'company-robe company-backends))
+  ;; (add-hook 'robe-mode-hook 'ac-robe-setup)
+  ;; (defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate) (rvm-activate-corresponding-ruby))
+  )
 
 ;; ----------------------------------------------------------- [ time ]
 
 (req-package time
-  :init (progn
-          (setq display-time-world-list '(("America/Los_Angeles" "Berkeley")
-                                          ("America/New_York" "New York")
-                                          ("UTC" "UTC")
-                                          ("Europe/London" "London")
-                                          ("Asia/Calcutta" "India")
-                                          ("Asia/Shanghai" "China")))
-          (global-set-key (kbd "<f9> C") 'helm-world-time)))
+  :config
+  (customize-set-variable 'display-time-world-list '(("America/Los_Angeles" "Berkeley")
+                                                     ("America/New_York" "New York")
+                                                     ("UTC" "UTC")
+                                                     ("Europe/London" "London")
+                                                     ("Asia/Calcutta" "India")
+                                                     ("Asia/Shanghai" "China")))
+  (global-set-key (kbd "<f9> C") 'helm-world-time))
 
 ;; ----------------------------------------------------------- [ sunshine ]
 
 (req-package sunshine
-  :init (progn
-          (setq sunshine-location "Berkeley, California")
-          (setq sunshine-show-icons t)
-          (setq sunshine-units 'imperial)
-          (global-set-key (kbd "<f9> w") 'sunshine-forecast)
-          (global-set-key (kbd "<f9> W") 'sunshine-quick-forecast)
-          ))
+  :config
+  (customize-set-variable 'sunshine-location "Lafayette, California")
+  (customize-set-variable 'sunshine-show-icons t)
+  (customize-set-variable 'sunshine-units 'imperial)
+  (global-set-key (kbd "<f9> w") 'sunshine-forecast)
+  (global-set-key (kbd "<f9> W") 'sunshine-quick-forecast))
 
 ;; ----------------------------------------------------------- [ company ]
 
 (req-package company
   :diminish " Ψ"
-  :config (progn
-            (setq company-auto-complete t
-                  company-idle-delay 0.5)
-            (add-to-list 'company-backends 'company-dabbrev t)
-            (add-to-list 'company-backends 'company-ispell t)
-            (add-to-list 'company-backends 'company-files t)
-            (add-to-list 'company-transformers 'company-sort-by-occurrence)))
+  :config
+  (customize-set-variable 'company-auto-complete t)
+  (customize-set-variable 'company-idle-delay 0.5)
+  (add-to-list 'company-backends 'company-dabbrev t)
+  (add-to-list 'company-backends 'company-ispell t)
+  (add-to-list 'company-backends 'company-files t)
+  (add-to-list 'company-transformers 'company-sort-by-occurrence))
 
 (defun my-pcomplete-capf ()
   "Org-mode completions."
@@ -537,7 +543,7 @@ recently selected windows nor the buffer list."
 ;; ----------------------------------------------------------- [ tramp ]
 
 ;; disable version control checks
-(setq vc-ignore-dir-regexp
+(customize-set-variable 'vc-ignore-dir-regexp
       (format "\\(%s\\)\\|\\(%s\\)"
               vc-ignore-dir-regexp
               tramp-file-name-regexp))
@@ -545,36 +551,36 @@ recently selected windows nor the buffer list."
 ;; ----------------------------------------------------------- [ ido ]
 
 (req-package ido
-  :config (progn
-          (setq ido-everywhere nil)
-          (add-hook 'ido-minibuffer-setup-hook
-                    (lambda ()
-                      ;; Locally disable 'truncate-lines'
-                      (set (make-local-variable 'truncate-lines) nil)))
-          (add-hook 'ido-setup-hook
-                    (lambda ()
-                      ;; Display ido results vertically, rather than horizontally:
-                      (setq ido-decorations (quote ("\n-> "
-                                                    ""
-                                                    "\n   "
-                                                    "\n   ..."
-                                                    "[" "]"
-                                                    " [No match]"
-                                                    " [Matched]"
-                                                    " [Not readable]"
-                                                    " [Too big]"
-                                                    " [Confirm]")))
-                      ;;eg. allows "bgorg" to match file "begin.org"
-                      (setq ido-enable-flex-matching t)
-                      (define-key ido-completion-map (kbd "<up>")   'ido-prev-match)
-                      (define-key ido-completion-map (kbd "<down>") 'ido-next-match)))))
+  :config
+  (customize-set-variable 'ido-everywhere nil)
+  (add-hook 'ido-minibuffer-setup-hook
+            (lambda ()
+              ;; Locally disable 'truncate-lines'
+              (set (make-local-variable 'truncate-lines) nil)))
+  (add-hook 'ido-setup-hook
+            (lambda ()
+              ;; Display ido results vertically, rather than horizontally:
+              (customize-set-variable 'ido-decorations (quote ("\n-> "
+                                                               ""
+                                                               "\n   "
+                                                               "\n   ..."
+                                                               "[" "]"
+                                                               " [No match]"
+                                                               " [Matched]"
+                                                               " [Not readable]"
+                                                               " [Too big]"
+                                                               " [Confirm]")))
+              ;;eg. allows "bgorg" to match file "begin.org"
+              (customize-set-variable 'ido-enable-flex-matching t)
+              (define-key ido-completion-map (kbd "<up>")   'ido-prev-match)
+              (define-key ido-completion-map (kbd "<down>") 'ido-next-match))))
 
 ;; ----------------------------------------------------------- [ magit ]
 
 
 (req-package magit
   :diminish "ma"
-  :init (setq magit-diff-options '("--ignore-all-space"))) ; ignore whitespace
+  :config (customize-set-variable 'magit-diff-arguments '("--ignore-all-space" "--stat" "--no-ext-diff"))) ; ignore whitespace
 
 ;; ----------------------------------------------------------- [ ibuffer ]
 
@@ -582,114 +588,114 @@ recently selected windows nor the buffer list."
 (req-package ibuffer
   :require ibuf-ext
   :bind ("C-x C-b" . ibuffer)
-  :config (progn
-            (setq ibuffer-show-empty-filter-groups nil)
-            (setq ibuffer-saved-filter-groups
-                  '(("default"
-                     ("version control" (or (mode . svn-status-mode)
-                                            (mode . svn-log-edit-mode)
-                                            (mode . magit-mode)
-                                            (mode . magit-status-mode)
-                                            (mode . magit-commit-mode)
-                                            (mode . magit-log-edit-mode)
-                                            (mode . magit-log-mode)
-                                            (mode . magit-reflog-mode)
-                                            (mode . magit-stash-mode)
-                                            (mode . magit-diff-mode)
-                                            (mode . magit-wazzup-mode)
-                                            (mode . magit-branch-manager-mode)
-                                            (name . "^\\*svn-")
-                                            (name . "^\\*vc\\*$")
-                                            (name . "^\\*Annotate")
-                                            (name . "^\\*git-")
-                                            (name . "^\\*magit")
-                                            (name . "^\\*vc-")))
-                     ("emacs" (or (name . "^\\*scratch\\*$")
-                                  (name . "^\\*Messages\\*$")
-                                  (name . "^\\*Warnings\\*$")
-                                  (name . "^TAGS\\(<[0-9]+>\\)?$")
-                                  (mode . help-mode)
-                                  (mode . package-menu-mode)
-                                  (name . "^\\*Apropos\\*$")
-                                  (name . "^\\*info\\*$")
-                                  (name . "^\\*Occur\\*$")
-                                  (name . "^\\*grep\\*$")
-                                  (name . "^\\*Compile-Log\\*$")
-                                  (name . "^\\*Backtrace\\*$")
-                                  (name . "^\\*Process List\\*$")
-                                  (name . "^\\*gud\\*$")
-                                  (name . "^\\*Man")
-                                  (name . "^\\*WoMan")
-                                  (name . "^\\*Kill Ring\\*$")
-                                  (name . "^\\*Completions\\*$")
-                                  (name . "^\\*tramp")
-                                  (name . "^\\*Shell Command Output\\*$")
-                                  (name . "^\\*Evernote-Client-Output\\*$")
-                                  (name . "^\\*compilation\\*$")))
-                     ("helm" (or (mode . helm-mode)
-                                 (name . "^\\*helm[- ]")
-                                 (name . "^\\*Debug Helm Log\\*$")))
-                     ("shell" (or (name . "^\\*shell\\*$")
-                                  (name . "^\\*ansi-term\\*$")
-                                  (name . "^\\*terminal<\d+>\\*$")
-                                  (name . "^\\*eshell\\*$")))
-                     ("evernote" (or (mode . evernote-browsing-mode)))
-                     ("emacs source" (or (mode . emacs-lisp-mode)
-                                         (filename . "/Applications/Emacs.app")
-                                         (filename . "/bin/emacs")))
-                     ("agenda" (or (name . "^\\*Calendar\\*$")
-                                   (name . "^diary$")
-                                   (name . "^\\*Agenda")
-                                   (name . "^\\*org-")
-                                   (name . "^\\*Org")
-                                   (mode . org-mode)
-                                   (mode . muse-mode)))
-                     ("latex" (or (mode . latex-mode)
-                                  (mode . LaTeX-mode)
-                                  (mode . bibtex-mode)
-                                  (mode . reftex-mode)))
-                     ("dired" (or (mode . dired-mode))))))
-            (add-hook 'ibuffer-hook (lambda () (ibuffer-switch-to-saved-filter-groups "default")))))
+  :config
+  (customize-set-variable 'ibuffer-show-empty-filter-groups nil)
+  (customize-set-variable 'ibuffer-saved-filter-groups
+                 '(("default"
+                    ("version control" (or (mode . svn-status-mode)
+                                           (mode . svn-log-edit-mode)
+                                           (mode . magit-mode)
+                                           (mode . magit-status-mode)
+                                           (mode . magit-commit-mode)
+                                           (mode . magit-log-edit-mode)
+                                           (mode . magit-log-mode)
+                                           (mode . magit-reflog-mode)
+                                           (mode . magit-stash-mode)
+                                           (mode . magit-diff-mode)
+                                           (mode . magit-wazzup-mode)
+                                           (mode . magit-branch-manager-mode)
+                                           (name . "^\\*svn-")
+                                           (name . "^\\*vc\\*$")
+                                           (name . "^\\*Annotate")
+                                           (name . "^\\*git-")
+                                           (name . "^\\*magit")
+                                           (name . "^\\*vc-")))
+                    ("emacs" (or (name . "^\\*scratch\\*$")
+                                 (name . "^\\*Messages\\*$")
+                                 (name . "^\\*Warnings\\*$")
+                                 (name . "^TAGS\\(<[0-9]+>\\)?$")
+                                 (mode . help-mode)
+                                 (mode . package-menu-mode)
+                                 (name . "^\\*Apropos\\*$")
+                                 (name . "^\\*info\\*$")
+                                 (name . "^\\*Occur\\*$")
+                                 (name . "^\\*grep\\*$")
+                                 (name . "^\\*Compile-Log\\*$")
+                                 (name . "^\\*Backtrace\\*$")
+                                 (name . "^\\*Process List\\*$")
+                                 (name . "^\\*gud\\*$")
+                                 (name . "^\\*Man")
+                                 (name . "^\\*WoMan")
+                                 (name . "^\\*Kill Ring\\*$")
+                                 (name . "^\\*Completions\\*$")
+                                 (name . "^\\*tramp")
+                                 (name . "^\\*Shell Command Output\\*$")
+                                 (name . "^\\*Evernote-Client-Output\\*$")
+                                 (name . "^\\*compilation\\*$")))
+                    ("helm" (or (mode . helm-mode)
+                                (name . "^\\*helm[- ]")
+                                (name . "^\\*Debug Helm Log\\*$")))
+                    ("shell" (or (name . "^\\*shell\\*$")
+                                 (name . "^\\*ansi-term\\*$")
+                                 (name . "^\\*terminal<\d+>\\*$")
+                                 (name . "^\\*eshell\\*$")))
+                    ("evernote" (or (mode . evernote-browsing-mode)))
+                    ("emacs source" (or (mode . emacs-lisp-mode)
+                                        (filename . "/Applications/Emacs.app")
+                                        (filename . "/bin/emacs")))
+                    ("agenda" (or (name . "^\\*Calendar\\*$")
+                                  (name . "^diary$")
+                                  (name . "^\\*Agenda")
+                                  (name . "^\\*org-")
+                                  (name . "^\\*Org")
+                                  (mode . org-mode)
+                                  (mode . muse-mode)))
+                    ("latex" (or (mode . latex-mode)
+                                 (mode . LaTeX-mode)
+                                 (mode . bibtex-mode)
+                                 (mode . reftex-mode)))
+                    ("dired" (or (mode . dired-mode))))))
+  (add-hook 'ibuffer-hook (lambda () (ibuffer-switch-to-saved-filter-groups "default")))
 
-(defadvice ibuffer-generate-filter-groups (after reverse-ibuffer-groups () activate)
-  "Order ibuffer filter groups so the order is : [Default], [agenda], [Emacs]."
-  (setq ad-return-value (nreverse ad-return-value)))
+  (defadvice ibuffer-generate-filter-groups (after reverse-ibuffer-groups () activate)
+    "Order ibuffer filter groups so the order is : [Default], [agenda], [Emacs]."
+    (setq ad-return-value (nreverse ad-return-value))))
 
 ;; ----------------------------------------------------------- [ ace-window ]
 
 (req-package ace-window
-  :config '(setq aw-scope 'frame))
+  :config '(customize-set-variable aw-scope 'frame))
 
 ;; ----------------------------------------------------------- [ abbrev ]
 
 (req-package abbrev
   :diminish ""
   :require key-chord
-  :init (progn
-          (defun endless/ispell-word-then-abbrev (p)
-            "Call `ispell-word', then create an abbrev for it.
+  :init (abbrev-mode +1)
+  :config
+  (defun endless/ispell-word-then-abbrev (p)
+    "Call `ispell-word', then create an abbrev for it.
 With prefix P, create local abbrev. Otherwise it will
 be global."
-            (interactive "P")
-            (let (bef aft)
-              (save-excursion
-                (while (progn
-                         (backward-word)
-                         (and (setq bef (thing-at-point 'word))
-                              (not (ispell-word nil 'quiet)))))
-                (setq aft (thing-at-point 'word)))
-              (when (and aft bef (not (equal aft bef)))
-                (setq aft (downcase aft))
-                (setq bef (downcase bef))
-                (define-abbrev
-                  (if p local-abbrev-table global-abbrev-table)
-                  bef aft)
-                (message "\"%s\" now expands to \"%s\" %sally"
-                         bef aft (if p "loc" "glob")))))
-          (setq abbrev-file-name "~/.abbrev_defs")
-          (setq save-abbrevs 'silently)
-          (setq-default abbrev-mode t)
-          (key-chord-define-global "sx" 'endless/ispell-word-then-abbrev)))
+    (interactive "P")
+    (let (bef aft)
+      (save-excursion
+        (while (progn
+                 (backward-word)
+                 (and (setq bef (thing-at-point 'word))
+                      (not (ispell-word nil 'quiet)))))
+        (setq aft (thing-at-point 'word)))
+      (when (and aft bef (not (equal aft bef)))
+        (setq aft (downcase aft))
+        (setq bef (downcase bef))
+        (define-abbrev
+          (if p local-abbrev-table global-abbrev-table)
+          bef aft)
+        (message "\"%s\" now expands to \"%s\" %sally"
+                 bef aft (if p "loc" "glob")))))
+  (customize-set-variable abbrev-file-name "~/.abbrev_defs")
+  (customize-set-variable save-abbrevs 'silently)
+  (key-chord-define-global "sx" 'endless/ispell-word-then-abbrev))
 
 ;; ----------------------------------------------------------- [ org ]
 
@@ -699,58 +705,56 @@ be global."
   :loader :elpa
   ;; NOTE: org must be manually installed from elpa / gnu since it's
   ;; require'd from init.el in order to tangle personal.org
-
-  :init (progn
-          (setq org-directory "~/Dropbox/workspace/org/"
-                ;;org-replace-disputed-keys t ; org-CUA-compatible
-                org-log-into-drawer t
-                org-support-shift-select 'always
-                org-default-notes-file (concat org-directory "refile.org")
-                org-agenda-files (list (concat org-directory "tasks.org")
-                                       (concat org-directory "sauron.org")
-                                       (concat org-directory "gcal.org"))
-                org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m)
-                org-startup-indented t
-                org-enforce-todo-dependencies t
-                org-confirm-elisp-link-function nil
-                org-src-window-setup 'current-window)
-          (org-babel-do-load-languages
-           'org-babel-load-languages '((sh . t)
-                                       (ruby . t)
-                                       (dot . t)
-                                       (latex . t)
-                                       (emacs-lisp . t))))
-  :config (progn
-            (add-hook 'org-mode-hook (lambda () (auto-revert-mode 1)))
-            (defun jeff/org-add-ids-to-headlines-in-file ()
-              "Add ID properties to all headlines in the current file which do not already have one."
-              (interactive)
-              (org-map-entries 'org-id-get-create))
-            ;; (add-hook 'org-mode-hook
-            ;;           (lambda ()
-            ;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
-
-            (defun org-check-misformatted-subtree ()
-              "Check misformatted entries in the current buffer."
-              (interactive)
-              (show-all)
-              (org-map-entries
-               (lambda ()
-                 (when (and (move-beginning-of-line 2)
-                            (not (looking-at org-heading-regexp)))
-                   (if (or (and (org-get-scheduled-time (point))
-                                (not (looking-at (concat "^.*" org-scheduled-regexp))))
-                           (and (org-get-deadline-time (point))
-                                (not (looking-at (concat "^.*" org-deadline-regexp)))))
-                       (when (y-or-n-p "Fix this subtree? ")
-                         (message "Call the function again when you're done fixing this subtree.")
-                         (recursive-edit))
-                     (message "All subtrees checked.")))))))
-
   :bind  (("C-c l" . org-store-link)
           ("C-c c" . org-capture)
           ("C-c a" . org-agenda)
-          ("C-c b" . org-iswitchb)))
+          ("C-c b" . org-iswitchb))
+
+  :config
+  (customize-set-variable 'org-directory "~/Dropbox/workspace/org/")
+  ;; (customize-set-variable 'org-replace-disputed-keys t) ; org-CUA-compatible
+  (customize-set-variable 'org-log-into-drawer t)
+  (customize-set-variable 'org-support-shift-select 'always)
+  (customize-set-variable 'org-default-notes-file (concat org-directory "refile.org")
+  (customize-set-variable 'org-agenda-files (list (concat org-directory "tasks.org")
+                                                  (concat org-directory "sauron.org")
+                                                  (concat org-directory "gcal.org")))
+  (customize-set-variable 'org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m))
+  (customize-set-variable 'org-startup-indented t)
+  (customize-set-variable 'org-enforce-todo-dependencies t)
+  (customize-set-variable 'org-confirm-elisp-link-function nil)
+  (customize-set-variable 'org-src-window-setup 'current-window))
+  (org-babel-do-load-languages
+   'org-babel-load-languages '((sh . t)
+                               (ruby . t)
+                               (dot . t)
+                               (latex . t)
+                               (emacs-lisp . t)))
+  (add-hook 'org-mode-hook (lambda () (auto-revert-mode 1)))
+  (defun jeff/org-add-ids-to-headlines-in-file ()
+    "Add ID properties to all headlines in the current file which do not already have one."
+    (interactive)
+    (org-map-entries 'org-id-get-create))
+  ;; (add-hook 'org-mode-hook
+  ;;           (lambda ()
+  ;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
+
+  (defun org-check-misformatted-subtree ()
+    "Check misformatted entries in the current buffer."
+    (interactive)
+    (show-all)
+    (org-map-entries
+     (lambda ()
+       (when (and (move-beginning-of-line 2)
+                  (not (looking-at org-heading-regexp)))
+         (if (or (and (org-get-scheduled-time (point))
+                      (not (looking-at (concat "^.*" org-scheduled-regexp))))
+                 (and (org-get-deadline-time (point))
+                      (not (looking-at (concat "^.*" org-deadline-regexp)))))
+             (when (y-or-n-p "Fix this subtree? ")
+               (message "Call the function again when you're done fixing this subtree.")
+               (recursive-edit))
+           (message "All subtrees checked.")))))))
 
 ;; org bullets, indent
 
@@ -765,15 +769,16 @@ be global."
 
 (req-package ox
   :require org
-  :init (setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
+  :config (validate-setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
 )
 
 ;; org habit
 
 (req-package org-habit
   :require org
-  :init (setq org-habit-following-days 1
-              org-habit-graph-column 46))
+  :config
+  (customize-set-variable 'org-habit-following-days 1)
+  (customize-set-variable 'org-habit-graph-column 46))
 
 ;; htmlize
 
@@ -781,231 +786,225 @@ be global."
 
 ;; org agenda
 
-(defun my-org-cmp-tag (a b)
-  "Compare the tags of A and B, in reverse order."
-  (let ((ta (mapconcat 'identity (reverse (get-text-property 1 'tags a)) ":"))
-        (tb (mapconcat 'identity (reverse (get-text-property 1 'tags b)) ":")))
-    (cond ((and (not ta) (not tb)) nil)
-          ((not ta) -1)
-          ((not tb) +1)
-          ((string-lessp ta tb) -1)
-          ((string-lessp tb ta) +1)
-          (t nil))))
-
 (req-package org-agenda
   :require (org htmlize)
-  :init (progn (setq org-agenda-tags-column -97
-                     org-agenda-block-separator (let ((retval ""))
-                                                  (dotimes (i (- org-agenda-tags-column)) (setq retval (concat retval "=")))
-                                                  retval)
-                     org-agenda-timegrid-use-ampm t
-                     org-agenda-time-grid '((daily weekly today require-timed remove-match)
-                                            #("----------------" 0 16 (org-heading t))
-                                            (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000))
-                     org-agenda-search-headline-for-time nil
-                     org-agenda-window-setup 'current-window
-                     org-agenda-log-mode-items '(clock closed state)
-                     org-agenda-dim-blocked-tasks nil ; much faster!
-                     org-agenda-use-tag-inheritance nil
-                     org-agenda-exporter-settings
-                     '(
-                       ;;(org-agenda-add-entry-text-maxlines 50)
-                       ;;(org-agenda-with-colors nil)
-                       (org-agenda-write-buffer-name "Agenda")
-                       ;;(ps-number-of-columns 2)
-                       (ps-landscape-mode nil)
-                       (ps-print-color-p (quote black-white))
-                       (htmlize-output-type (quote css)))
+  :config
+  (customize-set-variable 'org-agenda-tags-column -97)
+  (customize-set-variable 'org-agenda-block-separator
+                          (let ((retval ""))
+                            (dotimes (i (- org-agenda-tags-column)) (setq retval (concat retval "=")))
+                            retval))
+  (customize-set-variable 'org-agenda-timegrid-use-ampm t)
+  ;; FIXME: (customize-set-variable 'org-agenda-time-grid
+  ;;                         '((daily weekly today require-timed remove-match)
+  ;;                           #("----------------" 0 16 (org-heading t))
+  ;;                           (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000)))
+  (customize-set-variable 'org-agenda-search-headline-for-time nil)
+  (customize-set-variable 'org-agenda-window-setup 'current-window)
+  (customize-set-variable 'org-agenda-log-mode-items '(clock closed state))
+  (customize-set-variable 'org-agenda-dim-blocked-tasks nil) ; much faster!
+  (customize-set-variable 'org-agenda-use-tag-inheritance nil)
+  (customize-set-variable 'org-agenda-exporter-settings
+                          '(
+                            ;;(org-agenda-add-entry-text-maxlines 50)
+                            ;;(org-agenda-with-colors nil)
+                            (org-agenda-write-buffer-name "Agenda")
+                            ;;(ps-number-of-columns 2)
+                            (ps-landscape-mode nil)
+                            (ps-print-color-p (quote black-white))
+                            (htmlize-output-type (quote css))))
 
-                     org-agenda-custom-commands
-                     '(("d" "Timeline for today" ((agenda "" ))
-                        ((org-agenda-span 1)
-                         (org-agenda-show-log t)
-                         (org-agenda-log-mode-items '(clock closed state))
-                         (org-agenda-clockreport-mode t)
-                         (org-agenda-entry-types '())))
+  (defun my-org-cmp-tag (a b)
+    "Compare the tags of A and B, in reverse order."
+    (let ((ta (mapconcat 'identity (reverse (get-text-property 1 'tags a)) ":"))
+          (tb (mapconcat 'identity (reverse (get-text-property 1 'tags b)) ":")))
+      (cond ((and (not ta) (not tb)) nil)
+            ((not ta) -1)
+            ((not tb) +1)
+            ((string-lessp ta tb) -1)
+            ((string-lessp tb ta) +1)
+            (t nil))))
+  (customize-set-variable 'org-agenda-custom-commands
+                          '(("d" "Timeline for today" ((agenda "" ))
+                             ((org-agenda-span 1)
+                              (org-agenda-show-log t)
+                              (org-agenda-log-mode-items '(clock closed state))
+                              (org-agenda-clockreport-mode t)
+                              (org-agenda-entry-types '())))
 
-                       ("s" "Startup View"
-                        ((agenda ""    ((org-agenda-span 3)
-                                        (org-agenda-start-on-weekday nil)
-                                        ;;(org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                                        (org-agenda-skip-scheduled-if-deadline-is-shown t)
-                                        (org-agenda-prefix-format "  %-10T %t")
-                                        (org-agenda-hide-tags-regexp "^@")
-                                        (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                                        (org-agenda-sorting-strategy '(time-up todo-state-down habit-up tag-up priority-down user-defined-up alpha-up))
-                                        ;;(org-agenda-todo-ignore-scheduled 'future)
-                                        (org-deadline-warning-days 0)))
-                         (agenda "TODO" ((org-agenda-time-grid nil)
-                                         (org-deadline-warning-days 365)
-                                         (org-agenda-prefix-format "  %-10T %s")
-                                         (org-agenda-hide-tags-regexp "^@")
-                                         (org-agenda-entry-types '(:deadline))
-                                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
-                                         (org-agenda-start-on-weekday nil)
-                                         (org-agenda-span 1)
-                                         (org-agenda-overriding-header "Unscheduled upcoming deadlines:")))
-                         (todo "TODO"   ((org-agenda-time-grid nil)
-                                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexp "#[A-C]" 'scheduled 'deadline))
-                                         ;;(org-agenda-todo-keyword-format "")
-                                         (org-agenda-prefix-format "  %-10T %t")
-                                         (org-agenda-hide-tags-regexp "^@")
-                                         ;;(org-agenda-show-inherited-tags nil)
-                                         (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                                         (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
-                                         (org-agenda-overriding-header "Unscheduled, no deadline:")))
-                         (todo "TODO"   ((org-agenda-time-grid nil)
-                                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'regexp "#[A-C]" 'scheduled 'deadline))
-                                         ;;(org-agenda-todo-keyword-format "")
-                                         (org-agenda-prefix-format "  %-10T %t")
-                                         (org-agenda-hide-tags-regexp "^@")
-                                         ;;(org-agenda-show-inherited-tags nil)
-                                         (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                                         (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
-                                         (org-agenda-overriding-header "Someday:")))))))
-               (add-hook 'org-finalize-agenda-hook
-                         (lambda () (remove-text-properties
-                                     (point-min) (point-max) '(mouse-face t))))
-               (add-hook 'org-agenda-mode-hook
-                         (lambda () (whitespace-mode -1)) t)
+                            ("s" "Startup View"
+                             ((agenda ""    ((org-agenda-span 3)
+                                             (org-agenda-start-on-weekday nil)
+                                             ;;(org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                             (org-agenda-skip-scheduled-if-deadline-is-shown t)
+                                             (org-agenda-prefix-format "  %-10T %t")
+                                             (org-agenda-hide-tags-regexp "^@")
+                                             (org-agenda-cmp-user-defined 'my-org-cmp-tag)
+                                             (org-agenda-sorting-strategy '(time-up todo-state-down habit-up tag-up priority-down user-defined-up alpha-up))
+                                             ;;(org-agenda-todo-ignore-scheduled 'future)
+                                             (org-deadline-warning-days 0)))
+                              (agenda "TODO" ((org-agenda-time-grid nil)
+                                              (org-deadline-warning-days 365)
+                                              (org-agenda-prefix-format "  %-10T %s")
+                                              (org-agenda-hide-tags-regexp "^@")
+                                              (org-agenda-entry-types '(:deadline))
+                                              (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
+                                              (org-agenda-start-on-weekday nil)
+                                              (org-agenda-span 1)
+                                              (org-agenda-overriding-header "Unscheduled upcoming deadlines:")))
+                              (todo "TODO"   ((org-agenda-time-grid nil)
+                                              (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexp "#[A-C]" 'scheduled 'deadline))
+                                              ;;(org-agenda-todo-keyword-format "")
+                                              (org-agenda-prefix-format "  %-10T %t")
+                                              (org-agenda-hide-tags-regexp "^@")
+                                              ;;(org-agenda-show-inherited-tags nil)
+                                              (org-agenda-cmp-user-defined 'my-org-cmp-tag)
+                                              (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
+                                              (org-agenda-overriding-header "Unscheduled, no deadline:")))
+                              (todo "TODO"   ((org-agenda-time-grid nil)
+                                              (org-agenda-skip-function '(org-agenda-skip-entry-if 'regexp "#[A-C]" 'scheduled 'deadline))
+                                              ;;(org-agenda-todo-keyword-format "")
+                                              (org-agenda-prefix-format "  %-10T %t")
+                                              (org-agenda-hide-tags-regexp "^@")
+                                              ;;(org-agenda-show-inherited-tags nil)
+                                              (org-agenda-cmp-user-defined 'my-org-cmp-tag)
+                                              (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
+                                              (org-agenda-overriding-header "Someday:")))))))
+  (add-hook 'org-finalize-agenda-hook
+            (lambda () (remove-text-properties
+                        (point-min) (point-max) '(mouse-face t))))
+  (add-hook 'org-agenda-mode-hook
+            (lambda () (whitespace-mode -1)) t)
 
-               (defun jeff/org-agenda-edit-headline ()
-                 "Go to the Org-mode file containing the item at point, then mark headline for overwriting."
-                 (interactive)
-                 (org-agenda-goto)
-                 (search-backward (org-get-heading t t))
-                 (push-mark)
-                 (goto-char (match-end 0))
-                 (activate-mark))
-               (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)
+  (defun jeff/org-agenda-edit-headline ()
+    "Go to the Org-mode file containing the item at point, then mark headline for overwriting."
+    (interactive)
+    (org-agenda-goto)
+    (search-backward (org-get-heading t t))
+    (push-mark)
+    (goto-char (match-end 0))
+    (activate-mark))
+  (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)
 
-               ;; Remove from agenda time grid lines that are in an appointment The
-               ;; agenda shows lines for the time grid. Some people think that these
-               ;; lines are a distraction when there are appointments at those
-               ;; times. You can get rid of the lines which coincide exactly with the
-               ;; beginning of an appointment. Michael Ekstrand has written a piece of
-               ;; advice that also removes lines that are somewhere inside an
-               ;; appointment: see [[http://orgmode.org/worg/org-hacks.html][Org-hacks]]
-               (defun org-time-to-minutes (time)
-                 "Convert an HHMM time to minutes"
-                 (+ (* (/ time 100) 60) (% time 100)))
+  ;; Remove from agenda time grid lines that are in an appointment The
+  ;; agenda shows lines for the time grid. Some people think that these
+  ;; lines are a distraction when there are appointments at those
+  ;; times. You can get rid of the lines which coincide exactly with the
+  ;; beginning of an appointment. Michael Ekstrand has written a piece of
+  ;; advice that also removes lines that are somewhere inside an
+  ;; appointment: see [[http://orgmode.org/worg/org-hacks.html][Org-hacks]]
+  ;; FIXME: See https://emacs.stackexchange.com/questions/35865/org-agenda-remove-time-grid-lines-that-are-in-an-appointment
 
-               (defun org-time-from-minutes (minutes)
-                 "Convert a number of minutes to an HHMM time"
-                 (+ (* (/ minutes 60) 100) (% minutes 60)))
+  ;; (defun org-time-to-minutes (time)
+  ;;   "Convert an HHMM time to minutes"
+  ;;   (+ (* (/ time 100) 60) (% time 100)))
 
-               (defun org-extract-window (line)
-                 "Extract start and end times from org entries"
-                (let ((start (get-text-property 1 'time-of-day line))
-                      (dur (get-text-property 1 'duration line)))
-                  (cond
-                   ((and start dur)
-                    (cons start
-                          (org-time-from-minutes
-                           (+ dur (org-time-to-minutes start)))))
-                   (start start)
-                   (t nil))))
+  ;; (defun org-time-from-minutes (minutes)
+  ;;   "Convert a number of minutes to an HHMM time"
+  ;;   (+ (* (/ minutes 60) 100) (% minutes 60)))
 
-               (defadvice org-agenda-add-time-grid-maybe (around mde-org-agenda-grid-tweakify
-                                                                 (list ndays todayp))
-                 (if (member 'remove-match (car org-agenda-time-grid))
-                     (let* ((windows (delq nil (mapcar 'org-extract-window list)))
-                            (org-agenda-time-grid
-                             (list (car org-agenda-time-grid)
-                                   (cadr org-agenda-time-grid)
-                                   (remove-if
-                                    (lambda (time)
-                                      (find-if (lambda (w)
-                                                 (if (numberp w)
-                                                     (equal w time)
-                                                   (and (>= time (car w))
-                                                        (< time (cdr w)))))
-                                               windows))
-                                    (caddr org-agenda-time-grid)))))
-                       ad-do-it)
-                   ad-do-it))
+  ;; (defun org-extract-window (line)
+  ;;   "Extract start and end times from org entries"
+  ;;   (let ((start (get-text-property 1 'time-of-day line))
+  ;;         (dur (get-text-property 1 'duration line)))
+  ;;     (cond
+  ;;      ((and start dur)
+  ;;       (cons start
+  ;;             (org-time-from-minutes
+  ;;              (+ dur (org-time-to-minutes start)))))
+  ;;      (start start)
+  ;;      (t nil))))
 
-               (ad-activate 'org-agenda-add-time-grid-maybe)
+  ;; (defadvice org-agenda-add-time-grid-maybe (around mde-org-agenda-grid-tweakify
+  ;;                                                   (list ndays todayp))
+  ;;   (if (member 'remove-match (car org-agenda-time-grid))
+  ;;       (let* ((windows (delq nil (mapcar 'org-extract-window list)))
+  ;;              (org-agenda-time-grid
+  ;;               (list (car org-agenda-time-grid)
+  ;;                     (cadr org-agenda-time-grid)
+  ;;                     (remove-if
+  ;;                      (lambda (time)
+  ;;                        (find-if (lambda (w)
+  ;;                                   (if (numberp w)
+  ;;                                       (equal w time)
+  ;;                                     (and (>= time (car w))
+  ;;                                          (< time (cdr w)))))
+  ;;                                 windows))
+  ;;                      (caddr org-agenda-time-grid)))))
+  ;;         ad-do-it)
+  ;;     ad-do-it))
 
-               ;; (defun kiwon/org-agenda-redo-in-other-window ()
-               ;;   "Call org-agenda-redo function even in the non-agenda buffer."
-               ;;   (interactive)
-               ;;   (let ((agenda-window (get-buffer-window org-agenda-buffer-name t)))
-               ;;     (when agenda-window
-               ;;       (with-selected-window agenda-window (org-agenda-redo)))))
-               ;;(run-at-time nil 60 'kiwon/org-agenda-redo-in-other-window)
-               ))
+  ;; (ad-activate 'org-agenda-add-time-grid-maybe)
+  )
 
 ;; org clock
 
 (req-package org-clock
   :require org
-  :init (progn
-          (setq org-clock-into-drawer t)
-          (defun jeff/org-mode-ask-effort ()
-            "Ask for an effort estimate when clocking in."
-            (unless (org-entry-get (point) "Effort")
-              (let ((effort
-                     (completing-read
-                      "Effort: "
-                      (org-entry-get-multivalued-property (point) "Effort"))))
-                (unless (equal effort "")
-                  (org-set-property "Effort" effort)))))
-          (add-hook 'org-clock-in-prepare-hook 'jeff/org-mode-ask-effort)))
+  :config
+  (customize-set-variable 'org-clock-into-drawer t)
+  (defun jeff/org-mode-ask-effort ()
+    "Ask for an effort estimate when clocking in."
+    (unless (org-entry-get (point) "Effort")
+      (let ((effort
+             (completing-read
+              "Effort: "
+              (org-entry-get-multivalued-property (point) "Effort"))))
+        (unless (equal effort "")
+          (org-set-property "Effort" effort)))))
+  (add-hook 'org-clock-in-prepare-hook 'jeff/org-mode-ask-effort))
 
 ;; org capture
 
 (req-package org-protocol
   :require org)
 
-(defun adjust-captured-headline (hl)
-  "Fixup headlines for amazon orders"
-  (downcase (if (string-match "amazon\\.com order of \\(.+?\\)\\(\\.\\.\\.\\)?\\( has shipped!\\)? :" hl)
-                (let ((item (match-string 1 hl)))
-                  (cond ((string-match ":@quicken:" hl) (concat "order of " item " :amazon_visa:@quicken:"))
-                        ((string-match ":@waiting:" hl) (concat "delivery of " item " :amazon:@waiting:"))
-                        (t hl))
-                  )
-              hl))
-  )
-
 (req-package org-capture
   :require (org org-protocol s)
-  :init (setq org-capture-templates
-              (quote (("b" "entry.html" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                       "* TODO %:description\n%:initial\n" :immediate-finish t)
-                      ("h" "habit" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                       "* TODO [#C] %?\nSCHEDULED: %(s-replace \">\" \" .+1d/3d>\" \"%t\")\n:PROPERTIES:\n:STYLE: habit\n:END:\n")
-                      ("t" "todo" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                       "* TODO [#C] %?\n")
-                      ;; capture bookmarklet
-                      ;; javascript:capture('@agendas');function enc(s){return encodeURIComponent(typeof(s)=="string"?s.toLowerCase().replace(/"/g, "'"):s);};function capture(context){var re=new RegExp(/(.*) - \S+@gmail.com/);var m=re.exec(document.title);var t=m?m[1]:document.title;javascript:location.href='org-protocol://capture://w/'+encodeURIComponent(location.href)+'/'+enc(t)+' :'+context+':/'+enc(window.getSelection());}
-                      ("w" "org-protocol" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                       "* TODO [#C] %?%(adjust-captured-headline \"%:description\")\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n"))))
-  :config (progn
-            (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create)
-            (add-hook 'org-capture-prepare-finalize-hook 'org-expiry-insert-created)
-
-            (defun my/save-all-agenda-buffers ()
-              "Function used to save all agenda buffers that are currently open, based on `org-agenda-files'."
-              (interactive)
-              (save-current-buffer
-                (dolist (buffer (buffer-list t))
-                  (set-buffer buffer)
-                  (when (member (buffer-file-name)
-                                (mapcar 'expand-file-name (org-agenda-files t)))
-                    (save-buffer)))))
-
-            ;; save all the agenda files after each capture
-            (add-hook 'org-capture-after-finalize-hook 'my/save-all-agenda-buffers))
   :bind (("C-M-r" . org-capture)
-         ("C-c r" . org-capture)))
+         ("C-c r" . org-capture))
+  :config
+  (defun adjust-captured-headline (hl)
+    "Fixup headlines for amazon orders"
+    (downcase (if (string-match "amazon\\.com order of \\(.+?\\)\\(\\.\\.\\.\\)?\\( has shipped!\\)? :" hl)
+                  (let ((item (match-string 1 hl)))
+                    (cond ((string-match ":@quicken:" hl) (concat "order of " item " :amazon_visa:@quicken:"))
+                          ((string-match ":@waiting:" hl) (concat "delivery of " item " :amazon:@waiting:"))
+                          (t hl))
+                    )
+                hl)))
+  (customize-set-variable 'org-capture-templates
+                 (quote (("b" "entry.html" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
+                          "* TODO %:description\n%:initial\n" :immediate-finish t)
+                         ("h" "habit" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
+                          "* TODO [#C] %?\nSCHEDULED: %(s-replace \">\" \" .+1d/3d>\" \"%t\")\n:PROPERTIES:\n:STYLE: habit\n:END:\n")
+                         ("t" "todo" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
+                          "* TODO [#C] %?\n")
+                         ;; capture bookmarklet
+                         ;; javascript:capture('@agendas');function enc(s){return encodeURIComponent(typeof(s)=="string"?s.toLowerCase().replace(/"/g, "'"):s);};function capture(context){var re=new RegExp(/(.*) - \S+@gmail.com/);var m=re.exec(document.title);var t=m?m[1]:document.title;javascript:location.href='org-protocol://capture://w/'+encodeURIComponent(location.href)+'/'+enc(t)+' :'+context+':/'+enc(window.getSelection());}
+                         ("w" "org-protocol" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
+                          "* TODO [#C] %?%(adjust-captured-headline \"%:description\")\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n"))))
+  (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create)
+  (add-hook 'org-capture-prepare-finalize-hook 'org-expiry-insert-created)
+
+  (defun my/save-all-agenda-buffers ()
+    "Function used to save all agenda buffers that are currently open, based on `org-agenda-files'."
+    (interactive)
+    (save-current-buffer
+      (dolist (buffer (buffer-list t))
+        (set-buffer buffer)
+        (when (member (buffer-file-name)
+                      (mapcar 'expand-file-name (org-agenda-files t)))
+          (save-buffer)))))
+
+  ;; save all the agenda files after each capture
+  (add-hook 'org-capture-after-finalize-hook 'my/save-all-agenda-buffers))
 
 ;; org reveal
 
 (req-package ox-reveal
   :loader :el-get-local
-  :init (setq org-reveal-root "file:///home/jeff/workspace/reveal.js"))
+  :config (customize-set-variable 'org-reveal-root "file:///home/jeff/workspace/reveal.js"))
 
 ;; org cua dwim
 
@@ -1019,12 +1018,10 @@ be global."
 (req-package org-expiry
   :loader :el-get-local
   :require org-capture
-  :init (progn
-          (org-expiry-insinuate)
-          (setq
-           org-expiry-created-property-name "CREATED" ; Name of property when an item is created
-           org-expiry-inactive-timestamps   t         ; Don't have everything in the agenda view
-           )))
+  :config
+  (org-expiry-insinuate)
+  (customize-set-variable 'org-expiry-created-property-name "CREATED") ; name of property when an item is created
+  (customize-set-variable 'org-expiry-inactive-timestamps t))          ; don't have everything in the agenda view
 
 ;; ----------------------------------------------------------- [ org-ehtml ]
 
@@ -1033,11 +1030,11 @@ be global."
 (req-package org-ehtml
   :loader :el-get-local
   :require (org web-server)
-  :init (setq
-         org-ehtml-everything-editable t
-         org-ehtml-allow-agenda t
-         org-ehtml-docroot (expand-file-name "~/Dropbox/workspace/org"))
   :config
+  (validate-setq org-ehtml-allow-agenda t)
+  (customize-set-variable 'org-ehtml-everything-editable t)
+  (customize-set-variable 'org-ehtml-docroot (expand-file-name "~/Dropbox/workspace/org"))
+
   (defun pre-adjust-agenda-for-html nil
     "Adjust agenda buffer before htmlize.
 Adds a link overlay to be intercepted by post-adjust-agenda-for-html."
@@ -1127,23 +1124,23 @@ GET header should contain a path in form '/todo/ID'."
                     ((:POST . ".*")       . org-ehtml-edit-handler))
                   3333)
       (error (message "Failed to create web server"))))
-)
+  )
 
 ;; ----------------------------------------------------------- [ evernote ]
 
 (req-package evernote-mode
   :loader :el-get-local
-  :init (progn
-          (setq evernote-developer-token "S=s1:U=81f:E=1470997a804:C=13fb1e67c09:P=1cd:A=en-devtoken:V=2:H=0b3aafa546daa4a9b43c77a7574390d4"
-                evernote-enml-formatter-command '("w3m" "-dump" "-I" "UTF8" "-O" "UTF8") ; optional
-                enh-enclient-command "/home/jeff/Dropbox/workspace/evernote-mode/ruby/bin/enclient.rb"))
   :bind (("C-c E c" . evernote-create-note)
          ("C-c E o" . evernote-open-note)
          ("C-c E s" . evernote-search-notes)
          ("C-c E S" . evernote-do-saved-search)
          ("C-c E w" . evernote-write-note)
          ("C-c E p" . evernote-post-region)
-         ("C-c E b" . evernote-browser)))
+         ("C-c E b" . evernote-browser))
+  :config
+  (customize-set-variable 'evernote-developer-token "S=s1:U=81f:E=1470997a804:C=13fb1e67c09:P=1cd:A=en-devtoken:V=2:H=0b3aafa546daa4a9b43c77a7574390d4")
+  (customize-set-variable 'evernote-enml-formatter-command '("w3m" "-dump" "-I" "UTF8" "-O" "UTF8")) ; optional
+  (validate-setq enh-enclient-command "/home/jeff/Dropbox/workspace/evernote-mode/ruby/bin/enclient.rb"))
 
 ;; ----------------------------------------------------------- [ windmove ]
 
@@ -1158,7 +1155,7 @@ GET header should contain a path in form '/todo/ID'."
 ;; ----------------------------------------------------------- [ shackle ]
 
 (req-package shackle
-  :init (setq shackle-rules '(("\\`\\*helm.*?\\*\\'" :regexp t :align t :size 0.4))))
+  :config (customize-set-variable 'shackle-rules '(("\\`\\*helm.*?\\*\\'" :regexp t :align t :size 0.4))))
 
 ;; ----------------------------------------------------------- [ diminished ]
 ;; Better to put these in the mode-specific sections.
@@ -1199,34 +1196,32 @@ GET header should contain a path in form '/todo/ID'."
 
 (req-package smart-mode-line
   :require custom
-  :init (progn
-          (sml/setup))
-  :config (progn
-            (sml/apply-theme 'automatic)
-            (add-to-list 'rm-excluded-modes " MRev" t)
-            (add-to-list 'rm-excluded-modes " Guide" t)
-            (add-to-list 'rm-excluded-modes " Helm" t)
-            (add-to-list 'rm-excluded-modes " company" t)
-            (add-to-list 'sml/replacer-regexp-list '("^:DB:workspace" ":WS:")   t)
-            (add-to-list 'sml/replacer-regexp-list '("^:WS:/uplands"  ":UP:")   t)
-            (add-to-list 'sml/replacer-regexp-list '("^:WS:/autodesk" ":ADSK:") t)
-            (setq sml/col-number-format "%03c")
-            (setq sml/use-projectile-p 'before-prefixes)
-            ))
+  :config
+  (sml/setup)
+  (sml/apply-theme 'automatic)
+  (add-to-list 'rm-excluded-modes " MRev" t)
+  (add-to-list 'rm-excluded-modes " Guide" t)
+  (add-to-list 'rm-excluded-modes " Helm" t)
+  (add-to-list 'rm-excluded-modes " company" t)
+  (add-to-list 'sml/replacer-regexp-list '("^:DB:workspace" ":WS:")   t)
+  (add-to-list 'sml/replacer-regexp-list '("^:WS:/uplands"  ":UP:")   t)
+  (add-to-list 'sml/replacer-regexp-list '("^:WS:/autodesk" ":ADSK:") t)
+  (customize-set-variable 'sml/col-number-format "%03c")
+  (customize-set-variable 'sml/use-projectile-p 'before-prefixes))
 
 ;; nyan mode
 
 (req-package nyan-mode
   :loader :el-get-local
-  :init (progn (nyan-mode +1)
-               (setq nyan-wavy-trail t)
-               (setq nyan-animate-nyancat t)))
+  :config
+  (nyan-mode +1)
+  (customize-set-variable 'nyan-wavy-trail t)
+  (customize-set-variable 'nyan-animate-nyancat t))
 
 ;; projectile mode
 
 (req-package projectile
-   :init (setq projectile-mode-line '(:eval (format " Π[%s]" (projectile-project-name))))
-)
+   :config (customize-set-variable 'projectile-mode-line '(:eval (format " Π[%s]" (projectile-project-name)))))
 
 ;; powerline
 ;; see https://github.com/11111000000/emacs-d/blob/master/init.el
@@ -1237,138 +1232,136 @@ GET header should contain a path in form '/todo/ID'."
 (req-package powerline
   ;; :disabled t
   :require nyan-mode
-  :init (progn
-          (defadvice load-theme (after reset-powerline-cache activate) (pl/reset-cache))
-          (defun powerline-jeff-theme ()
-            "Set to Jeff's theme."
-            (interactive)
-            (setq powerline-default-separator 'wave
-                  powerline-height 14
-                  powerline-default-separator-dir '(left . right))
+  :config
+  (defadvice load-theme (after reset-powerline-cache activate) (pl/reset-cache))
+  (defun powerline-jeff-theme ()
+    "Set to Jeff's theme."
+    (interactive)
+    (customize-set-variable 'powerline-default-separator 'wave)
+    (customize-set-variable 'powerline-height 14)
+    (customize-set-variable 'powerline-default-separator-dir '(left . right))
 
-            (setq-default mode-line-format
-                          '("%e"
-                            (:eval
-                             (let* ((active (powerline-selected-window-active))
-                                    (mode-line (if active 'mode-line 'mode-line-inactive))
-                                    (face1 (if active 'powerline-active1 'powerline-inactive1))
-                                    (face2 (if active 'powerline-active2 'powerline-inactive2))
+    (customize-set-variable 'mode-line-format
+                  '("%e"
+                    (:eval
+                     (let* ((active (powerline-selected-window-active))
+                            (mode-line (if active 'mode-line 'mode-line-inactive))
+                            (face1 (if active 'powerline-active1 'powerline-inactive1))
+                            (face2 (if active 'powerline-active2 'powerline-inactive2))
 
-                                    (separator-left (intern (format "powerline-%s-%s"
-                                                                    'wave
-                                                                    (car powerline-default-separator-dir))))
+                            (separator-left (intern (format "powerline-%s-%s"
+                                                            'wave
+                                                            (car powerline-default-separator-dir))))
 
-                                    (separator-right (intern (format "powerline-%s-%s"
-                                                                     'wave
-                                                                     (cdr powerline-default-separator-dir))))
+                            (separator-right (intern (format "powerline-%s-%s"
+                                                             'wave
+                                                             (cdr powerline-default-separator-dir))))
 
-                                    (lhs (list
-                                          (powerline-raw "%*" face2 'l)
-                                          (powerline-buffer-size face2 'l)
-                                          (powerline-buffer-id face2 'l)
-                                          (powerline-raw " " face2)
-                                          (funcall separator-left mode-line face1)
-                                          (powerline-narrow face1 'l)
-                                          (powerline-vc face1)))
-                                    (rhs (list
-                                          (when (bound-and-true-p nyan-mode)
-                                            (powerline-raw (list (nyan-create)) face1 'r))
-                                          (powerline-raw "%4l" face1 'r)
-                                          (powerline-raw ":" face1)
-                                          (powerline-raw "%3c" face1 'r)
-                                          (funcall separator-right face1 mode-line)
-                                          (powerline-raw " " face2)
-                                          (powerline-raw global-mode-string face2)
-                                          ;;(powerline-raw "%6p" nil 'r)
-                                          ;;(powerline-hud face2 face1)
-                                          ))
-                                    (ctr (list
-                                          ;;(powerline-raw " " face1)
-                                          (funcall separator-left face1 face2)
-                                          (when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
-                                            (powerline-raw erc-modified-channels-object face2 'l))
-                                          (powerline-major-mode face2 'l)
-                                          (powerline-process face2)
-                                          (powerline-raw " :" face2)
-                                          (powerline-minor-modes face2 'l)
-                                          (powerline-raw " " face2)
-                                          (funcall separator-right face2 face1))))
+                            (lhs (list
+                                  (powerline-raw "%*" face2 'l)
+                                  (powerline-buffer-size face2 'l)
+                                  (powerline-buffer-id face2 'l)
+                                  (powerline-raw " " face2)
+                                  (funcall separator-left mode-line face1)
+                                  (powerline-narrow face1 'l)
+                                  (powerline-vc face1)))
+                            (rhs (list
+                                  (when (bound-and-true-p nyan-mode)
+                                    (powerline-raw (list (nyan-create)) face1 'r))
+                                  (powerline-raw "%4l" face1 'r)
+                                  (powerline-raw ":" face1)
+                                  (powerline-raw "%3c" face1 'r)
+                                  (funcall separator-right face1 mode-line)
+                                  (powerline-raw " " face2)
+                                  (powerline-raw global-mode-string face2)
+                                  ;;(powerline-raw "%6p" nil 'r)
+                                  ;;(powerline-hud face2 face1)
+                                  ))
+                            (ctr (list
+                                  ;;(powerline-raw " " face1)
+                                  (funcall separator-left face1 face2)
+                                  (when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
+                                    (powerline-raw erc-modified-channels-object face2 'l))
+                                  (powerline-major-mode face2 'l)
+                                  (powerline-process face2)
+                                  (powerline-raw " :" face2)
+                                  (powerline-minor-modes face2 'l)
+                                  (powerline-raw " " face2)
+                                  (funcall separator-right face2 face1))))
 
-                               (concat (powerline-render lhs)
-                                       (powerline-fill-center face1 (/ (powerline-width ctr) 2.0))
-                                       (powerline-render ctr)
-                                       ;;(powerline-fill face1 (powerline-width rhs))
-                                       (powerline-render rhs)))))))
-          (powerline-jeff-theme)
-          ))
+                       (concat (powerline-render lhs)
+                               (powerline-fill-center face1 (/ (powerline-width ctr) 2.0))
+                               (powerline-render ctr)
+                               ;;(powerline-fill face1 (powerline-width rhs))
+                               (powerline-render rhs)))))))
+  (powerline-jeff-theme))
 
 ;; ----------------------------------------------------------- [ edit-server ]
 
 (req-package edit-server
   :require edit-server-htmlize
-  :config (progn
-            (setq edit-server-new-frame nil)
-            (autoload 'edit-server-maybe-dehtmlize-buffer "edit-server-htmlize" "edit-server-htmlize" t)
-            (autoload 'edit-server-maybe-htmlize-buffer   "edit-server-htmlize" "edit-server-htmlize" t)
-            (add-hook 'edit-server-start-hook 'edit-server-maybe-dehtmlize-buffer)
-            (add-hook 'edit-server-done-hook  'edit-server-maybe-htmlize-buffer)
-            (edit-server-start))
-  :init (progn
-          (add-hook 'edit-server-start-hook
-                    (lambda ()
-                      (when (string-match "github.com" (buffer-name))
-                        (markdown-mode))))
-          (defun kill-window-with-current-buffer nil
-            "Delete all windows representing the current buffer."
-            (interactive)
-            (remove-hook 'kill-buffer-hook 'kill-window-with-current-buffer)
-            (delete-window))
-          (add-hook 'edit-server-done-hook
-                    (lambda ()
-                      (progn (add-hook 'kill-buffer-hook 'kill-window-with-current-buffer))))))
+  :config
+  (customize-set-variable 'edit-server-new-frame nil)
+  (autoload 'edit-server-maybe-dehtmlize-buffer "edit-server-htmlize" "edit-server-htmlize" t)
+  (autoload 'edit-server-maybe-htmlize-buffer   "edit-server-htmlize" "edit-server-htmlize" t)
+  (add-hook 'edit-server-start-hook 'edit-server-maybe-dehtmlize-buffer)
+  (add-hook 'edit-server-done-hook  'edit-server-maybe-htmlize-buffer)
+  (add-hook 'edit-server-start-hook
+            (lambda ()
+              (when (string-match "github.com" (buffer-name))
+                (markdown-mode))))
+  (defun kill-window-with-current-buffer nil
+    "Delete all windows representing the current buffer."
+    (interactive)
+    (remove-hook 'kill-buffer-hook 'kill-window-with-current-buffer)
+    (delete-window))
+  (add-hook 'edit-server-done-hook
+            (lambda ()
+              (progn (add-hook 'kill-buffer-hook 'kill-window-with-current-buffer))))
+  (edit-server-start))
 
 ;; ----------------------------------------------------------- [ theme ]
 
 (req-package auto-dim-other-buffers
-  :init (progn
-          (auto-dim-other-buffers-mode t)
-          (defun adjust-dim-face (&rest r)
-            (set-face-attribute 'auto-dim-other-buffers-face nil
-                                :background (color-darken-name
-                                             (face-attribute 'default :background) 3)))
-          (defun adob--ignore-buffer (buffer)
-          "Return whether to ignore BUFFER and do not affect its state.
+  :config
+  (auto-dim-other-buffers-mode t)
+  (defun adjust-dim-face (&rest r)
+    (set-face-attribute 'auto-dim-other-buffers-face nil
+                        :background (color-darken-name
+                                     (face-attribute 'default :background) 3)))
+  (defun adob--ignore-buffer (buffer)
+    "Return whether to ignore BUFFER and do not affect its state.
 Currently only mini buffer, echo areas, and helm are ignored."
-          (or (null buffer)
-              (minibufferp buffer)
-              (string-match "^ \\*Echo Area" (buffer-name buffer))
-              (string-match "\\*helm" (buffer-name buffer))
-              (string-match "\\*Minibuf" (buffer-name buffer))
-              ))))
+    (or (null buffer)
+        (minibufferp buffer)
+        (string-match "^ \\*Echo Area" (buffer-name buffer))
+        (string-match "\\*helm" (buffer-name buffer))
+        (string-match "\\*Minibuf" (buffer-name buffer))
+        )))
 
 (req-package custom
-  :init (setq custom-safe-themes t))
+  :config (customize-set-variable 'custom-safe-themes t))
 
 (req-package solarized-theme
-   :require custom
-   :init (defun solarized nil
-           "Enable solarized theme"
-           (interactive)
-           (disable-theme 'zenburn)
-           (setq solarized-high-contrast-mode-line nil)
-           (setq solarized-scale-org-headlines t)
-           (load-theme 'solarized-dark t)
-           (sml/apply-theme 'respectful)
-           (setq x-underline-at-descent-line t)))
+  :require custom
+  :config (defun solarized nil
+            "Enable solarized theme"
+            (interactive)
+            (disable-theme 'zenburn)
+            (customize-set-variable 'solarized-high-contrast-mode-line nil)
+            (customize-set-variable 'solarized-scale-org-headlines t)
+            (load-theme 'solarized-dark t)
+            (sml/apply-theme 'respectful)
+            (customize-set-variable 'x-underline-at-descent-line t)))
 
 (req-package zenburn-theme
   :require custom
-  :init (defun zenburn nil
-          "Enable zenburn theme"
-          (interactive)
-          (disable-theme 'solarized-dark)
-          (load-theme 'zenburn t)
-          (sml/apply-theme 'respectful)))
+  :config (defun zenburn nil
+            "Enable zenburn theme"
+            (interactive)
+            (disable-theme 'solarized-dark)
+            (load-theme 'zenburn t)
+            (sml/apply-theme 'respectful)))
 
 (deftheme jeff-theme "Jeff's theme.")
 (custom-theme-set-faces
@@ -1410,119 +1403,120 @@ Currently only mini buffer, echo areas, and helm are ignored."
 ;; ----------------------------------------------------------- [ hydra ]
 
 (req-package hydra
-  :require windmove ace-window org-agenda
-  :ensure t
-  :config
-  (eval-and-compile
-    (defhydra hydra-window ()
-      "window"
-      ("<left>" windmove-left "left")
-      ("<down>" windmove-down "down")
-      ("<up>" windmove-up "up")
-      ("<right>" windmove-right "right")
-      ("a" (lambda ()
-             (interactive)
-             (ace-window 1)
-             (add-hook 'ace-window-end-once-hook
-                       'hydra-window/body))
-       "ace")
-      ("v" (lambda ()
-             (interactive)
-             (split-window-right)
-             (windmove-right))
-       "vert")
-      ("x" (lambda ()
-             (interactive)
-             (split-window-below)
-             (windmove-down))
-       "horz")
-      ("s" (lambda ()
-             (interactive)
-             (ace-window 4)
-             (add-hook 'ace-window-end-once-hook
-                       'hydra-window/body))
-       "swap")
-      ("d" (lambda ()
-             (interactive)
-             (ace-window 16)
-             (add-hook 'ace-window-end-once-hook
-                       'hydra-window/body))
-       "del")
-      ("o" delete-other-windows "1" :color blue)
-      ("i" ace-maximize-window "a1" :color blue)
-      ("q" nil "cancel")))
+    :require (windmove ace-window org-agenda)
+;; FIXME:   :ensure t
+    :config
+    (eval-and-compile
+      (defhydra hydra-window ()
+        "window"
+        ("<left>" windmove-left "left")
+        ("<down>" windmove-down "down")
+        ("<up>" windmove-up "up")
+        ("<right>" windmove-right "right")
+        ("a" (lambda ()
+               (interactive)
+               (ace-window 1)
+               (add-hook 'ace-window-end-once-hook
+                         'hydra-window/body))
+         "ace")
+        ("v" (lambda ()
+               (interactive)
+               (split-window-right)
+               (windmove-right))
+         "vert")
+        ("x" (lambda ()
+               (interactive)
+               (split-window-below)
+               (windmove-down))
+         "horz")
+        ("s" (lambda ()
+               (interactive)
+               (ace-window 4)
+               (add-hook 'ace-window-end-once-hook
+                         'hydra-window/body))
+         "swap")
+        ("d" (lambda ()
+               (interactive)
+               (ace-window 16)
+               (add-hook 'ace-window-end-once-hook
+                         'hydra-window/body))
+         "del")
+        ("o" delete-other-windows "1" :color blue)
+        ("i" ace-maximize-window "a1" :color blue)
+        ("q" nil "cancel")))
 
-  (define-key global-map
-    (kbd "C-M-O") 'hydra-window/body)
+    (define-key global-map
+      (kbd "C-M-O") 'hydra-window/body)
 
 
-  ;; from http://oremacs.com/2016/04/04/hydra-doc-syntax/
+    ;; from http://oremacs.com/2016/04/04/hydra-doc-syntax/
 
-  (defun org-agenda-cts ()
-    (if (bound-and-true-p org-mode)
-        (let ((args (get-text-property
-                     (min (1- (point-max)) (point))
-                     'org-last-args)))
-          (nth 2 args))
-      nil))
+    (defun org-agenda-cts ()
+      (if (bound-and-true-p org-mode)
+          (let ((args (get-text-property
+                       (min (1- (point-max)) (point))
+                       'org-last-args)))
+            (nth 2 args))
+        nil))
 
-  (eval-and-compile
-    (defhydra hydra-org-agenda-view (:hint nil)
-      "
-  _d_: ?d? day        _g_: time grid=?g? _a_: arch-trees
-  _w_: ?w? week       _[_: inactive      _A_: arch-files
-  _t_: ?t? fortnight  _f_: follow=?f?    _r_: report=?r?
-  _m_: ?m? month      _e_: entry =?e?    _D_: diary=?D?
-  _y_: ?y? year       _q_: quit          _L__l__c_: ?l?"
-      ("SPC" org-agenda-reset-view)
-      ("d" org-agenda-day-view
-       (if (eq 'day (org-agenda-cts))
-           "[x]" "[ ]"))
-      ("w" org-agenda-week-view
-       (if (eq 'week (org-agenda-cts))
-           "[x]" "[ ]"))
-      ("t" org-agenda-fortnight-view
-       (if (eq 'fortnight (org-agenda-cts))
-           "[x]" "[ ]"))
-      ("m" org-agenda-month-view
-       (if (eq 'month (org-agenda-cts)) "[x]" "[ ]"))
-      ("y" org-agenda-year-view
-       (if (eq 'year (org-agenda-cts)) "[x]" "[ ]"))
-      ("l" org-agenda-log-mode
-       (format "% -3S" org-agenda-show-log))
-      ("L" (org-agenda-log-mode '(4)))
-      ("c" (org-agenda-log-mode 'clockcheck))
-      ("f" org-agenda-follow-mode
-       (format "% -3S" org-agenda-follow-mode))
-      ("a" org-agenda-archives-mode)
-      ("A" (org-agenda-archives-mode 'files))
-      ("r" org-agenda-clockreport-mode
-       (format "% -3S" org-agenda-clockreport-mode))
-      ("e" org-agenda-entry-text-mode
-       (format "% -3S" org-agenda-entry-text-mode))
-      ("g" org-agenda-toggle-time-grid
-       (format "% -3S" org-agenda-use-time-grid))
-      ("D" org-agenda-toggle-diary
-       (format "% -3S" org-agenda-include-diary))
-      ("!" org-agenda-toggle-deadlines)
-      ("["
-       (let ((org-agenda-include-inactive-timestamps t))
-         (org-agenda-check-type t 'timeline 'agenda)
-         (org-agenda-redo)))
-      ("q" (message "Abort") :exit t)))
+    (eval-and-compile
+      (defhydra hydra-org-agenda-view (:hint nil)
+        "
+    _d_: ?d? day        _g_: time grid=?g? _a_: arch-trees
+    _w_: ?w? week       _[_: inactive      _A_: arch-files
+    _t_: ?t? fortnight  _f_: follow=?f?    _r_: report=?r?
+    _m_: ?m? month      _e_: entry =?e?    _D_: diary=?D?
+    _y_: ?y? year       _q_: quit          _L__l__c_: ?l?"
+        ("SPC" org-agenda-reset-view)
+        ("d" org-agenda-day-view
+         (if (eq 'day (org-agenda-cts))
+             "[x]" "[ ]"))
+        ("w" org-agenda-week-view
+         (if (eq 'week (org-agenda-cts))
+             "[x]" "[ ]"))
+        ("t" org-agenda-fortnight-view
+         (if (eq 'fortnight (org-agenda-cts))
+             "[x]" "[ ]"))
+        ("m" org-agenda-month-view
+         (if (eq 'month (org-agenda-cts)) "[x]" "[ ]"))
+        ("y" org-agenda-year-view
+         (if (eq 'year (org-agenda-cts)) "[x]" "[ ]"))
+        ("l" org-agenda-log-mode
+         (format "% -3S" org-agenda-show-log))
+        ("L" (org-agenda-log-mode '(4)))
+        ("c" (org-agenda-log-mode 'clockcheck))
+        ("f" org-agenda-follow-mode
+         (format "% -3S" org-agenda-follow-mode))
+        ("a" org-agenda-archives-mode)
+        ("A" (org-agenda-archives-mode 'files))
+        ("r" org-agenda-clockreport-mode
+         (format "% -3S" org-agenda-clockreport-mode))
+        ("e" org-agenda-entry-text-mode
+         (format "% -3S" org-agenda-entry-text-mode))
+        ("g" org-agenda-toggle-time-grid
+         (format "% -3S" org-agenda-use-time-grid))
+        ("D" org-agenda-toggle-diary
+         (format "% -3S" org-agenda-include-diary))
+        ("!" org-agenda-toggle-deadlines)
+        ("["
+         (let ((org-agenda-include-inactive-timestamps t))
+           (org-agenda-check-type t 'timeline 'agenda)
+           (org-agenda-redo)))
+        ("q" (message "Abort") :exit t)))
 
-  (define-key org-agenda-mode-map
-    "v" 'hydra-org-agenda-view/body)
-  )
+    (define-key org-agenda-mode-map
+      "v" 'hydra-org-agenda-view/body)
+    )
 
 ;; ----------------------------------------------------------- [ key-chord ]
 
 (req-package key-chord
-  :config (progn (key-chord-define-global "xf" 'prelude-fullscreen)
-                 (key-chord-define-global "xd" '(lambda () (interactive) (load-theme 'solarized-dark)))
-                 (key-chord-define-global "xl" '(lambda () (interactive) (load-theme 'solarized-light)))
-                 (key-chord-define-global "xx" 'helm-M-x)
-                 (key-chord-mode +1)))
+  :config
+  (key-chord-define-global "xf" 'prelude-fullscreen)
+  (key-chord-define-global "xd" '(lambda () (interactive) (load-theme 'solarized-dark)))
+  (key-chord-define-global "xl" '(lambda () (interactive) (load-theme 'solarized-light)))
+  (key-chord-define-global "xx" 'helm-M-x)
+  (key-chord-mode +1))
 
 ;; ----------------------------------------------------------- [ quicken ]
 
@@ -1601,14 +1595,13 @@ Currently only mini buffer, echo areas, and helm are ignored."
   (clipboard-kill-ring-save (point-min) (point-max))
   (message "table saved to clipboard")
 
-  (setq to (url-encode-url "Michelle Bowen <bowen.kowalski@gmail.com>")
-        subject "quicken quiz"
-        body (url-encode-url (buffer-string)))
-
-  (browse-url (concat "https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1"
-                      "&to=" to
-                      "&su=" subject
-                      "&body=" body)) )
+  (let ((to (url-encode-url "Michelle Bowen <bowen.kowalski@gmail.com>"))
+        (subject "quicken quiz")
+        (body (url-encode-url (buffer-string))))
+    (browse-url (concat "https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1"
+                        "&to=" to
+                        "&su=" subject
+                        "&body=" body))))
 
 ;; ----------------------------------------------------------- [ finish ]
 
