@@ -814,11 +814,6 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
                             (let ((retval ""))
                               (dotimes (i (- org-agenda-tags-column)) (setq retval (concat retval "=")))
                               retval))
-    (customize-set-variable 'org-agenda-timegrid-use-ampm t)
-    ;; FIXME: (customize-set-variable 'org-agenda-time-grid
-    ;;                         '((daily weekly today require-timed remove-match)
-    ;;                           #("----------------" 0 16 (org-heading t))
-    ;;                           (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000)))
     (customize-set-variable 'org-agenda-search-headline-for-time nil)
     (customize-set-variable 'org-agenda-window-setup 'current-window)
     (customize-set-variable 'org-agenda-log-mode-items '(clock closed state))
@@ -905,6 +900,12 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
       (goto-char (match-end 0))
       (activate-mark))
     (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)
+
+    (customize-set-variable 'org-agenda-timegrid-use-ampm t)
+    ;; FIXME: (customize-set-variable 'org-agenda-time-grid
+    ;;                         '((daily weekly today require-timed remove-match)
+    ;;                           #("----------------" 0 16 (org-heading t))
+    ;;                           (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000)))
 
     ;; Remove from agenda time grid lines that are in an appointment The
     ;; agenda shows lines for the time grid. Some people think that these
@@ -1184,35 +1185,35 @@ Better to put these in the mode-specific sections.
 These diminish strings are only for those modes not mentioned elsewhere.
 
 #+BEGIN_SRC emacs-lisp
-(req-package emacs-lisp          :diminish "eλ")
-;(req-package auto-complete       :diminish " α")
-;(req-package auto-fill-function  :diminish " φ")
-;(req-package autopair            :diminish "")
-(req-package beacon              :diminish "")
-;(req-package cider-interaction   :diminish " ηζ")
-;(req-package cider               :diminish " ηζ")
-;(req-package clojure             :diminish "cλ")
-;(req-package eldoc               :diminish "")
-;(req-package elisp-slime-nav     :diminish " δ")
-(req-package flycheck            :diminish " φc")
-(req-package flymake             :diminish " φm")
-(req-package flyspell            :diminish " φs")
-;(req-package guru                :diminish "")
-;(req-package haskell             :diminish "hλ")
-;(req-package hi-lock             :diminish "")
-(req-package js2                 :diminish "jλ")
-;(req-package kibit               :diminish " κ")
-;(req-package lambda              :diminish "")
-(req-package markdown            :diminish "md")
-;(req-package nrepl-interaction   :diminish " ηζ")
-;(req-package nrepl               :diminish " ηζ")
-(req-package paredit             :diminish " Φ")
-;(req-package processing          :diminish "P5")
-;(req-package python              :diminish "pλ")
-;(req-package tuareg              :diminish "mλ")
-(req-package volatile-highlights :diminish " υ")
-;(req-package wrap-region         :diminish "")
-;(req-package yas-minor           :diminish " γ")
+  (add-hook 'emacs-lisp-mode-hook (lambda() (setq mode-name "eλ")) t)
+  ;;(req-package auto-complete       :diminish " α")
+  ;;(req-package auto-fill-function  :diminish " φ")
+  ;;(req-package autopair            :diminish "")
+  (req-package beacon              :diminish "")
+  ;;(req-package cider-interaction   :diminish " ηζ")
+  ;;(req-package cider               :diminish " ηζ")
+  ;;(req-package clojure             :diminish "cλ")
+  ;;(req-package eldoc               :diminish "")
+  ;;(req-package elisp-slime-nav     :diminish " δ")
+  (req-package flycheck            :diminish " φc")
+  (req-package flymake             :diminish " φm")
+  (req-package flyspell            :diminish " φs")
+  ;;(req-package guru                :diminish "")
+  ;;(req-package haskell             :diminish "hλ")
+  ;;(req-package hi-lock             :diminish "")
+  (req-package js2-mode            :diminish "jλ")
+  ;;(req-package kibit               :diminish " κ")
+  ;;(req-package lambda              :diminish "")
+  (req-package markdown-mode       :diminish "md")
+  ;;(req-package nrepl-interaction   :diminish " ηζ")
+  ;;(req-package nrepl               :diminish " ηζ")
+  (req-package paredit             :diminish " Φ")
+  ;;(req-package processing          :diminish "P5")
+  ;;(req-package python              :diminish "pλ")
+  ;;(req-package tuareg              :diminish "mλ")
+  (req-package volatile-highlights :diminish " υ")
+  ;;(req-package wrap-region         :diminish "")
+  ;;(req-package yas-minor           :diminish " γ")
 #+END_SRC
 
 ** ----------------------------------------------------------- [ modeline ]
@@ -1428,7 +1429,6 @@ see https://github.com/11111000000/emacs-d/blob/master/init.el
 #+BEGIN_SRC emacs-lisp
   (req-package hydra
     :require (windmove ace-window org-agenda)
-;; FIXME:   :ensure t
     :config
     (eval-and-compile
       (defhydra hydra-window ()
@@ -1471,7 +1471,6 @@ see https://github.com/11111000000/emacs-d/blob/master/init.el
 
     (define-key global-map
       (kbd "C-M-O") 'hydra-window/body)
-
 
     ;; from http://oremacs.com/2016/04/04/hydra-doc-syntax/
 

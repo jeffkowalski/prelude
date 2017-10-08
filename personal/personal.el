@@ -794,11 +794,6 @@ be global."
                           (let ((retval ""))
                             (dotimes (i (- org-agenda-tags-column)) (setq retval (concat retval "=")))
                             retval))
-  (customize-set-variable 'org-agenda-timegrid-use-ampm t)
-  ;; FIXME: (customize-set-variable 'org-agenda-time-grid
-  ;;                         '((daily weekly today require-timed remove-match)
-  ;;                           #("----------------" 0 16 (org-heading t))
-  ;;                           (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000)))
   (customize-set-variable 'org-agenda-search-headline-for-time nil)
   (customize-set-variable 'org-agenda-window-setup 'current-window)
   (customize-set-variable 'org-agenda-log-mode-items '(clock closed state))
@@ -885,6 +880,12 @@ be global."
     (goto-char (match-end 0))
     (activate-mark))
   (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)
+
+  (customize-set-variable 'org-agenda-timegrid-use-ampm t)
+  ;; FIXME: (customize-set-variable 'org-agenda-time-grid
+  ;;                         '((daily weekly today require-timed remove-match)
+  ;;                           #("----------------" 0 16 (org-heading t))
+  ;;                           (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000)))
 
   ;; Remove from agenda time grid lines that are in an appointment The
   ;; agenda shows lines for the time grid. Some people think that these
@@ -1162,35 +1163,35 @@ GET header should contain a path in form '/todo/ID'."
 ;; These diminish strings are only for those modes not mentioned elsewhere.
 
 
-(req-package emacs-lisp          :diminish "eλ")
-;(req-package auto-complete       :diminish " α")
-;(req-package auto-fill-function  :diminish " φ")
-;(req-package autopair            :diminish "")
+(add-hook 'emacs-lisp-mode-hook (lambda() (setq mode-name "eλ")) t)
+;;(req-package auto-complete       :diminish " α")
+;;(req-package auto-fill-function  :diminish " φ")
+;;(req-package autopair            :diminish "")
 (req-package beacon              :diminish "")
-;(req-package cider-interaction   :diminish " ηζ")
-;(req-package cider               :diminish " ηζ")
-;(req-package clojure             :diminish "cλ")
-;(req-package eldoc               :diminish "")
-;(req-package elisp-slime-nav     :diminish " δ")
+;;(req-package cider-interaction   :diminish " ηζ")
+;;(req-package cider               :diminish " ηζ")
+;;(req-package clojure             :diminish "cλ")
+;;(req-package eldoc               :diminish "")
+;;(req-package elisp-slime-nav     :diminish " δ")
 (req-package flycheck            :diminish " φc")
 (req-package flymake             :diminish " φm")
 (req-package flyspell            :diminish " φs")
-;(req-package guru                :diminish "")
-;(req-package haskell             :diminish "hλ")
-;(req-package hi-lock             :diminish "")
-(req-package js2                 :diminish "jλ")
-;(req-package kibit               :diminish " κ")
-;(req-package lambda              :diminish "")
-(req-package markdown            :diminish "md")
-;(req-package nrepl-interaction   :diminish " ηζ")
-;(req-package nrepl               :diminish " ηζ")
+;;(req-package guru                :diminish "")
+;;(req-package haskell             :diminish "hλ")
+;;(req-package hi-lock             :diminish "")
+(req-package js2-mode            :diminish "jλ")
+;;(req-package kibit               :diminish " κ")
+;;(req-package lambda              :diminish "")
+(req-package markdown-mode       :diminish "md")
+;;(req-package nrepl-interaction   :diminish " ηζ")
+;;(req-package nrepl               :diminish " ηζ")
 (req-package paredit             :diminish " Φ")
-;(req-package processing          :diminish "P5")
-;(req-package python              :diminish "pλ")
-;(req-package tuareg              :diminish "mλ")
+;;(req-package processing          :diminish "P5")
+;;(req-package python              :diminish "pλ")
+;;(req-package tuareg              :diminish "mλ")
 (req-package volatile-highlights :diminish " υ")
-;(req-package wrap-region         :diminish "")
-;(req-package yas-minor           :diminish " γ")
+;;(req-package wrap-region         :diminish "")
+;;(req-package yas-minor           :diminish " γ")
 
 ;; smart mode line
 
@@ -1403,110 +1404,108 @@ Currently only mini buffer, echo areas, and helm are ignored."
 ;; ----------------------------------------------------------- [ hydra ]
 
 (req-package hydra
-    :require (windmove ace-window org-agenda)
-;; FIXME:   :ensure t
-    :config
-    (eval-and-compile
-      (defhydra hydra-window ()
-        "window"
-        ("<left>" windmove-left "left")
-        ("<down>" windmove-down "down")
-        ("<up>" windmove-up "up")
-        ("<right>" windmove-right "right")
-        ("a" (lambda ()
-               (interactive)
-               (ace-window 1)
-               (add-hook 'ace-window-end-once-hook
-                         'hydra-window/body))
-         "ace")
-        ("v" (lambda ()
-               (interactive)
-               (split-window-right)
-               (windmove-right))
-         "vert")
-        ("x" (lambda ()
-               (interactive)
-               (split-window-below)
-               (windmove-down))
-         "horz")
-        ("s" (lambda ()
-               (interactive)
-               (ace-window 4)
-               (add-hook 'ace-window-end-once-hook
-                         'hydra-window/body))
-         "swap")
-        ("d" (lambda ()
-               (interactive)
-               (ace-window 16)
-               (add-hook 'ace-window-end-once-hook
-                         'hydra-window/body))
-         "del")
-        ("o" delete-other-windows "1" :color blue)
-        ("i" ace-maximize-window "a1" :color blue)
-        ("q" nil "cancel")))
+  :require (windmove ace-window org-agenda)
+  :config
+  (eval-and-compile
+    (defhydra hydra-window ()
+      "window"
+      ("<left>" windmove-left "left")
+      ("<down>" windmove-down "down")
+      ("<up>" windmove-up "up")
+      ("<right>" windmove-right "right")
+      ("a" (lambda ()
+             (interactive)
+             (ace-window 1)
+             (add-hook 'ace-window-end-once-hook
+                       'hydra-window/body))
+       "ace")
+      ("v" (lambda ()
+             (interactive)
+             (split-window-right)
+             (windmove-right))
+       "vert")
+      ("x" (lambda ()
+             (interactive)
+             (split-window-below)
+             (windmove-down))
+       "horz")
+      ("s" (lambda ()
+             (interactive)
+             (ace-window 4)
+             (add-hook 'ace-window-end-once-hook
+                       'hydra-window/body))
+       "swap")
+      ("d" (lambda ()
+             (interactive)
+             (ace-window 16)
+             (add-hook 'ace-window-end-once-hook
+                       'hydra-window/body))
+       "del")
+      ("o" delete-other-windows "1" :color blue)
+      ("i" ace-maximize-window "a1" :color blue)
+      ("q" nil "cancel")))
 
-    (define-key global-map
-      (kbd "C-M-O") 'hydra-window/body)
+  (define-key global-map
+    (kbd "C-M-O") 'hydra-window/body)
 
+  ;; from http://oremacs.com/2016/04/04/hydra-doc-syntax/
 
-    ;; from http://oremacs.com/2016/04/04/hydra-doc-syntax/
+  (defun org-agenda-cts ()
+    (if (bound-and-true-p org-mode)
+        (let ((args (get-text-property
+                     (min (1- (point-max)) (point))
+                     'org-last-args)))
+          (nth 2 args))
+      nil))
 
-    (defun org-agenda-cts ()
-      (if (bound-and-true-p org-mode)
-          (let ((args (get-text-property
-                       (min (1- (point-max)) (point))
-                       'org-last-args)))
-            (nth 2 args))
-        nil))
+  (eval-and-compile
+    (defhydra hydra-org-agenda-view (:hint nil)
+      "
+  _d_: ?d? day        _g_: time grid=?g? _a_: arch-trees
+  _w_: ?w? week       _[_: inactive      _A_: arch-files
+  _t_: ?t? fortnight  _f_: follow=?f?    _r_: report=?r?
+  _m_: ?m? month      _e_: entry =?e?    _D_: diary=?D?
+  _y_: ?y? year       _q_: quit          _L__l__c_: ?l?"
+      ("SPC" org-agenda-reset-view)
+      ("d" org-agenda-day-view
+       (if (eq 'day (org-agenda-cts))
+           "[x]" "[ ]"))
+      ("w" org-agenda-week-view
+       (if (eq 'week (org-agenda-cts))
+           "[x]" "[ ]"))
+      ("t" org-agenda-fortnight-view
+       (if (eq 'fortnight (org-agenda-cts))
+           "[x]" "[ ]"))
+      ("m" org-agenda-month-view
+       (if (eq 'month (org-agenda-cts)) "[x]" "[ ]"))
+      ("y" org-agenda-year-view
+       (if (eq 'year (org-agenda-cts)) "[x]" "[ ]"))
+      ("l" org-agenda-log-mode
+       (format "% -3S" org-agenda-show-log))
+      ("L" (org-agenda-log-mode '(4)))
+      ("c" (org-agenda-log-mode 'clockcheck))
+      ("f" org-agenda-follow-mode
+       (format "% -3S" org-agenda-follow-mode))
+      ("a" org-agenda-archives-mode)
+      ("A" (org-agenda-archives-mode 'files))
+      ("r" org-agenda-clockreport-mode
+       (format "% -3S" org-agenda-clockreport-mode))
+      ("e" org-agenda-entry-text-mode
+       (format "% -3S" org-agenda-entry-text-mode))
+      ("g" org-agenda-toggle-time-grid
+       (format "% -3S" org-agenda-use-time-grid))
+      ("D" org-agenda-toggle-diary
+       (format "% -3S" org-agenda-include-diary))
+      ("!" org-agenda-toggle-deadlines)
+      ("["
+       (let ((org-agenda-include-inactive-timestamps t))
+         (org-agenda-check-type t 'timeline 'agenda)
+         (org-agenda-redo)))
+      ("q" (message "Abort") :exit t)))
 
-    (eval-and-compile
-      (defhydra hydra-org-agenda-view (:hint nil)
-        "
-    _d_: ?d? day        _g_: time grid=?g? _a_: arch-trees
-    _w_: ?w? week       _[_: inactive      _A_: arch-files
-    _t_: ?t? fortnight  _f_: follow=?f?    _r_: report=?r?
-    _m_: ?m? month      _e_: entry =?e?    _D_: diary=?D?
-    _y_: ?y? year       _q_: quit          _L__l__c_: ?l?"
-        ("SPC" org-agenda-reset-view)
-        ("d" org-agenda-day-view
-         (if (eq 'day (org-agenda-cts))
-             "[x]" "[ ]"))
-        ("w" org-agenda-week-view
-         (if (eq 'week (org-agenda-cts))
-             "[x]" "[ ]"))
-        ("t" org-agenda-fortnight-view
-         (if (eq 'fortnight (org-agenda-cts))
-             "[x]" "[ ]"))
-        ("m" org-agenda-month-view
-         (if (eq 'month (org-agenda-cts)) "[x]" "[ ]"))
-        ("y" org-agenda-year-view
-         (if (eq 'year (org-agenda-cts)) "[x]" "[ ]"))
-        ("l" org-agenda-log-mode
-         (format "% -3S" org-agenda-show-log))
-        ("L" (org-agenda-log-mode '(4)))
-        ("c" (org-agenda-log-mode 'clockcheck))
-        ("f" org-agenda-follow-mode
-         (format "% -3S" org-agenda-follow-mode))
-        ("a" org-agenda-archives-mode)
-        ("A" (org-agenda-archives-mode 'files))
-        ("r" org-agenda-clockreport-mode
-         (format "% -3S" org-agenda-clockreport-mode))
-        ("e" org-agenda-entry-text-mode
-         (format "% -3S" org-agenda-entry-text-mode))
-        ("g" org-agenda-toggle-time-grid
-         (format "% -3S" org-agenda-use-time-grid))
-        ("D" org-agenda-toggle-diary
-         (format "% -3S" org-agenda-include-diary))
-        ("!" org-agenda-toggle-deadlines)
-        ("["
-         (let ((org-agenda-include-inactive-timestamps t))
-           (org-agenda-check-type t 'timeline 'agenda)
-           (org-agenda-redo)))
-        ("q" (message "Abort") :exit t)))
-
-    (define-key org-agenda-mode-map
-      "v" 'hydra-org-agenda-view/body)
-    )
+  (define-key org-agenda-mode-map
+    "v" 'hydra-org-agenda-view/body)
+  )
 
 ;; ----------------------------------------------------------- [ key-chord ]
 
