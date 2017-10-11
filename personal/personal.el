@@ -882,10 +882,10 @@ be global."
   (define-key org-agenda-mode-map (kbd "h") 'jeff/org-agenda-edit-headline)
 
   (customize-set-variable 'org-agenda-timegrid-use-ampm t)
-  ;; FIXME: (customize-set-variable 'org-agenda-time-grid
-  ;;                         '((daily weekly today require-timed remove-match)
-  ;;                           #("----------------" 0 16 (org-heading t))
-  ;;                           (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000)))
+  (customize-set-variable 'org-agenda-time-grid
+                          '((daily weekly today require-timed remove-match)
+                            (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000)
+                            "........" "----------------"))
 
   ;; Remove from agenda time grid lines that are in an appointment The
   ;; agenda shows lines for the time grid. Some people think that these
@@ -894,48 +894,61 @@ be global."
   ;; beginning of an appointment. Michael Ekstrand has written a piece of
   ;; advice that also removes lines that are somewhere inside an
   ;; appointment: see [[http://orgmode.org/worg/org-hacks.html][Org-hacks]]
-  ;; FIXME: See https://emacs.stackexchange.com/questions/35865/org-agenda-remove-time-grid-lines-that-are-in-an-appointment
 
-  ;; (defun org-time-to-minutes (time)
-  ;;   "Convert an HHMM time to minutes"
-  ;;   (+ (* (/ time 100) 60) (% time 100)))
+  (defun org-time-to-minutes (time)
+    "Convert an HHMM time to minutes"
+    (+ (* (/ time 100) 60) (% time 100)))
 
-  ;; (defun org-time-from-minutes (minutes)
-  ;;   "Convert a number of minutes to an HHMM time"
-  ;;   (+ (* (/ minutes 60) 100) (% minutes 60)))
+  (defun org-time-from-minutes (minutes)
+    "Convert a number of minutes to an HHMM time"
+    (+ (* (/ minutes 60) 100) (% minutes 60)))
 
-  ;; (defun org-extract-window (line)
-  ;;   "Extract start and end times from org entries"
-  ;;   (let ((start (get-text-property 1 'time-of-day line))
-  ;;         (dur (get-text-property 1 'duration line)))
-  ;;     (cond
-  ;;      ((and start dur)
-  ;;       (cons start
-  ;;             (org-time-from-minutes
-  ;;              (+ dur (org-time-to-minutes start)))))
-  ;;      (start start)
-  ;;      (t nil))))
+  (defun org-extract-window (line)
+    "Extract start and end times from org entries"
+    (let ((start (get-text-property 1 'time-of-day line))
+          (dur (get-text-property 1 'duration line)))
+      (cond
+       ((and start dur)
+        (cons start
+              (org-time-from-minutes
+               (+ dur (org-time-to-minutes start)))))
+       (start start)
+       (t nil))))
 
-  ;; (defadvice org-agenda-add-time-grid-maybe (around mde-org-agenda-grid-tweakify
-  ;;                                                   (list ndays todayp))
-  ;;   (if (member 'remove-match (car org-agenda-time-grid))
-  ;;       (let* ((windows (delq nil (mapcar 'org-extract-window list)))
-  ;;              (org-agenda-time-grid
-  ;;               (list (car org-agenda-time-grid)
-  ;;                     (cadr org-agenda-time-grid)
-  ;;                     (remove-if
-  ;;                      (lambda (time)
-  ;;                        (find-if (lambda (w)
-  ;;                                   (if (numberp w)
-  ;;                                       (equal w time)
-  ;;                                     (and (>= time (car w))
-  ;;                                          (< time (cdr w)))))
-  ;;                                 windows))
-  ;;                      (caddr org-agenda-time-grid)))))
-  ;;         ad-do-it)
-  ;;     ad-do-it))
-
-  ;; (ad-activate 'org-agenda-add-time-grid-maybe)
+  (defadvice org-agenda-add-time-grid-maybe (around mde-org-agenda-grid-tweakify
+                                                    (list ndays todayp))
+    (if (member 'remove-match (car org-agenda-time-grid))
+        (flet ((extract-window
+                (line)
+                (let ((start (get-text-property 1 'time-of-day line))
+                      (dur (get-text-property 1 'duration line)))
+                  (cond
+                   ((and start dur)
+                    (cons start
+                          (org-time-from-minutes
+                           (truncate
+                            (+ dur (org-time-to-minutes start))))))
+                   (start start)
+                   (t nil)))))
+          (let* ((windows (delq nil (mapcar 'extract-window list)))
+                 (org-agenda-time-grid
+                  (list
+                   (car org-agenda-time-grid)
+                   (remove-if
+                    (lambda (time)
+                      (find-if (lambda (w)
+                                 (if (numberp w)
+                                     (equal w time)
+                                   (and (>= time (car w))
+                                        (< time (cdr w)))))
+                               windows))
+                    (cadr org-agenda-time-grid) )
+                   (caddr org-agenda-time-grid)
+                   (cadddr org-agenda-time-grid)
+                   )))
+            ad-do-it))
+      ad-do-it))
+  (ad-activate 'org-agenda-add-time-grid-maybe)
   )
 
 ;; org clock
