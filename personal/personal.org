@@ -721,7 +721,6 @@ which throws error "progn: Not an in-range integer, float, or cons of integers"
 #+BEGIN_SRC emacs-lisp
   (req-package org
     :diminish "Ο"
-    :pin gnu
     :loader :elpa
     ;; NOTE: org must be manually installed from elpa / gnu since it's
     ;; require'd from init.el in order to tangle personal.org
