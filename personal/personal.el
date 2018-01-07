@@ -723,6 +723,8 @@ be global."
   (customize-set-variable 'org-enforce-todo-dependencies t)
   (customize-set-variable 'org-confirm-elisp-link-function nil)
   (customize-set-variable 'org-src-window-setup 'current-window))
+  (customize-set-variable 'org-priority-faces '((?A . org-warning)))
+
   (org-babel-do-load-languages
    'org-babel-load-languages '((sh . t)
                                (ruby . t)
