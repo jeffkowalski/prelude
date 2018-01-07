@@ -967,52 +967,6 @@ be global."
           (org-set-property "Effort" effort)))))
   (add-hook 'org-clock-in-prepare-hook 'jeff/org-mode-ask-effort))
 
-;; org capture
-
-(req-package org-protocol
-  :require org)
-
-(req-package org-capture
-  :require (org org-protocol s)
-  :bind (("C-M-r" . org-capture)
-         ("C-c r" . org-capture))
-  :config
-  (defun adjust-captured-headline (hl)
-    "Fixup headlines for amazon orders"
-    (downcase (if (string-match "amazon\\.com order of \\(.+?\\)\\(\\.\\.\\.\\)?\\( has shipped!\\)? :" hl)
-                  (let ((item (match-string 1 hl)))
-                    (cond ((string-match ":@quicken:" hl) (concat "order of " item " :amazon_visa:@quicken:"))
-                          ((string-match ":@waiting:" hl) (concat "delivery of " item " :amazon:@waiting:"))
-                          (t hl))
-                    )
-                hl)))
-  (customize-set-variable 'org-capture-templates
-                 (quote (("b" "entry.html" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                          "* TODO %:description\n%:initial\n" :immediate-finish t)
-                         ("h" "habit" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                          "* TODO [#C] %?\nSCHEDULED: %(s-replace \">\" \" .+1d/3d>\" \"%t\")\n:PROPERTIES:\n:STYLE: habit\n:END:\n")
-                         ("t" "todo" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                          "* TODO [#C] %?\n")
-                         ;; capture bookmarklet
-                         ;; javascript:capture('@agendas');function enc(s){return encodeURIComponent(typeof(s)=="string"?s.toLowerCase().replace(/"/g, "'"):s);};function capture(context){var re=new RegExp(/(.*) - \S+@gmail.com/);var m=re.exec(document.title);var t=m?m[1]:document.title;javascript:location.href='org-protocol://capture://w/'+encodeURIComponent(location.href)+'/'+enc(t)+' :'+context+':/'+enc(window.getSelection());}
-                         ("w" "org-protocol" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                          "* TODO [#C] %?%(adjust-captured-headline \"%:description\")\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n"))))
-  (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create)
-  (add-hook 'org-capture-prepare-finalize-hook 'org-expiry-insert-created)
-
-  (defun my/save-all-agenda-buffers ()
-    "Function used to save all agenda buffers that are currently open, based on `org-agenda-files'."
-    (interactive)
-    (save-current-buffer
-      (dolist (buffer (buffer-list t))
-        (set-buffer buffer)
-        (when (member (buffer-file-name)
-                      (mapcar 'expand-file-name (org-agenda-files t)))
-          (save-buffer)))))
-
-  ;; save all the agenda files after each capture
-  (add-hook 'org-capture-after-finalize-hook 'my/save-all-agenda-buffers))
-
 ;; org reveal
 
 (req-package ox-reveal
