@@ -1321,29 +1321,14 @@ GET header should contain a path in form '/todo/ID'."
                                (powerline-render rhs)))))))
   (powerline-jeff-theme))
 
-;; ----------------------------------------------------------- [ edit-server ]
+;; ----------------------------------------------------------- [ atomic-chrome ]
+;; Homepage: https://github.com/alpha22jp/atomic-chrome
+;; Chrome extension: https://chrome.google.com/webstore/detail/atomic-chrome/lhaoghhllmiaaagaffababmkdllgfcmc
 
-(req-package edit-server
-  :require edit-server-htmlize
+(req-package atomic-chrome
   :config
-  (customize-set-variable 'edit-server-new-frame nil)
-  (autoload 'edit-server-maybe-dehtmlize-buffer "edit-server-htmlize" "edit-server-htmlize" t)
-  (autoload 'edit-server-maybe-htmlize-buffer   "edit-server-htmlize" "edit-server-htmlize" t)
-  (add-hook 'edit-server-start-hook 'edit-server-maybe-dehtmlize-buffer)
-  (add-hook 'edit-server-done-hook  'edit-server-maybe-htmlize-buffer)
-  (add-hook 'edit-server-start-hook
-            (lambda ()
-              (when (string-match "github.com" (buffer-name))
-                (markdown-mode))))
-  (defun kill-window-with-current-buffer nil
-    "Delete all windows representing the current buffer."
-    (interactive)
-    (remove-hook 'kill-buffer-hook 'kill-window-with-current-buffer)
-    (delete-window))
-  (add-hook 'edit-server-done-hook
-            (lambda ()
-              (progn (add-hook 'kill-buffer-hook 'kill-window-with-current-buffer))))
-  (edit-server-start))
+  (customize-set-variable 'atomic-chrome-buffer-open-style 'frame)
+  (atomic-chrome-start-server))
 
 ;; ----------------------------------------------------------- [ theme ]
 
