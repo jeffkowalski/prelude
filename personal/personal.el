@@ -920,17 +920,17 @@ be global."
                                                     (list ndays todayp))
     (if (member 'remove-match (car org-agenda-time-grid))
         (flet ((extract-window
-                (line)
-                (let ((start (get-text-property 1 'time-of-day line))
-                      (dur (get-text-property 1 'duration line)))
-                  (cond
-                   ((and start dur)
-                    (cons start
-                          (org-time-from-minutes
-                           (truncate
-                            (+ dur (org-time-to-minutes start))))))
-                   (start start)
-                   (t nil)))))
+                   (line)
+                   (let ((start (get-text-property 1 'time-of-day line))
+                         (dur (get-text-property 1 'duration line)))
+                     (cond
+                      ((and start dur)
+                       (cons start
+                             (org-time-from-minutes
+                              (truncate
+                               (+ dur (org-time-to-minutes start))))))
+                      (start start)
+                      (t nil)))))
           (let* ((windows (delq nil (mapcar 'extract-window list)))
                  (org-agenda-time-grid
                   (list
