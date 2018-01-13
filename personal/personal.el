@@ -32,61 +32,54 @@
 ;; Setup el-get first
 
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+(add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
 
 (when (not (require 'el-get))
   (req-package-force el-get))
 
-(progn
-  (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-  (customize-set-variable 'el-get-sources '(
-                         (:name org-expiry
-                                :description "Expiry mechanism for Org entries"
-                                :type http
-                                :url "http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-expiry.el;hb=HEAD"
-                                :localname "org-expiry.el"
-                                :features org-expiry)
-                         (:name flymake
-                                :description "Continuous syntax checking for Emacs"
-                                :type github
-                                :pkgname "jeffkowalski/emacs-flymake")
-                         (:name evernote-mode
-                                :description "Functions for editing Evernote notes directly from Emacs"
-                                :type github
-                                :pkgname "jeffkowalski/evernote-mode"
-                                :features evernote-mode)
-                         (:name nyan-mode
-                                :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
-                                :type github
-                                :pkgname "jeffkowalski/nyan-mode"
-                                :features nyan-mode)
-                         (:name org-cua-dwim
-                                :description "Org-mode and CUA-mode compatibility layer"
-                                :type github
-                                :pkgname "jeffkowalski/org-cua-dwim"
-                                :features org-cua-dwim)
-                         (:name eshell-git-prompt
-                                :description "Some Eshell prompts for Git users"
-                                :type github
-                                :pkgname "jeffkowalski/eshell-git-prompt"
-                                :features eshell-git-prompt)
-                         (:name org-ehtml
-                                :description "Export Org-mode files as editable web pages"
-                                :type github
-                                :pkgname "jeffkowalski/org-ehtml"
-                                :load-path "src")
-                         (:name org-reveal
-                                :description "Exports Org-mode contents to Reveal.js HTML presentation"
-                                :type github
-                                :pkgname "jeffkowalski/org-reveal"
-                                :features ox-reveal)
-                         ))
-  (defun req-package-providers-present-el-get-local (package)
-    "Return t if PACKAGE is available in el-get-sources."
-    (memq package (mapcar (lambda (x) (plist-get x :name)) el-get-sources)))
-  (puthash :el-get-local '(req-package-providers-install-el-get
-                           req-package-providers-present-el-get-local)
-           req-package-providers-map))
-
+(customize-set-variable 'el-get-sources
+                        '(
+                          (:name org-expiry
+                                 :description "Expiry mechanism for Org entries"
+                                 :type http
+                                 :url "http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-expiry.el;hb=HEAD"
+                                 :localname "org-expiry.el"
+                                 :features org-expiry)
+                          (:name flymake
+                                 :description "Continuous syntax checking for Emacs"
+                                 :type github
+                                 :pkgname "jeffkowalski/emacs-flymake")
+                          (:name evernote-mode
+                                 :description "Functions for editing Evernote notes directly from Emacs"
+                                 :type github
+                                 :pkgname "jeffkowalski/evernote-mode"
+                                 :features evernote-mode)
+                          (:name nyan-mode
+                                 :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
+                                 :type github
+                                 :pkgname "jeffkowalski/nyan-mode"
+                                 :features nyan-mode)
+                          (:name org-cua-dwim
+                                 :description "Org-mode and CUA-mode compatibility layer"
+                                 :type github
+                                 :pkgname "jeffkowalski/org-cua-dwim"
+                                 :features org-cua-dwim)
+                          (:name eshell-git-prompt
+                                 :description "Some Eshell prompts for Git users"
+                                 :type github
+                                 :pkgname "jeffkowalski/eshell-git-prompt"
+                                 :features eshell-git-prompt)
+                          (:name org-ehtml
+                                 :description "Export Org-mode files as editable web pages"
+                                 :type github
+                                 :pkgname "jeffkowalski/org-ehtml"
+                                 :load-path "src")
+                          (:name org-reveal
+                                 :description "Exports Org-mode contents to Reveal.js HTML presentation"
+                                 :type github
+                                 :pkgname "jeffkowalski/org-reveal"
+                                 :features ox-reveal)
+                          ))
 (el-get 'sync (mapcar (lambda (x) (plist-get x :name)) el-get-sources))
 
 ;; Override function defined in use-package, so that packages from el-get are considered as well as those from the package manager.
@@ -1029,20 +1022,19 @@ be global."
 ;; org reveal
 
 (req-package ox-reveal
-  :loader :el-get-local
   :config (customize-set-variable 'org-reveal-root "file:///home/jeff/workspace/reveal.js"))
 
 ;; org cua dwim
 
 (req-package org-cua-dwim
-  :loader :el-get-local
+  :el-get t
   :require (cua-base org)
   :init (org-cua-dwim-activate))
 
 ;; org expiry
 
 (req-package org-expiry
-  :loader :el-get-local
+  :el-get t
   :require org-capture
   :config
   (org-expiry-insinuate)
@@ -1054,7 +1046,7 @@ be global."
 (req-package web-server)
 
 (req-package org-ehtml
-  :loader :el-get-local
+  :el-get t
   :require (org web-server)
   :config
   (validate-setq org-ehtml-allow-agenda t)
@@ -1155,7 +1147,7 @@ GET header should contain a path in form '/todo/ID'."
 ;; ----------------------------------------------------------- [ evernote ]
 
 (req-package evernote-mode
-  :loader :el-get-local
+  :el-get t
   :bind (("C-c E c" . evernote-create-note)
          ("C-c E o" . evernote-open-note)
          ("C-c E s" . evernote-search-notes)
@@ -1238,7 +1230,7 @@ GET header should contain a path in form '/todo/ID'."
 ;; nyan mode
 
 (req-package nyan-mode
-  :loader :el-get-local
+  :el-get t
   :config
   (nyan-mode +1)
   (customize-set-variable 'nyan-wavy-trail t)
