@@ -1346,50 +1346,68 @@ GET header should contain a path in form '/todo/ID'."
 
 ;; ----------------------------------------------------------- [ theme ]
 
-(req-package dimmer
+(req-package auto-dim-other-buffers
   :config
-  (dimmer-mode)
-  (customize-set-variable 'dimmer-fraction 0.50))
+  (auto-dim-other-buffers-mode t)
+  ;; adjust-dim-face added to emacs-starup-hook below
+  (defun adjust-dim-face (&rest r)
+    (set-face-attribute 'auto-dim-other-buffers-face nil
+                        :background (color-darken-name
+                                     (face-attribute 'default :background) 3)))
+  (defun adob--ignore-buffer (buffer)
+    "Return whether to ignore BUFFER and do not affect its state.
+Currently only mini buffer, echo areas, and helm are ignored."
+    (or (null buffer)
+        (minibufferp buffer)
+        (string-match "^ \\*Echo Area" (buffer-name buffer))
+        (string-match "\\*helm" (buffer-name buffer))
+        (string-match "\\*Minibuf" (buffer-name buffer))
+        )))
 
-(req-package custom
-  :config (customize-set-variable 'custom-safe-themes t))
+  (req-package dimmer
+    :config
+    (dimmer-mode)
+    (customize-set-variable 'dimmer-fraction 0.50))
 
-(req-package solarized-theme
-  :require custom
-  :config (defun solarized nil
-            "Enable solarized theme"
-            (interactive)
-            (disable-theme 'zenburn)
-            (customize-set-variable 'solarized-high-contrast-mode-line nil)
-            (customize-set-variable 'solarized-scale-org-headlines t)
-            (load-theme 'solarized-dark t)
-            (sml/apply-theme 'respectful)
-            (customize-set-variable 'x-underline-at-descent-line t)))
+  (req-package custom
+    :config (customize-set-variable 'custom-safe-themes t))
 
-(req-package zenburn-theme
-  :require custom
-  :config (defun zenburn nil
-            "Enable zenburn theme"
-            (interactive)
-            (disable-theme 'solarized-dark)
-            (load-theme 'zenburn t)
-            (sml/apply-theme 'respectful)))
+  (req-package solarized-theme
+    :require custom
+    :config (defun solarized nil
+              "Enable solarized theme"
+              (interactive)
+              (disable-theme 'zenburn)
+              (customize-set-variable 'solarized-high-contrast-mode-line nil)
+              (customize-set-variable 'solarized-scale-org-headlines t)
+              (load-theme 'solarized-dark t)
+              (sml/apply-theme 'respectful)
+              (customize-set-variable 'x-underline-at-descent-line t)))
 
-(deftheme jeff-theme "Jeff's theme.")
-(custom-theme-set-faces
- 'jeff-theme
- ;; '(helm-ff-directory ((t (:foreground "deep sky blue"))))
- ;; '(helm-ff-file ((t (:foreground "gainsboro"))))
- ;; '(helm-ff-symlink ((t (:foreground "cyan"))))
- ;; '(highlight ((t (:background "black"))))
- ;; '(org-agenda-current-time ((t (:inherit org-time-grid :background "dim gray"))) t)
- ;; '(org-agenda-done ((t (:foreground "dim gray"))))
- ;; '(org-scheduled-previously ((t (:foreground "#bc8383"))))
- ;; '(org-warning ((t (:foreground "#cc9393" :weight bold))))
- ;; '(region ((t (:background "dim gray"))))
- ;; '(mode-line ((t :overline ,unspecified :underline nil :box '(:line-width 1 :color "#969896"))))
- )
-(enable-theme 'jeff-theme)
+  (req-package zenburn-theme
+    :require custom
+    :config (defun zenburn nil
+              "Enable zenburn theme"
+              (interactive)
+              (disable-theme 'solarized-dark)
+              (load-theme 'zenburn t)
+              (sml/apply-theme 'respectful)))
+
+  (deftheme jeff-theme "Jeff's theme.")
+  (custom-theme-set-faces
+   'jeff-theme
+   ;; '(helm-ff-directory ((t (:foreground "deep sky blue"))))
+   ;; '(helm-ff-file ((t (:foreground "gainsboro"))))
+   ;; '(helm-ff-symlink ((t (:foreground "cyan"))))
+   ;; '(highlight ((t (:background "black"))))
+   ;; '(org-agenda-current-time ((t (:inherit org-time-grid :background "dim gray"))) t)
+   ;; '(org-agenda-done ((t (:foreground "dim gray"))))
+   ;; '(org-scheduled-previously ((t (:foreground "#bc8383"))))
+   ;; '(org-warning ((t (:foreground "#cc9393" :weight bold))))
+   ;; '(region ((t (:background "dim gray"))))
+   ;; '(mode-line ((t :overline ,unspecified :underline nil :box '(:line-width 1 :color "#969896"))))
+   )
+  (enable-theme 'jeff-theme)
 
 ;; ----------------------------------------------------------- [ key bindings ]
 
