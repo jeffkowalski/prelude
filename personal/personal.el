@@ -85,34 +85,34 @@
 ;; Override function defined in use-package, so that packages from el-get are considered as well as those from the package manager.
 
 (defun use-package-ensure-elpa (package &optional no-refresh)
-    (if (or (package-installed-p package) (el-get-package-exists-p package))
-        t
-      (if (or (assoc package package-archive-contents) no-refresh)
-          (package-install package)
-        (progn
-          (package-refresh-contents)
-          (use-package-ensure-elpa package t)))))
+  (if (or (package-installed-p package) (el-get-package-exists-p package))
+      t
+    (if (or (assoc package package-archive-contents) no-refresh)
+        (package-install package)
+      (progn
+        (package-refresh-contents)
+        (use-package-ensure-elpa package t)))))
 
-  (add-to-list 'use-package-keywords :el-get)
+(add-to-list 'use-package-keywords :el-get)
 
-  (defun use-package-normalize/:el-get (name-symbol keyword args)
-    (use-package-only-one (symbol-name keyword) args
-      (lambda (label arg)
-        (cond
-         ((booleanp arg) name-symbol)
-         ((symbolp arg) arg)
-         (t
-          (use-package-error
-           ":el-get wants an package name or boolean value"))))))
+(defun use-package-normalize/:el-get (name-symbol keyword args)
+  (use-package-only-one (symbol-name keyword) args
+    (lambda (label arg)
+      (cond
+       ((booleanp arg) name-symbol)
+       ((symbolp arg) arg)
+       (t
+        (use-package-error
+         ":el-get wants an package name or boolean value"))))))
 
-  (defun use-package-handler/:el-get (name-symbol keyword archive-name rest state)
-    (let ((body (use-package-process-keywords name-symbol rest state)))
-      ;; This happens at macro expansion time, not when the expanded code is
-      ;; compiled or evaluated.
-      (if (null archive-name)
-          body
-        (el-get-install archive-name)
-        body)))
+(defun use-package-handler/:el-get (name-symbol keyword archive-name rest state)
+  (let ((body (use-package-process-keywords name-symbol rest state)))
+    ;; This happens at macro expansion time, not when the expanded code is
+    ;; compiled or evaluated.
+    (if (null archive-name)
+        body
+      (el-get-install archive-name)
+      body)))
 
 ;; Enable sorting on all columns in package menu's tabular list.
 ;; Note my naive mapping removes the final properties (like :right-align) if present.
@@ -1346,22 +1346,10 @@ GET header should contain a path in form '/todo/ID'."
 
 ;; ----------------------------------------------------------- [ theme ]
 
-(req-package auto-dim-other-buffers
+(req-package dimmer
   :config
-  (auto-dim-other-buffers-mode t)
-  (defun adjust-dim-face (&rest r)
-    (set-face-attribute 'auto-dim-other-buffers-face nil
-                        :background (color-darken-name
-                                     (face-attribute 'default :background) 3)))
-  (defun adob--ignore-buffer (buffer)
-    "Return whether to ignore BUFFER and do not affect its state.
-Currently only mini buffer, echo areas, and helm are ignored."
-    (or (null buffer)
-        (minibufferp buffer)
-        (string-match "^ \\*Echo Area" (buffer-name buffer))
-        (string-match "\\*helm" (buffer-name buffer))
-        (string-match "\\*Minibuf" (buffer-name buffer))
-        )))
+  (dimmer-mode)
+  (customize-set-variable 'dimmer-fraction 0.50))
 
 (req-package custom
   :config (customize-set-variable 'custom-safe-themes t))

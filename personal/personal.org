@@ -1370,22 +1370,10 @@ Chrome extension: https://chrome.google.com/webstore/detail/atomic-chrome/lhaogh
 #+END_SRC
 ** ----------------------------------------------------------- [ theme ]
 #+BEGIN_SRC emacs-lisp
-  (req-package auto-dim-other-buffers
+  (req-package dimmer
     :config
-    (auto-dim-other-buffers-mode t)
-    (defun adjust-dim-face (&rest r)
-      (set-face-attribute 'auto-dim-other-buffers-face nil
-                          :background (color-darken-name
-                                       (face-attribute 'default :background) 3)))
-    (defun adob--ignore-buffer (buffer)
-      "Return whether to ignore BUFFER and do not affect its state.
-  Currently only mini buffer, echo areas, and helm are ignored."
-      (or (null buffer)
-          (minibufferp buffer)
-          (string-match "^ \\*Echo Area" (buffer-name buffer))
-          (string-match "\\*helm" (buffer-name buffer))
-          (string-match "\\*Minibuf" (buffer-name buffer))
-          )))
+    (dimmer-mode)
+    (customize-set-variable 'dimmer-fraction 0.50))
 
   (req-package custom
     :config (customize-set-variable 'custom-safe-themes t))
