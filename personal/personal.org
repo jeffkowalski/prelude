@@ -440,6 +440,12 @@ To jump to a register, use C-x r j followed by the letter of the register.
       (lambda ()
         (dired-single-buffer ".."))))
 #+END_SRC
+** ----------------------------------------------------------- [ smex ]
+#+BEGIN_SRC emacs-lisp
+  (req-package smex ; remember recently and most frequently used commands
+    :config
+    (setq smex-save-file (expand-file-name ".smex-items" prelude-savefile-dir)))
+#+END_SRC
 ** ----------------------------------------------------------- [ helm ]
 #+BEGIN_SRC emacs-lisp
   (req-package helm

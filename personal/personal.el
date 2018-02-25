@@ -423,6 +423,12 @@ abc |ghi        <-- point still after white space after calling this function."
     (lambda ()
       (dired-single-buffer ".."))))
 
+;; ----------------------------------------------------------- [ smex ]
+
+(req-package smex ; remember recently and most frequently used commands
+  :config
+  (setq smex-save-file (expand-file-name ".smex-items" prelude-savefile-dir)))
+
 ;; ----------------------------------------------------------- [ helm ]
 
 (req-package helm
