@@ -137,6 +137,12 @@
     (message "upgrade complete"))
 )
 
+;; chords
+
+(req-package use-package-chords
+   :force t ;; load package immediately, no dependency resolution
+   :config (key-chord-mode 1))
+
 ;; ----------------------------------------------------------- [ cua ]
 
 (req-package cua-base
@@ -356,17 +362,6 @@ abc |ghi        <-- point still after white space after calling this function."
   :config
   (set-fontset-font t 'unicode "PowerlineSymbols" nil 'prepend))
 
-;; (add-hook 'eshell-mode-hook
-;;           (lambda ()
-;;               (define-key eshell-mode-map
-;;                 [remap pcomplete]
-;;                 'helm-esh-pcomplete)))
-;; (add-hook 'eshell-mode-hook
-;;           (lambda ()
-;;               (define-key eshell-mode-map
-;;                 (kbd "M-p")
-;;                 'helm-eshell-history)))
-
 ;; ----------------------------------------------------------- [ multi-term ]
 
 (req-package multi-term
@@ -429,15 +424,27 @@ abc |ghi        <-- point still after white space after calling this function."
   :config
   (setq smex-save-file (expand-file-name ".smex-items" prelude-savefile-dir)))
 
+;; ----------------------------------------------------------- [ ivy/counsel/swiper ]
+
+(req-package ivy
+  :diminish ((counsel-mode . "")
+             (ivy-mode . ""))
+  :init (counsel-mode 1)
+  ;; Use Enter on a directory to navigate into the directory, not open it with dired
+  :bind (:map ivy-minibuffer-map ("RET" . ivy-alt-done)))
+
 ;; ----------------------------------------------------------- [ helm ]
 
 (req-package helm
+  :disabled t
   :diminish " H"
   :init (helm-mode 1)
   :bind (("C-x C-f" . helm-find-files)
          ("M-x"     . helm-M-x)
          ("C-x b"   . helm-buffers-list)
          ("C-M-g"   . helm-do-grep))
+  :chords (("xx" . helm-M-x))
+
   :config
   (helm-adaptive-mode t)
   (defun jeff/find-file-as-root ()
@@ -447,47 +454,47 @@ abc |ghi        <-- point still after white space after calling this function."
       (unless (file-writable-p file)
         (setq file (concat "/sudo:root@localhost:" file)))
       (find-file file)))
-  (global-set-key (kbd "C-x F") 'jeff/find-file-as-root))
+  (global-set-key (kbd "C-x F") 'jeff/find-file-as-root)
 
-;; FIXME workaround problem in select-frame-set-input-focus
-;;   select-frame-set-input-focus(#<frame *Minibuf-1* * 0x6a44268>)
-;;   helm-frame-or-window-configuration(restore)
-;;   helm-cleanup()
-;;   ...
-;;   helm-internal(...)
-;;   ...
-;; which throws error "progn: Not an in-range integer, float, or cons of integers"
+  ;; FIXME workaround problem in select-frame-set-input-focus
+  ;;  select-frame-set-input-focus(#<frame *Minibuf-1* * 0x6a44268>)
+  ;;  helm-frame-or-window-configuration(restore)
+  ;;  helm-cleanup()
+  ;;  ...
+  ;;  helm-internal(...)
+  ;;  ...
+  ;; which throws error "progn: Not an in-range integer, float, or cons of integers"
+  (defun select-frame-set-input-focus (frame &optional norecord)
+    "Select FRAME, raise it, and set input focus, if possible.
+  If `mouse-autoselect-window' is non-nil, also move mouse pointer
+  to FRAME's selected window.  Otherwise, if `focus-follows-mouse'
+  is non-nil, move mouse cursor to FRAME.
 
-(defun select-frame-set-input-focus (frame &optional norecord)
-  "Select FRAME, raise it, and set input focus, if possible.
-If `mouse-autoselect-window' is non-nil, also move mouse pointer
-to FRAME's selected window.  Otherwise, if `focus-follows-mouse'
-is non-nil, move mouse cursor to FRAME.
+  Optional argument NORECORD means to neither change the order of
+  recently selected windows nor the buffer list."
+    (select-frame frame norecord)
+    (raise-frame frame)
 
-Optional argument NORECORD means to neither change the order of
-recently selected windows nor the buffer list."
-  (select-frame frame norecord)
-  (raise-frame frame)
+    ;; Ensure, if possible, that FRAME gets input focus.
+    ;; (when (memq (window-system frame) '(x w32 ns))
+    ;;    (x-focus-frame frame))
 
-  ;; Ensure, if possible, that FRAME gets input focus.
-  ;; (when (memq (window-system frame) '(x w32 ns))
-  ;;    (x-focus-frame frame))
-
-  ;; Move mouse cursor if necessary.
-  (cond
-   (mouse-autoselect-window
-    (let ((edges (window-inside-edges (frame-selected-window frame))))
-      ;; Move mouse cursor into FRAME's selected window to avoid that
-      ;; Emacs mouse-autoselects another window.
-      (set-mouse-position frame (nth 2 edges) (nth 1 edges))))
-   (focus-follows-mouse
-    ;; Move mouse cursor into FRAME to avoid that another frame gets
-    ;; selected by the window manager.
-    (set-mouse-position frame (1- (frame-width frame)) 0))))
+    ;; Move mouse cursor if necessary.
+    (cond
+     (mouse-autoselect-window
+      (let ((edges (window-inside-edges (frame-selected-window frame))))
+        ;; Move mouse cursor into FRAME's selected window to avoid that
+        ;; Emacs mouse-autoselects another window.
+        (set-mouse-position frame (nth 2 edges) (nth 1 edges))))
+     (focus-follows-mouse
+      ;; Move mouse cursor into FRAME to avoid that another frame gets
+      ;; selected by the window manager.
+      (set-mouse-position frame (1- (frame-width frame)) 0)))))
 
 ;; helm-swoop
 
 (req-package helm-swoop
+  :disabled t
   :require helm
   :defines (helm-swoop-last-prefix-number)
   :bind (("M-i" . helm-swoop)))
@@ -514,7 +521,7 @@ recently selected windows nor the buffer list."
 ;; robe
 
 (req-package robe
-  :require (helm-robe company inf-ruby)
+  :require (company inf-ruby)
   :config
   (add-hook 'ruby-mode-hook 'robe-mode)
   (eval-after-load 'company '(push 'company-robe company-backends))
@@ -525,6 +532,7 @@ recently selected windows nor the buffer list."
 ;; ----------------------------------------------------------- [ time ]
 
 (req-package time
+  :disabled t
   :config
   (customize-set-variable 'display-time-world-list '(("America/Los_Angeles" "Berkeley")
                                                      ("America/New_York" "New York")
@@ -597,7 +605,6 @@ recently selected windows nor the buffer list."
               (define-key ido-completion-map (kbd "<down>") 'ido-next-match))))
 
 ;; ----------------------------------------------------------- [ magit ]
-
 
 (req-package magit
   :diminish "ma"
@@ -1381,6 +1388,8 @@ Currently only mini buffer, echo areas, and helm are ignored."
 
 (req-package solarized-theme
   :require custom
+  :chords (("xd" . (lambda () (interactive) (load-theme 'solarized-dark)))
+           ("xl" . (lambda () (interactive) (load-theme 'solarized-light))))
   :config (defun solarized nil
             "Enable solarized theme"
             (interactive)
@@ -1414,6 +1423,8 @@ Currently only mini buffer, echo areas, and helm are ignored."
 (global-set-key (kbd "<C-prior>")       'scroll-other-window-down)
 (global-set-key (kbd "<C-tab>")         'next-buffer)
 (global-set-key (kbd "<C-S-iso-lefttab>") 'previous-buffer)
+
+(key-chord-define-global "xf" 'prelude-fullscreen)
 
 (define-key isearch-mode-map (kbd "<f3>") 'isearch-repeat-forward)
 (define-key isearch-mode-map (kbd "C-f")  'isearch-repeat-forward)
@@ -1526,16 +1537,6 @@ Currently only mini buffer, echo areas, and helm are ignored."
   (define-key org-agenda-mode-map
     "v" 'hydra-org-agenda-view/body)
   )
-
-;; ----------------------------------------------------------- [ key-chord ]
-
-(req-package key-chord
-  :config
-  (key-chord-define-global "xf" 'prelude-fullscreen)
-  (key-chord-define-global "xd" '(lambda () (interactive) (load-theme 'solarized-dark)))
-  (key-chord-define-global "xl" '(lambda () (interactive) (load-theme 'solarized-light)))
-  (key-chord-define-global "xx" 'helm-M-x)
-  (key-chord-mode +1))
 
 ;; ----------------------------------------------------------- [ quicken ]
 
