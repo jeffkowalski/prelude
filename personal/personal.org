@@ -32,6 +32,7 @@ Use "C-c C-v t" to tangle
   (require 'req-package)
   (customize-set-variable 'use-package-verbose t)
   (customize-set-variable 'use-package-minimum-reported-time 0)
+;;  (customize-set-variable 'use-package-always-ensure t)
   (customize-set-variable 'req-package-log-level 'trace)
   (req-package--log-set-level req-package-log-level)
 #+END_SRC
@@ -97,14 +98,35 @@ Use "C-c C-v t" to tangle
 
 *** Override function defined in use-package, so that packages from el-get are considered as well as those from the package manager.
 #+BEGIN_SRC emacs-lisp
-  (defun use-package-ensure-elpa (package &optional no-refresh)
-    (if (or (package-installed-p package) (el-get-package-exists-p package))
-        t
-      (if (or (assoc package package-archive-contents) no-refresh)
-          (package-install package)
-        (progn
-          (package-refresh-contents)
-          (use-package-ensure-elpa package t)))))
+  (defun use-package-ensure-elpa (name args state &optional no-refresh)
+    (dolist (ensure args)
+      (let ((package
+             (or (and (eq ensure t) (use-package-as-symbol name))
+                 ensure)))
+        (when package
+          (require 'package)
+          (when (consp package)
+            (use-package-pin-package (car package) (cdr package))
+            (setq package (car package)))
+          (unless (or (package-installed-p package) (el-get-package-exists-p package))
+            (condition-case-unless-debug err
+                (progn
+                  (when (assoc package (bound-and-true-p
+                                        package-pinned-packages))
+                    (package-read-all-archive-contents))
+                  (if (assoc package package-archive-contents)
+                      (package-install package)
+                    (package-refresh-contents)
+                    (when (assoc package (bound-and-true-p
+                                          package-pinned-packages))
+                      (package-read-all-archive-contents))
+                    (package-install package))
+                  t)
+              (error
+               (display-warning 'use-package
+                                (format "Failed to install %s: %s"
+                                        name (error-message-string err))
+                                :error))))))))
 
   (add-to-list 'use-package-keywords :el-get)
 
@@ -1459,44 +1481,43 @@ Chrome extension: https://chrome.google.com/webstore/detail/atomic-chrome/lhaogh
   (req-package hydra
     :require (windmove ace-window org-agenda)
     :config
-    (eval-and-compile
-      (defhydra hydra-window ()
-        "window"
-        ("<left>" windmove-left "left")
-        ("<down>" windmove-down "down")
-        ("<up>" windmove-up "up")
-        ("<right>" windmove-right "right")
-        ("a" (lambda ()
-               (interactive)
-               (ace-window 1)
-               (add-hook 'ace-window-end-once-hook
-                         'hydra-window/body))
-         "ace")
-        ("v" (lambda ()
-               (interactive)
-               (split-window-right)
-               (windmove-right))
-         "vert")
-        ("x" (lambda ()
-               (interactive)
-               (split-window-below)
-               (windmove-down))
-         "horz")
-        ("s" (lambda ()
-               (interactive)
-               (ace-window 4)
-               (add-hook 'ace-window-end-once-hook
-                         'hydra-window/body))
-         "swap")
-        ("d" (lambda ()
-               (interactive)
-               (ace-window 16)
-               (add-hook 'ace-window-end-once-hook
-                         'hydra-window/body))
-         "del")
-        ("o" delete-other-windows "1" :color blue)
-        ("i" ace-maximize-window "a1" :color blue)
-        ("q" nil "cancel")))
+    (defhydra hydra-window ()
+      "window"
+      ("<left>" windmove-left "left")
+      ("<down>" windmove-down "down")
+      ("<up>" windmove-up "up")
+      ("<right>" windmove-right "right")
+      ("a" (lambda ()
+             (interactive)
+             (ace-window 1)
+             (add-hook 'ace-window-end-once-hook
+                       'hydra-window/body))
+       "ace")
+      ("v" (lambda ()
+             (interactive)
+             (split-window-right)
+             (windmove-right))
+       "vert")
+      ("x" (lambda ()
+             (interactive)
+             (split-window-below)
+             (windmove-down))
+       "horz")
+      ("s" (lambda ()
+             (interactive)
+             (ace-window 4)
+             (add-hook 'ace-window-end-once-hook
+                       'hydra-window/body))
+       "swap")
+      ("d" (lambda ()
+             (interactive)
+             (ace-window 16)
+             (add-hook 'ace-window-end-once-hook
+                       'hydra-window/body))
+       "del")
+      ("o" delete-other-windows "1" :color blue)
+      ("i" ace-maximize-window "a1" :color blue)
+      ("q" nil "cancel"))
 
     (define-key global-map
       (kbd "C-M-O") 'hydra-window/body)
@@ -1511,50 +1532,49 @@ Chrome extension: https://chrome.google.com/webstore/detail/atomic-chrome/lhaogh
             (nth 2 args))
         nil))
 
-    (eval-and-compile
-      (defhydra hydra-org-agenda-view (:hint nil)
-        "
+    (defhydra hydra-org-agenda-view (:hint nil)
+      "
     _d_: ?d? day        _g_: time grid=?g? _a_: arch-trees
     _w_: ?w? week       _[_: inactive      _A_: arch-files
     _t_: ?t? fortnight  _f_: follow=?f?    _r_: report=?r?
     _m_: ?m? month      _e_: entry =?e?    _D_: diary=?D?
     _y_: ?y? year       _q_: quit          _L__l__c_: ?l?"
-        ("SPC" org-agenda-reset-view)
-        ("d" org-agenda-day-view
-         (if (eq 'day (org-agenda-cts))
-             "[x]" "[ ]"))
-        ("w" org-agenda-week-view
-         (if (eq 'week (org-agenda-cts))
-             "[x]" "[ ]"))
-        ("t" org-agenda-fortnight-view
-         (if (eq 'fortnight (org-agenda-cts))
-             "[x]" "[ ]"))
-        ("m" org-agenda-month-view
-         (if (eq 'month (org-agenda-cts)) "[x]" "[ ]"))
-        ("y" org-agenda-year-view
-         (if (eq 'year (org-agenda-cts)) "[x]" "[ ]"))
-        ("l" org-agenda-log-mode
-         (format "% -3S" org-agenda-show-log))
-        ("L" (org-agenda-log-mode '(4)))
-        ("c" (org-agenda-log-mode 'clockcheck))
-        ("f" org-agenda-follow-mode
-         (format "% -3S" org-agenda-follow-mode))
-        ("a" org-agenda-archives-mode)
-        ("A" (org-agenda-archives-mode 'files))
-        ("r" org-agenda-clockreport-mode
-         (format "% -3S" org-agenda-clockreport-mode))
-        ("e" org-agenda-entry-text-mode
-         (format "% -3S" org-agenda-entry-text-mode))
-        ("g" org-agenda-toggle-time-grid
-         (format "% -3S" org-agenda-use-time-grid))
-        ("D" org-agenda-toggle-diary
-         (format "% -3S" org-agenda-include-diary))
-        ("!" org-agenda-toggle-deadlines)
-        ("["
-         (let ((org-agenda-include-inactive-timestamps t))
-           (org-agenda-check-type t 'timeline 'agenda)
-           (org-agenda-redo)))
-        ("q" (message "Abort") :exit t)))
+      ("SPC" org-agenda-reset-view)
+      ("d" org-agenda-day-view
+       (if (eq 'day (org-agenda-cts))
+           "[x]" "[ ]"))
+      ("w" org-agenda-week-view
+       (if (eq 'week (org-agenda-cts))
+           "[x]" "[ ]"))
+      ("t" org-agenda-fortnight-view
+       (if (eq 'fortnight (org-agenda-cts))
+           "[x]" "[ ]"))
+      ("m" org-agenda-month-view
+       (if (eq 'month (org-agenda-cts)) "[x]" "[ ]"))
+      ("y" org-agenda-year-view
+       (if (eq 'year (org-agenda-cts)) "[x]" "[ ]"))
+      ("l" org-agenda-log-mode
+       (format "% -3S" org-agenda-show-log))
+      ("L" (org-agenda-log-mode '(4)))
+      ("c" (org-agenda-log-mode 'clockcheck))
+      ("f" org-agenda-follow-mode
+       (format "% -3S" org-agenda-follow-mode))
+      ("a" org-agenda-archives-mode)
+      ("A" (org-agenda-archives-mode 'files))
+      ("r" org-agenda-clockreport-mode
+       (format "% -3S" org-agenda-clockreport-mode))
+      ("e" org-agenda-entry-text-mode
+       (format "% -3S" org-agenda-entry-text-mode))
+      ("g" org-agenda-toggle-time-grid
+       (format "% -3S" org-agenda-use-time-grid))
+      ("D" org-agenda-toggle-diary
+       (format "% -3S" org-agenda-include-diary))
+      ("!" org-agenda-toggle-deadlines)
+      ("["
+       (let ((org-agenda-include-inactive-timestamps t))
+         (org-agenda-check-type t 'timeline 'agenda)
+         (org-agenda-redo)))
+      ("q" (message "Abort") :exit t))
 
     (define-key org-agenda-mode-map
       "v" 'hydra-org-agenda-view/body)
