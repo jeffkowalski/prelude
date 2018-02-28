@@ -956,48 +956,36 @@ be global."
 
   (defun org-extract-window (line)
     "Extract start and end times from org entries"
-    (let ((start (get-text-property 1 'time-of-day line))
-          (dur (get-text-property 1 'duration line)))
-      (cond
-       ((and start dur)
-        (cons start
-              (org-time-from-minutes
-               (+ dur (org-time-to-minutes start)))))
-       (start start)
-       (t nil))))
+     (let ((start (get-text-property 1 'time-of-day line))
+           (dur (get-text-property 1 'duration line)))
+       (cond
+        ((and start dur)
+         (cons start
+               (org-time-from-minutes
+                (truncate
+                 (+ dur (org-time-to-minutes start))))))
+        (start start)
+        (t nil))))
 
   (defadvice org-agenda-add-time-grid-maybe (around mde-org-agenda-grid-tweakify
                                                     (list ndays todayp))
     (if (member 'remove-match (car org-agenda-time-grid))
-        (flet ((extract-window
-                   (line)
-                   (let ((start (get-text-property 1 'time-of-day line))
-                         (dur (get-text-property 1 'duration line)))
-                     (cond
-                      ((and start dur)
-                       (cons start
-                             (org-time-from-minutes
-                              (truncate
-                               (+ dur (org-time-to-minutes start))))))
-                      (start start)
-                      (t nil)))))
-          (let* ((windows (delq nil (mapcar 'extract-window list)))
-                 (org-agenda-time-grid
-                  (list
-                   (car org-agenda-time-grid)
-                   (remove-if
-                    (lambda (time)
-                      (find-if (lambda (w)
-                                 (if (numberp w)
-                                     (equal w time)
-                                   (and (>= time (car w))
-                                        (< time (cdr w)))))
-                               windows))
-                    (cadr org-agenda-time-grid) )
-                   (caddr org-agenda-time-grid)
-                   (cadddr org-agenda-time-grid)
-                   )))
-            ad-do-it))
+        (let* ((windows (delq nil (mapcar 'org-extract-window list)))
+               (org-agenda-time-grid
+                (list
+                 (car org-agenda-time-grid)
+                 (remove-if (lambda (time)
+                              (find-if (lambda (w)
+                                         (if (numberp w)
+                                             (equal w time)
+                                           (and (>= time (car w))
+                                                (< time (cdr w)))))
+                                       windows))
+                            (cadr org-agenda-time-grid))
+                 (caddr org-agenda-time-grid)
+                 (cadddr org-agenda-time-grid)
+                 )))
+          ad-do-it)
       ad-do-it))
   (ad-activate 'org-agenda-add-time-grid-maybe)
   )
