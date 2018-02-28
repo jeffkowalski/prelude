@@ -429,7 +429,7 @@ abc |ghi        <-- point still after white space after calling this function."
 ;; ----------------------------------------------------------- [ dired ]
 
 (req-package dired-single
-  :require (autorevert dired dired+)
+  :require (autorevert dired)
   :config
   (customize-set-variable 'font-lock-maximum-decoration (quote ((dired-mode) (t . t))))
   (customize-set-variable 'dired-omit-files (concat dired-omit-files "\\."))
