@@ -236,6 +236,11 @@
   (customize-set-variable 'auto-revert-use-notify nil)
   (customize-set-variable 'auto-revert-interval 1))
 
+;; editorconfig
+
+(req-package editorconfig
+  :diminish "")
+
 ;; clang-format
 
 (req-package clang-format
@@ -1370,6 +1375,7 @@ GET header should contain a path in form '/todo/ID'."
 ;; ----------------------------------------------------------- [ theme ]
 
 (req-package auto-dim-other-buffers
+  :diminish ""
   :config
   (auto-dim-other-buffers-mode t)
   ;; adjust-dim-face added to emacs-starup-hook below

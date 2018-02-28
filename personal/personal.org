@@ -251,6 +251,11 @@ Note my naive mapping removes the final properties (like :right-align) if presen
     (customize-set-variable 'auto-revert-use-notify nil)
     (customize-set-variable 'auto-revert-interval 1))
 #+END_SRC
+*** editorconfig
+#+BEGIN_SRC emacs-lisp
+  (req-package editorconfig
+    :diminish "")
+#+END_SRC
 *** clang-format
 #+BEGIN_SRC emacs-lisp
   (req-package clang-format
@@ -1392,6 +1397,7 @@ Chrome extension: https://chrome.google.com/webstore/detail/atomic-chrome/lhaogh
 ** ----------------------------------------------------------- [ theme ]
 #+BEGIN_SRC emacs-lisp
   (req-package auto-dim-other-buffers
+    :diminish ""
     :config
     (auto-dim-other-buffers-mode t)
     ;; adjust-dim-face added to emacs-starup-hook below
