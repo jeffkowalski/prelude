@@ -780,7 +780,7 @@ be global."
     (customize-set-variable 'org-src-window-setup 'current-window)
 
     (org-babel-do-load-languages
-     'org-babel-load-languages '((sh . t)
+     'org-babel-load-languages '((shell . t)
                                  (ruby . t)
                                  (dot . t)
                                  (latex . t)
