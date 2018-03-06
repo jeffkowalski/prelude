@@ -151,7 +151,7 @@
 
 (req-package package-utils
   :init
-  (defun U nil
+  (defun upgrade-emacs-packages nil
     (interactive)
     "Upgrade all packages"
     (package-utils-upgrade-all)
