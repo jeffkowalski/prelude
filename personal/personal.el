@@ -75,6 +75,11 @@
                                  :type github
                                  :pkgname "jeffkowalski/org-ehtml"
                                  :load-path "src")
+                          (:name emacs-web-server
+                                 :description "Web server running Emacs Lisp handlers"
+                                 :type github
+                                 :pkgname "jeffkowalski/emacs-web-server"
+                                 :features web-server)
                           (:name org-reveal
                                  :description "Exports Org-mode contents to Reveal.js HTML presentation"
                                  :type github
