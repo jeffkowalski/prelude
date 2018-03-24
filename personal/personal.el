@@ -1200,7 +1200,7 @@ GET header should contain a path in form '/todo/ID'."
                     ((:GET  . "/todo")    . jeff/todo-handler)
                     ((:GET  . ".*")       . org-ehtml-file-handler)
                     ((:POST . ".*")       . org-ehtml-edit-handler))
-                  3333)
+                  3333 nil :host (format-network-address (car (network-interface-info "zt0")) t))
       (error (message "Failed to create web server"))))
   )
 
