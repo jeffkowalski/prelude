@@ -483,7 +483,7 @@ If you're an `evil-mode` user you'll probably do well to disable `key-chord-mode
 
 #### vim emulation
 
-If you want to use vim inside of emacs enable the `prelude-evil` module which provides
+If you want to use vim keybindings inside of Emacs enable the `prelude-evil` module which provides
 support for `evil-mode`.
 
 ### Cheatsheet
@@ -494,11 +494,20 @@ Use `C-h k <key>` (`<key>` are the ones listed on the left) or `C-h f <function>
 
 #### PDF generation
 
-Install [latex](https://www.latex-project.org/get/)
+Install [LaTeX](https://www.latex-project.org/get/)
 
 ``` bash
 cd modules/doc
 pdflatex prelude-cheatsheet.tex
+```
+
+#### PNG generation
+
+Install [Poppler](https://poppler.freedesktop.org/)
+
+``` bash
+cd modules/doc
+pdftocairo -png -singlefile prelude-cheatsheet.pdf cheatsheet
 ```
 
 ## Automatic package installation
@@ -727,7 +736,7 @@ Support is available via several channels:
 * Prelude's Google Group <emacs-prelude@googlegroups.com>
 * Prelude's Freenode channel (`#prelude-emacs`)
 * [Gitter](https://gitter.im/bbatsov/prelude)
-.
+
 ## Contributors
 
 Here's a [list](https://github.com/bbatsov/prelude/contributors) of all the people who have contributed to the
