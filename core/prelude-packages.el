@@ -1,6 +1,6 @@
 ;;; prelude-packages.el --- Emacs Prelude: default package selection.
 ;;
-;; Copyright © 2011-2017 Bozhidar Batsov
+;; Copyright © 2011-2018 Bozhidar Batsov
 ;;
 ;; Author: Bozhidar Batsov <bozhidar@batsov.com>
 ;; URL: https://github.com/bbatsov/prelude
@@ -59,7 +59,6 @@
     beacon
     browse-kill-ring
     crux
-    dash
     discover-my-major
     diff-hl
     diminish
@@ -75,8 +74,8 @@
     god-mode
     grizzl
     guru-mode
+    hl-todo
     imenu-anywhere
-    ov
     projectile
     magit
     move-text
