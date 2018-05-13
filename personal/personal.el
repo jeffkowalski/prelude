@@ -33,11 +33,11 @@
 ;; Setup el-get first
 
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
-(add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
 
 (when (not (require 'el-get))
   (req-package-force el-get))
 
+(add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
 (customize-set-variable 'el-get-sources
                         '(
                           (:name org-expiry
