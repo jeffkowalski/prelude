@@ -1089,10 +1089,8 @@ be global."
 
 (req-package org-expiry
   :el-get t
-  :require org-capture
   :config
   (org-expiry-insinuate)
-  (customize-set-variable 'org-expiry-created-property-name "CREATED") ; name of property when an item is created
   (customize-set-variable 'org-expiry-inactive-timestamps t))          ; don't have everything in the agenda view
 
 ;; org journal
