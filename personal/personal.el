@@ -1389,9 +1389,10 @@ GET header should contain a path in form '/todo/ID'."
   (auto-dim-other-buffers-mode t)
   ;; adjust-dim-face added to emacs-starup-hook below
   (defun adjust-dim-face (&rest r)
-    (set-face-attribute 'auto-dim-other-buffers-face nil
-                        :background (color-darken-name
-                                     (face-attribute 'default :background) 3)))
+    (unless (string= "unspecified-bg" (face-attribute 'default :background))
+      (set-face-attribute 'auto-dim-other-buffers-face nil
+                          :background (color-darken-name
+                                       (face-attribute 'default :background) 3))))
   (defun adob--ignore-buffer (buffer)
     "Return whether to ignore BUFFER and do not affect its state.
 Currently only mini buffer, echo areas, and helm are ignored."
@@ -1655,7 +1656,7 @@ Currently only mini buffer, echo areas, and helm are ignored."
   (interactive)
   (toggle-frame-fullscreen)
   (run-with-idle-timer 1 nil (lambda () (org-agenda nil "s")))
-  (if (tty-type (frame-terminal)) (zenburn) (solarized)))
+  t)
 
 (add-hook 'emacs-startup-hook
           '(lambda ()
