@@ -778,6 +778,7 @@ be global."
     (customize-set-variable 'org-agenda-files (list (concat org-directory "tasks.org")
                                                     (concat org-directory "sauron.org")
                                                     (concat org-directory "gcal.org")))
+    (customize-set-variable 'org-refile-targets '((nil :regexp . "SOMEDAY")(nil :regexp . "RECURRING")))
     (customize-set-variable 'org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m))
     (customize-set-variable 'org-startup-indented t)
     (customize-set-variable 'org-enforce-todo-dependencies t)
