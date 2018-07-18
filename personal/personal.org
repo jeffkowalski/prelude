@@ -1071,7 +1071,7 @@ To jump to a register, use C-x r j followed by the letter of the register.
                            ("h" "habit" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
                             "* TODO [#C] %?\nSCHEDULED: %(s-replace \">\" \" .+1d/3d>\" \"%t\")\n:PROPERTIES:\n:STYLE: habit\n:END:\n")
                            ("t" "todo" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                            "* TODO [#C] %?\n")
+                            "* TODO [#C] %?\nSCHEDULED: %t\n")
                            ;; capture bookmarklet
                            ;; javascript:capture('@agendas');function enc(s){return encodeURIComponent(typeof(s)=="string"?s.toLowerCase().replace(/"/g, "'"):s);};function capture(context){var re=new RegExp(/(.*) - \S+@gmail.com/);var m=re.exec(document.title);var t=m?m[1]:document.title;javascript:location.href='org-protocol://capture://w/'+encodeURIComponent(location.href)+'/'+enc(t)+' :'+context+':/'+enc(window.getSelection());}
                            ("w" "org-protocol" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
