@@ -50,11 +50,6 @@
                                  :description "Continuous syntax checking for Emacs"
                                  :type github
                                  :pkgname "jeffkowalski/emacs-flymake")
-                          (:name evernote-mode
-                                 :description "Functions for editing Evernote notes directly from Emacs"
-                                 :type github
-                                 :pkgname "jeffkowalski/evernote-mode"
-                                 :features evernote-mode)
                           (:name nyan-mode
                                  :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
                                  :type github
@@ -690,7 +685,6 @@ abc |ghi        <-- point still after white space after calling this function."
                                  (name . "^\\*Completions\\*$")
                                  (name . "^\\*tramp")
                                  (name . "^\\*Shell Command Output\\*$")
-                                 (name . "^\\*Evernote-Client-Output\\*$")
                                  (name . "^\\*compilation\\*$")))
                     ("helm" (or (mode . helm-mode)
                                 (name . "^\\*helm[- ]")
@@ -699,7 +693,6 @@ abc |ghi        <-- point still after white space after calling this function."
                                  (name . "^\\*ansi-term\\*$")
                                  (name . "^\\*terminal<\d+>\\*$")
                                  (name . "^\\*eshell\\*$")))
-                    ("evernote" (or (mode . evernote-browsing-mode)))
                     ("emacs source" (or (mode . emacs-lisp-mode)
                                         (filename . "/Applications/Emacs.app")
                                         (filename . "/bin/emacs")))
@@ -1202,22 +1195,6 @@ GET header should contain a path in form '/todo/ID'."
                   3333 nil :host (format-network-address (car (network-interface-info "zt0")) t))
       (error (message "Failed to create web server"))))
   )
-
-;; ----------------------------------------------------------- [ evernote ]
-
-(req-package evernote-mode
-  :el-get t
-  :bind (("C-c E c" . evernote-create-note)
-         ("C-c E o" . evernote-open-note)
-         ("C-c E s" . evernote-search-notes)
-         ("C-c E S" . evernote-do-saved-search)
-         ("C-c E w" . evernote-write-note)
-         ("C-c E p" . evernote-post-region)
-         ("C-c E b" . evernote-browser))
-  :config
-  (customize-set-variable 'evernote-developer-token "S=s1:U=81f:E=1470997a804:C=13fb1e67c09:P=1cd:A=en-devtoken:V=2:H=0b3aafa546daa4a9b43c77a7574390d4")
-  (customize-set-variable 'evernote-enml-formatter-command '("w3m" "-dump" "-I" "UTF8" "-O" "UTF8")) ; optional
-  (validate-setq enh-enclient-command "/home/jeff/Dropbox/workspace/evernote-mode/ruby/bin/enclient.rb"))
 
 ;; ----------------------------------------------------------- [ windmove ]
 
