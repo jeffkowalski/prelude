@@ -693,7 +693,6 @@ be global."
     ;; require'd from init.el in order to tangle personal.org
     :bind  (("C-c l" . org-store-link)
             ("C-c c" . org-capture)
-            ("C-c a" . org-agenda)
             ("C-c b" . org-iswitchb))
 
     :config
@@ -702,11 +701,8 @@ be global."
     (customize-set-variable 'org-log-into-drawer t)
     (customize-set-variable 'org-support-shift-select 'always)
     (customize-set-variable 'org-default-notes-file (concat org-directory "refile.org"))
-    (customize-set-variable 'org-agenda-files (list (concat org-directory "tasks.org")
-                                                    (concat org-directory "sauron.org")
-                                                    (concat org-directory "gcal.org")))
     (customize-set-variable 'org-refile-targets '((nil :regexp . "SOMEDAY")(nil :regexp . "RECURRING")))
-    (customize-set-variable 'org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-habit org-irc org-mhe org-rmail org-w3m))
+    (customize-set-variable 'org-modules '(org-docview org-info org-habit))
     (customize-set-variable 'org-startup-indented t)
     (customize-set-variable 'org-enforce-todo-dependencies t)
     (customize-set-variable 'org-confirm-elisp-link-function nil)
@@ -718,6 +714,13 @@ be global."
                                  (dot . t)
                                  (latex . t)
                                  (emacs-lisp . t)))
+
+    ;; Let's have pretty source code blocks
+    (setq org-edit-src-content-indentation 0
+          org-src-tab-acts-natively t
+          org-src-fontify-natively t
+          org-confirm-babel-evaluate nil)
+
     (add-hook 'org-mode-hook (lambda () (auto-revert-mode 1)))
     (defun jeff/org-add-ids-to-headlines-in-file ()
       "Add ID properties to all headlines in the current file which do not already have one."
@@ -747,11 +750,11 @@ be global."
 ;; org bullets, indent
 
 (req-package org-bullets
-  :diminish " Οι"
+  :diminish " Οβ"
   :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 (req-package org-indent
   :require org-bullets
-  :diminish " Οβ")
+  :diminish " Οι")
 
 ;; ox
 
@@ -776,7 +779,11 @@ be global."
 
 (req-package org-agenda
   :require (org htmlize)
+  :bind (("C-c a" . org-agenda))
   :config
+  (customize-set-variable 'org-agenda-files (list (concat org-directory "tasks.org")
+                                                  (concat org-directory "sauron.org")
+                                                  (concat org-directory "gcal.org")))
   (customize-set-variable 'org-agenda-tags-column -97)
   (customize-set-variable 'org-agenda-block-separator
                           (let ((retval ""))
@@ -808,52 +815,7 @@ be global."
             ((string-lessp ta tb) -1)
             ((string-lessp tb ta) +1)
             (t nil))))
-  (customize-set-variable 'org-agenda-custom-commands
-                          '(("d" "Timeline for today" ((agenda "" ))
-                             ((org-agenda-span 1)
-                              (org-agenda-show-log t)
-                              (org-agenda-log-mode-items '(clock closed state))
-                              (org-agenda-clockreport-mode t)
-                              (org-agenda-entry-types '())))
 
-                            ("s" "Startup View"
-                             ((agenda ""    ((org-agenda-span 3)
-                                             (org-agenda-start-on-weekday nil)
-                                             ;;(org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                                             (org-agenda-skip-scheduled-if-deadline-is-shown t)
-                                             (org-agenda-prefix-format "  %-10T %t")
-                                             (org-agenda-hide-tags-regexp "^@")
-                                             (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                                             (org-agenda-sorting-strategy '(time-up todo-state-down habit-up tag-up priority-down user-defined-up alpha-up))
-                                             ;;(org-agenda-todo-ignore-scheduled 'future)
-                                             (org-deadline-warning-days 0)))
-                              (agenda "TODO" ((org-agenda-time-grid nil)
-                                              (org-deadline-warning-days 365)
-                                              (org-agenda-prefix-format "  %-10T %s")
-                                              (org-agenda-hide-tags-regexp "^@")
-                                              (org-agenda-entry-types '(:deadline))
-                                              (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
-                                              (org-agenda-start-on-weekday nil)
-                                              (org-agenda-span 1)
-                                              (org-agenda-overriding-header "Unscheduled upcoming deadlines:")))
-                              (todo "TODO"   ((org-agenda-time-grid nil)
-                                              (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexp "#[A-C]" 'scheduled 'deadline))
-                                              ;;(org-agenda-todo-keyword-format "")
-                                              (org-agenda-prefix-format "  %-10T %t")
-                                              (org-agenda-hide-tags-regexp "^@")
-                                              ;;(org-agenda-show-inherited-tags nil)
-                                              (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                                              (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
-                                              (org-agenda-overriding-header "Unscheduled, no deadline:")))
-                              (todo "TODO"   ((org-agenda-time-grid nil)
-                                              (org-agenda-skip-function '(org-agenda-skip-entry-if 'regexp "#[A-C]" 'scheduled 'deadline))
-                                              ;;(org-agenda-todo-keyword-format "")
-                                              (org-agenda-prefix-format "  %-10T %t")
-                                              (org-agenda-hide-tags-regexp "^@")
-                                              ;;(org-agenda-show-inherited-tags nil)
-                                              (org-agenda-cmp-user-defined 'my-org-cmp-tag)
-                                              (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
-                                              (org-agenda-overriding-header "Someday:")))))))
   (add-hook 'org-finalize-agenda-hook
             (lambda () (remove-text-properties
                         (point-min) (point-max) '(mouse-face t))))
@@ -894,16 +856,16 @@ be global."
 
   (defun org-extract-window (line)
     "Extract start and end times from org entries"
-     (let ((start (get-text-property 1 'time-of-day line))
-           (dur (get-text-property 1 'duration line)))
-       (cond
-        ((and start dur)
-         (cons start
-               (org-time-from-minutes
-                (truncate
-                 (+ dur (org-time-to-minutes start))))))
-        (start start)
-        (t nil))))
+    (let ((start (get-text-property 1 'time-of-day line))
+          (dur (get-text-property 1 'duration line)))
+      (cond
+       ((and start dur)
+        (cons start
+              (org-time-from-minutes
+               (truncate
+                (+ dur (org-time-to-minutes start))))))
+       (start start)
+       (t nil))))
 
   (defadvice org-agenda-add-time-grid-maybe (around mde-org-agenda-grid-tweakify
                                                     (list ndays todayp))
@@ -926,6 +888,73 @@ be global."
           ad-do-it)
       ad-do-it))
   (ad-activate 'org-agenda-add-time-grid-maybe)
+  )
+
+;; org super agenda
+
+(req-package org-super-agenda
+  :require (org org-agenda)
+  :config
+  (org-super-agenda-mode +1)
+  (customize-set-variable 'org-agenda-custom-commands
+                          '(
+                            ("z" "Zen View"
+                             ((agenda ""  (
+                                           (org-agenda-span 3)
+                                           (org-agenda-start-on-weekday 0)
+                                           (org-agenda-skip-scheduled-if-deadline-is-shown t)
+                                           (org-deadline-warning-days 0)
+                                           (org-agenda-hide-tags-regexp "^@")
+                                           (org-super-agenda-groups
+                                            '((:discard (:todo "DONE" :todo "CANCELED" :todo "SKIP"))
+                                              (:name "Calendar"
+                                                     :time-grid t)
+                                              (:name "Habits"
+                                                     :habit t)
+                                              (:name "michelle_bowen"
+                                                     :tag "michelle_bowen")
+                                              (:name "@errands"
+                                                     :tag "@errands")
+                                              (:name "@home"
+                                                     :tag "@home")
+                                              (:name "@quicken"
+                                                     :tag "@quicken")
+                                              (:name "other" ; "Tasks"
+                                                     :anything t)
+                                              ))))
+                              (agenda "" (
+                                          (org-agenda-overriding-header "Unscheduled upcoming deadlines")
+                                          (org-agenda-span 1)
+                                          (org-agenda-time-grid nil)
+                                          (org-deadline-warning-days 365)
+                                          (org-agenda-entry-types '(:deadline))
+                                          (org-agenda-skip-deadline-prewarning-if-scheduled t)
+                                          ))
+                              (alltodo "" (
+                                           (org-agenda-overriding-header "")
+                                           (org-agenda-hide-tags-regexp "^@")
+                                           (org-agenda-prefix-format "  %-10T %t")
+                                           (org-agenda-cmp-user-defined 'my-org-cmp-tag)
+                                           (org-agenda-sorting-strategy '(priority-down tag-up user-defined-up alpha-up))
+                                           (org-super-agenda-groups
+                                            '((:discard (:deadline t :scheduled t))
+                                              (:name "Unscheduled no deadline"
+                                                     :priority>= "C")
+                                              (:name "Someday"
+                                                     :priority< "C")
+                                              )))))
+                             ) ; zen view
+                            ))
+  )
+
+;; origami
+
+(req-package origami
+  :require org-super-agenda
+  :bind (:map org-super-agenda-header-map
+              ("TAB"  . origami-toggle-node))
+  :config
+  (add-hook 'org-agenda-mode-hook (lambda () (origami-mode t)) t)
   )
 
 ;; org clock
@@ -1567,7 +1596,7 @@ Currently only mini buffer, echo areas, and helm are ignored."
   "Show schedule in fullscreen."
   (interactive)
   (toggle-frame-fullscreen)
-  (run-with-idle-timer 1 nil (lambda () (org-agenda nil "s")))
+  (run-with-idle-timer 1 nil (lambda () (org-agenda nil "z")))
   t)
 
 (add-hook 'emacs-startup-hook
