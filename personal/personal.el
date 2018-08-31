@@ -919,6 +919,8 @@ be global."
                                                      :tag "@home")
                                               (:name "@quicken"
                                                      :tag "@quicken")
+                                              (:name "@waiting"
+                                                     :tag "@waiting")
                                               (:name "other" ; "Tasks"
                                                      :anything t)
                                               ))))
