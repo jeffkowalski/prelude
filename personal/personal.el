@@ -1357,8 +1357,8 @@ Currently only mini buffer, echo areas, and helm are ignored."
 
 (req-package solarized-theme
   :require custom
-  :chords (("xd" . (lambda () (interactive) (load-theme 'solarized-dark)))
-           ("xl" . (lambda () (interactive) (load-theme 'solarized-light))))
+  :chords (("xd" . (lambda () (interactive) (load-theme 'solarized-dark) (set-face-attribute 'org-agenda-date nil :box '(:line-width 1) :height 1.1)))
+           ("xl" . (lambda () (interactive) (load-theme 'solarized-light) (set-face-attribute 'org-agenda-date nil :box '(:line-width 1) :height 1.1))))
   :config (defun solarized nil
             "Enable solarized theme"
             (interactive)
@@ -1367,7 +1367,8 @@ Currently only mini buffer, echo areas, and helm are ignored."
             (customize-set-variable 'solarized-scale-org-headlines t)
             (load-theme 'solarized-dark t)
             (sml/apply-theme 'respectful)
-            (customize-set-variable 'x-underline-at-descent-line t)))
+            (customize-set-variable 'x-underline-at-descent-line t)
+            (set-face-attribute 'org-agenda-date nil :box '(:line-width 1) :height 1.1)))
 
 (req-package zenburn-theme
   :require custom
@@ -1376,7 +1377,8 @@ Currently only mini buffer, echo areas, and helm are ignored."
             (interactive)
             (disable-theme 'solarized-dark)
             (load-theme 'zenburn t)
-            (sml/apply-theme 'respectful)))
+            (sml/apply-theme 'respectful)
+            (set-face-attribute 'org-agenda-date nil :box '(:line-width 1) :height 1.1)))
 
 ;; ----------------------------------------------------------- [ key bindings ]
 
