@@ -783,7 +783,8 @@ be global."
   :config
   (customize-set-variable 'org-agenda-files (list (concat org-directory "tasks.org")
                                                   (concat org-directory "sauron.org")
-                                                  (concat org-directory "gcal.org")))
+                                                  (concat org-directory "jeff.org")
+                                                  (concat org-directory "michelle.org")))
   (customize-set-variable 'org-agenda-tags-column -97)
   (customize-set-variable 'org-agenda-block-separator
                           (let ((retval ""))
