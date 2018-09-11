@@ -687,65 +687,65 @@ be global."
 ;; ----------------------------------------------------------- [ org ]
 
 (req-package org
-    :diminish "Ο"
-;;    :loader :elpa
-    ;; NOTE: org must be manually installed from elpa / gnu since it's
-    ;; require'd from init.el in order to tangle personal.org
-    :bind  (("C-c l" . org-store-link)
-            ("C-c c" . org-capture)
-            ("C-c b" . org-iswitchb))
+  :diminish "Ο"
+  ;;    :loader :elpa
+  ;; NOTE: org must be manually installed from elpa / gnu since it's
+  ;; require'd from init.el in order to tangle personal.org
+  :bind  (("C-c l" . org-store-link)
+          ("C-c b" . org-iswitchb))
 
-    :config
-    (customize-set-variable 'org-directory "~/Dropbox/workspace/org/")
-    ;; (customize-set-variable 'org-replace-disputed-keys t) ; org-CUA-compatible
-    (customize-set-variable 'org-log-into-drawer t)
-    (customize-set-variable 'org-support-shift-select 'always)
-    (customize-set-variable 'org-default-notes-file (concat org-directory "refile.org"))
-    (customize-set-variable 'org-refile-targets '((nil :regexp . "SOMEDAY")(nil :regexp . "RECURRING")))
-    (customize-set-variable 'org-modules '(org-docview org-info org-habit))
-    (customize-set-variable 'org-startup-indented t)
-    (customize-set-variable 'org-enforce-todo-dependencies t)
-    (customize-set-variable 'org-confirm-elisp-link-function nil)
-    (customize-set-variable 'org-src-window-setup 'current-window)
+  :config
+  (customize-set-variable 'org-directory "~/Dropbox/workspace/org/")
+  ;; (customize-set-variable 'org-replace-disputed-keys t) ; org-CUA-compatible
+  (customize-set-variable 'org-log-into-drawer t)
+  (customize-set-variable 'org-support-shift-select 'always)
+  (customize-set-variable 'org-default-notes-file (concat org-directory "refile.org"))
+  (customize-set-variable 'org-refile-targets '((nil :regexp . "SOMEDAY")(nil :regexp . "RECURRING")))
+  (customize-set-variable 'org-modules '(org-docview org-info org-habit))
+  (customize-set-variable 'org-startup-indented t)
+  (customize-set-variable 'org-enforce-todo-dependencies t)
+  (customize-set-variable 'org-confirm-elisp-link-function nil)
+  (customize-set-variable 'org-src-window-setup 'current-window)
 
-    (org-babel-do-load-languages
-     'org-babel-load-languages '((shell . t)
-                                 (ruby . t)
-                                 (dot . t)
-                                 (latex . t)
-                                 (emacs-lisp . t)))
+  (org-babel-do-load-languages
+   'org-babel-load-languages '((shell . t)
+                               (ruby . t)
+                               (dot . t)
+                               (latex . t)
+                               (emacs-lisp . t)))
 
-    ;; Let's have pretty source code blocks
-    (setq org-edit-src-content-indentation 0
-          org-src-tab-acts-natively t
-          org-src-fontify-natively t
-          org-confirm-babel-evaluate nil)
+  ;; Let's have pretty source code blocks
+  (setq org-edit-src-content-indentation 0
+        org-src-tab-acts-natively t
+        org-src-fontify-natively t
+        org-confirm-babel-evaluate nil)
 
-    (add-hook 'org-mode-hook (lambda () (auto-revert-mode 1)))
-    (defun jeff/org-add-ids-to-headlines-in-file ()
-      "Add ID properties to all headlines in the current file which do not already have one."
-      (interactive)
-      (org-map-entries 'org-id-get-create))
-    ;; (add-hook 'org-mode-hook
-    ;;           (lambda ()
-    ;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
+  (add-hook 'org-mode-hook (lambda () (auto-revert-mode 1)))
+  (defun jeff/org-add-ids-to-headlines-in-file ()
+    "Add ID properties to all headlines in the current file which do not already have one."
+    (interactive)
+    (org-map-entries 'org-id-get-create))
+  ;; (add-hook 'org-mode-hook
+  ;;           (lambda ()
+  ;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
 
-    (defun org-check-misformatted-subtree ()
-      "Check misformatted entries in the current buffer."
-      (interactive)
-      (show-all)
-      (org-map-entries
-       (lambda ()
-         (when (and (move-beginning-of-line 2)
-                    (not (looking-at org-heading-regexp)))
-           (if (or (and (org-get-scheduled-time (point))
-                        (not (looking-at (concat "^.*" org-scheduled-regexp))))
-                   (and (org-get-deadline-time (point))
-                        (not (looking-at (concat "^.*" org-deadline-regexp)))))
-               (when (y-or-n-p "Fix this subtree? ")
-                 (message "Call the function again when you're done fixing this subtree.")
-                 (recursive-edit))
-             (message "All subtrees checked.")))))))
+  (defun org-check-misformatted-subtree ()
+    "Check misformatted entries in the current buffer."
+    (interactive)
+    (show-all)
+    (org-map-entries
+     (lambda ()
+       (when (and (move-beginning-of-line 2)
+                  (not (looking-at org-heading-regexp)))
+         (if (or (and (org-get-scheduled-time (point))
+                      (not (looking-at (concat "^.*" org-scheduled-regexp))))
+                 (and (org-get-deadline-time (point))
+                      (not (looking-at (concat "^.*" org-deadline-regexp)))))
+             (when (y-or-n-p "Fix this subtree? ")
+               (message "Call the function again when you're done fixing this subtree.")
+               (recursive-edit))
+           (message "All subtrees checked."))))))
+)
 
 ;; org bullets, indent
 
@@ -979,13 +979,9 @@ be global."
 
 ;; org capture
 
-(req-package org-protocol
-  :require org)
-
 (req-package org-capture
-  :require (org org-protocol s)
-  :bind (("C-M-r" . org-capture)
-         ("C-c r" . org-capture))
+  :require (org s)
+  :bind (("C-c c" . org-capture))
   :config
   (defun adjust-captured-headline (hl)
     "Fixup headlines for amazon orders"
@@ -997,29 +993,29 @@ be global."
                     )
                 hl)))
 
-  ;; Thank you random guy from StackOverflow
-  ;; http://stackoverflow.com/questions/23517372/hook-or-advice-when-aborting-org-capture-before-template-selection
-  (defadvice org-capture (after make-full-window-frame activate)
-    "Advise capture to be the only window when used as a popup named 'emacs-capture'"
-    (if (equal "emacs-capture" (frame-parameter nil 'name)) (delete-other-windows)))
-  (defadvice org-capture-finalize (after delete-capture-frame activate)
-    "Advise capture-finalize to close the frame"
-    (if (equal "emacs-capture" (frame-parameter nil 'name)) (delete-frame)))
-
   (customize-set-variable 'org-capture-templates
-                 (quote (("b" "entry.html" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                          "* TODO %:description\n%:initial\n" :immediate-finish t)
-                         ("h" "habit" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                          "* TODO [#C] %?\nSCHEDULED: %(s-replace \">\" \" .+1d/3d>\" \"%t\")\n:PROPERTIES:\n:STYLE: habit\n:END:\n")
-                         ("t" "todo" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                          "* TODO [#C] %?\nSCHEDULED: %t\n")
-                         ;; capture bookmarklet
-                         ;; javascript:capture('@agendas');function enc(s){return encodeURIComponent(typeof(s)=="string"?s.toLowerCase().replace(/"/g, "'"):s);};function capture(context){var re=new RegExp(/(.*) - \S+@gmail.com/);var m=re.exec(document.title);var t=m?m[1]:document.title;javascript:location.href='org-protocol://capture://w/'+encodeURIComponent(location.href)+'/'+enc(t)+' :'+context+':/'+enc(window.getSelection());}
-                         ("w" "org-protocol" entry (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
-                          "* TODO [#C] %?%(adjust-captured-headline \"%:description\")\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n"))))
+                          '(;; template for use by scripts, like entry.html or gmailtender
+                            ("b" "entry.html" entry
+                             (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
+                             "* TODO %:description\n%:initial\n" :immediate-finish t)
+                            ;; template for habits, which include the special property
+                            ("h" "habit" entry
+                             (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
+                             "* TODO [#C] %?\nSCHEDULED: %(s-replace \">\" \" .+1d/3d>\" \"%t\")\n:PROPERTIES:\n:STYLE: habit\n:END:\n")
+                            ;; standard template, scheduled for today with average priority
+                            ("t" "todo" entry
+                             (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
+                             "* TODO [#C] %?\nSCHEDULED: %t\n")
+                            ;; template for use by capture bookmarklet and emacsclient
+                            ;; javascript:capture('@agendas');function enc(s){return encodeURIComponent(typeof(s)=="string"?s.toLowerCase().replace(/"/g, "'"):s);};function capture(context){var re=new RegExp(/(.*) - \S+@gmail.com/);var m=re.exec(document.title);var t=m?m[1]:document.title;javascript:location.href='org-protocol://capture://w/'+encodeURIComponent(location.href)+'/'+enc(t)+' :'+context+':/'+enc(window.getSelection());}
+                            ("w" "org-protocol" entry
+                             (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
+                             "* TODO [#C] %?%(adjust-captured-headline \"%:description\")\nSCHEDULED: %t\n:PROPERTIES:\n:END:\n%:link\n%:initial\n")))
+
   (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create)
   (add-hook 'org-capture-prepare-finalize-hook 'org-expiry-insert-created)
 
+  ;; save all the agenda files after each capture
   (defun my/save-all-agenda-buffers ()
     "Function used to save all agenda buffers that are currently open, based on `org-agenda-files'."
     (interactive)
@@ -1029,9 +1025,60 @@ be global."
         (when (member (buffer-file-name)
                       (mapcar 'expand-file-name (org-agenda-files t)))
           (save-buffer)))))
-
-  ;; save all the agenda files after each capture
   (add-hook 'org-capture-after-finalize-hook 'my/save-all-agenda-buffers))
+
+;; org protocol
+
+(req-package org-protocol
+  :require org-capture
+  :config
+  ;; We're overriding this function to get rid of the raise-window at the end,
+  ;; which would switch desktops.
+  (defun org-protocol-do-capture (info)
+    "Perform the actual capture based on INFO."
+    (let* ((temp-parts (org-protocol-parse-parameters info))
+           (parts
+            (cond
+             ((and (listp info) (symbolp (car info))) info)
+             ((= (length (car temp-parts)) 1) ;; First parameter is exactly one character long
+              (org-protocol-assign-parameters temp-parts '(:template :url :title :body)))
+             (t
+              (org-protocol-assign-parameters temp-parts '(:url :title :body)))))
+           (template (or (plist-get parts :template)
+                         org-protocol-default-template-key))
+           (url (and (plist-get parts :url) (org-protocol-sanitize-uri (plist-get parts :url))))
+           (type (and url (if (string-match "^\\([a-z]+\\):" url)
+                              (match-string 1 url))))
+           (title (or (plist-get parts :title) ""))
+           (region (or (plist-get parts :body) ""))
+           (orglink (if url
+                        (org-make-link-string
+                         url (if (string-match "[^[:space:]]" title) title url))
+                      title))
+           (org-capture-link-is-already-stored t)) ;; avoid call to org-store-link
+      (setq org-stored-links
+            (cons (list url title) org-stored-links))
+      (org-store-link-props :type type
+                            :link url
+                            :description title
+                            :annotation orglink
+                            :initial region
+                            :query parts)
+      ;; (raise-frame)
+      (funcall 'org-capture nil template)))
+  )
+
+;; org capture pop frame
+
+(req-package org-capture-pop-frame
+  :config
+  (customize-set-variable 'ocpf-frame-parameters
+                          '((name . "org-capture-pop-frame")
+                            (width . 132)
+                            (height . 10)
+                            (tool-bar-lines . 0)
+                            (menu-bar-lines . 0)))
+  )
 
 ;; org reveal
 
