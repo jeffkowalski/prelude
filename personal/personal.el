@@ -361,6 +361,7 @@ abc |ghi        <-- point still after white space after calling this function."
    (set-register (car r) (cons 'file (cdr r))))
  '((?p . "~/.emacs.d/personal/personal.org")
    (?i . "~/Dropbox/sync-linux/installation.txt")
+   (?j . "~/Dropbox/workspace/org/journal.org")
    (?c . "~/.emacs.d/personal/custom.el")
    (?f . "~/.config/fish/config.fish")
    (?m . "~/Dropbox/sync-linux/mac_addrs.org")
@@ -1002,6 +1003,10 @@ be global."
                             ("h" "habit" entry
                              (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
                              "* TODO [#C] %?\nSCHEDULED: %(s-replace \">\" \" .+1d/3d>\" \"%t\")\n:PROPERTIES:\n:STYLE: habit\n:END:\n")
+                            ;; a journal entry, stored in a datetree
+                            ("j" "journal" entry
+                             (file+datetree (lambda () (concat org-directory "journal.org")))
+                             "** %^{Heading}")
                             ;; standard template, scheduled for today with average priority
                             ("t" "todo" entry
                              (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
@@ -1075,7 +1080,7 @@ be global."
   (customize-set-variable 'ocpf-frame-parameters
                           '((name . "org-capture-pop-frame")
                             (width . 132)
-                            (height . 10)
+                            (height . 14)
                             (tool-bar-lines . 0)
                             (menu-bar-lines . 0)))
   )
