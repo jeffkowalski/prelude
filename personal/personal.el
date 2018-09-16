@@ -1006,7 +1006,7 @@ be global."
                             ;; a journal entry, stored in a datetree
                             ("j" "journal" entry
                              (file+datetree (lambda () (concat org-directory "journal.org")))
-                             "** %^{Heading}")
+                             "** %U %?")
                             ;; standard template, scheduled for today with average priority
                             ("t" "todo" entry
                              (file+headline (lambda () (concat org-directory "tasks.org")) "SINGLETON")
