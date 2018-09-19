@@ -1005,7 +1005,7 @@ be global."
                              "* TODO [#C] %?\nSCHEDULED: %(s-replace \">\" \" .+1d/3d>\" \"%t\")\n:PROPERTIES:\n:STYLE: habit\n:END:\n")
                             ;; a journal entry, stored in a datetree
                             ("j" "journal" entry
-                             (file+datetree (lambda () (concat org-directory "journal.org")))
+                             (file+olp+datetree (lambda () (concat org-directory "journal.org")))
                              "** %U %?")
                             ;; standard template, scheduled for today with average priority
                             ("t" "todo" entry
