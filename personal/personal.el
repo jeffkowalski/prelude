@@ -1105,12 +1105,6 @@ be global."
   (org-expiry-insinuate)
   (customize-set-variable 'org-expiry-inactive-timestamps t))          ; don't have everything in the agenda view
 
-;; org journal
-
-(req-package org-journal
-  :config
-  (customize-set-variable 'org-journal-dir (expand-file-name "~/Dropbox/workspace/org/journal")))
-
 ;; ----------------------------------------------------------- [ org-ehtml ]
 
 (req-package web-server)
