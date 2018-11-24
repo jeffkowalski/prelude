@@ -508,6 +508,11 @@ To jump to a register, use C-x r j followed by the letter of the register.
     ;; (defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate) (rvm-activate-corresponding-ruby))
     )
 #+END_SRC
+*** rubocop
+#+BEGIN_SRC emacs-lisp
+(req-package rubocop
+  (add-hook 'ruby-mode-hook 'rubocop-mode))
+#+END_SRC
 ** ----------------------------------------------------------- [ time ]
 #+BEGIN_SRC emacs-lisp
   (req-package time

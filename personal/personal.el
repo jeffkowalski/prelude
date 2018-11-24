@@ -491,6 +491,11 @@ abc |ghi        <-- point still after white space after calling this function."
   ;; (defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate) (rvm-activate-corresponding-ruby))
   )
 
+;; rubocop
+
+(req-package rubocop
+  (add-hook 'ruby-mode-hook 'rubocop-mode))
+
 ;; ----------------------------------------------------------- [ time ]
 
 (req-package time
