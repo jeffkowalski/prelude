@@ -496,6 +496,14 @@ abc |ghi        <-- point still after white space after calling this function."
 (req-package rubocop
   (add-hook 'ruby-mode-hook 'rubocop-mode))
 
+;; ----------------------------------------------------------- [ realgud ]
+
+(req-package realgud)
+(req-package realgud-pry
+  :require realgud)
+(req-package realgud-byebug
+  :require realgud)
+
 ;; ----------------------------------------------------------- [ time ]
 
 (req-package time
