@@ -532,7 +532,7 @@ abc |ghi        <-- point still after white space after calling this function."
 (req-package company
   :diminish " Ψ"
   :config
-  (customize-set-variable 'company-auto-complete t)
+  (customize-set-variable 'company-auto-complete 'company-explicit-action-p)
   (customize-set-variable 'company-idle-delay 0.5)
   (add-to-list 'company-backends 'company-dabbrev t)
   (add-to-list 'company-backends 'company-ispell t)
