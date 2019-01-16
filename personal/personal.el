@@ -920,6 +920,7 @@ be global."
                                            (org-agenda-skip-scheduled-if-deadline-is-shown t)
                                            (org-deadline-warning-days 0)
                                            (org-agenda-hide-tags-regexp "^@")
+                                           (org-super-agenda-header-separator "")
                                            (org-super-agenda-groups
                                             '((:discard (:todo "DONE" :todo "CANCELED" :todo "SKIP"))
                                               (:name "Calendar"
@@ -928,6 +929,8 @@ be global."
                                                      :habit t)
                                               (:name "michelle_bowen"
                                                      :tag "michelle_bowen")
+                                              (:name "@calls"
+                                                     :tag "@calls")
                                               (:name "@errands"
                                                      :tag "@errands")
                                               (:name "@home"
@@ -949,6 +952,7 @@ be global."
                                           ))
                               (alltodo "" (
                                            (org-agenda-overriding-header "")
+                                           (org-super-agenda-header-separator "")
                                            (org-agenda-hide-tags-regexp "^@")
                                            (org-agenda-prefix-format "  %-10T %t")
                                            (org-agenda-cmp-user-defined 'my-org-cmp-tag)
