@@ -43,7 +43,7 @@
                           (:name org-expiry
                                  :description "Expiry mechanism for Org entries"
                                  :type http
-                                 :url "http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-expiry.el;hb=HEAD"
+                                 :url "https://code.orgmode.org/bzg/org-mode/raw/master/contrib/lisp/org-expiry.el"
                                  :localname "org-expiry.el"
                                  :features org-expiry)
                           (:name flymake
