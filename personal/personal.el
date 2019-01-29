@@ -75,11 +75,6 @@
                                  :type github
                                  :pkgname "jeffkowalski/emacs-web-server"
                                  :features web-server)
-                          (:name org-reveal
-                                 :description "Exports Org-mode contents to Reveal.js HTML presentation"
-                                 :type github
-                                 :pkgname "jeffkowalski/org-reveal"
-                                 :features ox-reveal)
                           ))
 (el-get 'sync (mapcar (lambda (x) (plist-get x :name)) el-get-sources))
 
@@ -726,6 +721,7 @@ be global."
                                (ruby . t)
                                (dot . t)
                                (latex . t)
+                               (gnuplot . t)
                                (emacs-lisp . t)))
 
   ;; Let's have pretty source code blocks
@@ -1102,11 +1098,6 @@ be global."
                             (menu-bar-lines . 0)))
   )
 
-;; org reveal
-
-(req-package ox-reveal
-  :config (customize-set-variable 'org-reveal-root "file:///home/jeff/workspace/reveal.js"))
-
 ;; org cua dwim
 
 (req-package org-cua-dwim
@@ -1121,6 +1112,11 @@ be global."
   :config
   (org-expiry-insinuate)
   (customize-set-variable 'org-expiry-inactive-timestamps t))          ; don't have everything in the agenda view
+
+;; org plot
+
+(req-package org-plot
+  :require gnuplot-mode)
 
 ;; ----------------------------------------------------------- [ org-ehtml ]
 

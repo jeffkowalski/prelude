@@ -87,11 +87,6 @@ Use "C-c C-v t" to tangle
                                    :type github
                                    :pkgname "jeffkowalski/emacs-web-server"
                                    :features web-server)
-                            (:name org-reveal
-                                   :description "Exports Org-mode contents to Reveal.js HTML presentation"
-                                   :type github
-                                   :pkgname "jeffkowalski/org-reveal"
-                                   :features ox-reveal)
                             ))
   (el-get 'sync (mapcar (lambda (x) (plist-get x :name)) el-get-sources))
 #+END_SRC
@@ -744,6 +739,7 @@ To jump to a register, use C-x r j followed by the letter of the register.
                                (ruby . t)
                                (dot . t)
                                (latex . t)
+                               (gnuplot . t)
                                (emacs-lisp . t)))
 
   ;; Let's have pretty source code blocks
@@ -1120,11 +1116,6 @@ To jump to a register, use C-x r j followed by the letter of the register.
                             (menu-bar-lines . 0)))
   )
 #+END_SRC
-*** org reveal
-#+BEGIN_SRC emacs-lisp
-  (req-package ox-reveal
-    :config (customize-set-variable 'org-reveal-root "file:///home/jeff/workspace/reveal.js"))
-#+END_SRC
 *** org cua dwim
 #+BEGIN_SRC emacs-lisp
   (req-package org-cua-dwim
@@ -1140,6 +1131,11 @@ To jump to a register, use C-x r j followed by the letter of the register.
     (org-expiry-insinuate)
     (customize-set-variable 'org-expiry-inactive-timestamps t))          ; don't have everything in the agenda view
 #+END_SRC
+*** org plot
+#+begin_src emacs-lisp
+  (req-package org-plot
+    :require gnuplot-mode)
+#+end_src
 ** ----------------------------------------------------------- [ org-ehtml ]
 #+BEGIN_SRC emacs-lisp
   (req-package web-server)
