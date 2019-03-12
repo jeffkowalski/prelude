@@ -709,7 +709,7 @@ be global."
   (customize-set-variable 'org-log-into-drawer t)
   (customize-set-variable 'org-support-shift-select 'always)
   (customize-set-variable 'org-default-notes-file (concat org-directory "refile.org"))
-  (customize-set-variable 'org-refile-targets '((nil :regexp . "SOMEDAY")(nil :regexp . "RECURRING")))
+  (customize-set-variable 'org-refile-targets '(("tasks.org" :regexp . "RECURRING\\|SINGLETON")))
   (customize-set-variable 'org-modules '(org-docview org-info org-habit))
   (customize-set-variable 'org-startup-indented t)
   (customize-set-variable 'org-enforce-todo-dependencies t)
