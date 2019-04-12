@@ -212,6 +212,7 @@
 (customize-set-variable 'help-window-select t)
 (customize-set-variable 'enable-recursive-minibuffers t)
 (customize-set-variable 'password-cache-expiry 900)
+(customize-set-variable 'browse-url-mailto-function nil)
 
  ;; hide trailing whitespaces in some programming modes:
  (mapc (lambda (hook)
