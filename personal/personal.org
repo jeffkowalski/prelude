@@ -720,7 +720,8 @@ To jump to a register, use C-x r j followed by the letter of the register.
   ;; NOTE: org must be manually installed from elpa / gnu since it's
   ;; require'd from init.el in order to tangle personal.org
   :bind  (("C-c l" . org-store-link)
-          ("C-c b" . org-iswitchb))
+          ("C-c b" . org-iswitchb)
+          ("C-c C-." . jeff/org-timestamp-inactive))
 
   :config
   (customize-set-variable 'org-directory "~/Dropbox/workspace/org/")
@@ -757,6 +758,16 @@ To jump to a register, use C-x r j followed by the letter of the register.
   ;; (add-hook 'org-mode-hook
   ;;           (lambda ()
   ;;             (add-hook 'before-save-hook 'jeff/org-add-ids-to-headlines-in-file nil 'local)))
+
+  (defun jeff/orgify-date ()
+    "Convert the date in the current cell to an inactive timestamp."
+    (interactive)
+    (org-table-get-field nil (format " %s " (org-insert-time-stamp (org-time-string-to-time (org-read-date nil nil (org-table-get-field))) nil t))))
+
+  (defun jeff/org-timestamp-inactive ()
+    "Just like org-time-stamp, but inactive."
+    (interactive)
+    (org-time-stamp nil t))
 
   (defun org-check-misformatted-subtree ()
     "Check misformatted entries in the current buffer."
