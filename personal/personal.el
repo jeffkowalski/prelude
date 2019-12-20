@@ -540,6 +540,41 @@ abc |ghi        <-- point still after white space after calling this function."
   (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
 (add-hook 'org-mode-hook 'my-pcomplete-capf)
 
+;; ----------------------------------------------------------- [ irony/platformio ]
+
+(req-package irony
+  :config
+  ;; Use irony's completion functions.
+  (add-hook 'irony-mode-hook
+            (lambda ()
+              (define-key irony-mode-map [remap completion-at-point]
+                'counsel-irony)
+              (define-key irony-mode-map [remap complete-symbol]
+                'counsel-irony)
+              (irony-cdb-autosetup-compile-options))))
+
+(req-package flycheck-irony
+  :require (flycheck irony)
+  :config
+  ;; Setup irony for flycheck.
+  (add-hook 'flycheck-mode-hook 'flycheck-irony-setup))
+
+(req-package irony-eldoc
+  :require irony
+  :config
+  (add-hook 'irony-mode-hook #'irony-eldoc))
+
+(req-package platformio-mode)
+
+;; edit ino files with arduino mode.
+(add-to-list 'auto-mode-alist '("\\.ino$" . arduino-mode))
+;; Enable irony for all c++ files, and platformio-mode only
+;; when needed (platformio.ini present in project root).
+(add-hook 'c++-mode-hook (lambda ()
+                           (irony-mode)
+                           (irony-eldoc)
+                           (platformio-conditionally-enable)))
+
 ;; ----------------------------------------------------------- [ tramp ]
 
 ;; disable version control checks
