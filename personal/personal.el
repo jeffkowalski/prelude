@@ -567,7 +567,10 @@ abc |ghi        <-- point still after white space after calling this function."
 (req-package platformio-mode)
 
 ;; edit ino files with arduino mode.
-(add-to-list 'auto-mode-alist '("\\.ino$" . arduino-mode))
+(req-package arduino-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.ino$" . arduino-mode)))
+
 ;; Enable irony for all c++ files, and platformio-mode only
 ;; when needed (platformio.ini present in project root).
 (add-hook 'c++-mode-hook (lambda ()

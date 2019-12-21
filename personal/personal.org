@@ -585,7 +585,10 @@ To jump to a register, use C-x r j followed by the letter of the register.
 (req-package platformio-mode)
 
 ;; edit ino files with arduino mode.
-(add-to-list 'auto-mode-alist '("\\.ino$" . arduino-mode))
+(req-package arduino-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.ino$" . arduino-mode)))
+
 ;; Enable irony for all c++ files, and platformio-mode only
 ;; when needed (platformio.ini present in project root).
 (add-hook 'c++-mode-hook (lambda ()
