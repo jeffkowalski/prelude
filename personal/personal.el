@@ -564,7 +564,14 @@ abc |ghi        <-- point still after white space after calling this function."
   :config
   (add-hook 'irony-mode-hook #'irony-eldoc))
 
-(req-package platformio-mode)
+(req-package platformio-mode
+  :config
+  (projectile-register-project-type 'PlatformIO '("platformio.ini")
+                                    :compile "pio run"
+                                    :src-dir "src"
+                                    :test-dir "test"
+                                    :test "pio test"
+                                    :run "pio run -t upload"))
 
 ;; edit ino files with arduino mode.
 (req-package arduino-mode
