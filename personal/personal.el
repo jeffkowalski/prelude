@@ -241,7 +241,7 @@
 
 (req-package clang-format
   :bind (("C-M-\\" . clang-format-buffer))
-  :config (customize-set-variable 'clang-format-executable "clang-format-3.8"))
+  :config (customize-set-variable 'clang-format-executable "clang-format"))
 
 ;; cperl mode
 

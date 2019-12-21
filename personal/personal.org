@@ -256,7 +256,7 @@ Note my naive mapping removes the final properties (like :right-align) if presen
 #+BEGIN_SRC emacs-lisp
   (req-package clang-format
     :bind (("C-M-\\" . clang-format-buffer))
-    :config (customize-set-variable 'clang-format-executable "clang-format-3.8"))
+    :config (customize-set-variable 'clang-format-executable "clang-format"))
 #+END_SRC
 *** cperl mode
 #+BEGIN_SRC emacs-lisp
