@@ -1340,8 +1340,6 @@ GET header should contain a path in form '/todo/ID'."
   (add-to-list 'rm-excluded-modes " Helm" t)
   (add-to-list 'rm-excluded-modes " company" t)
   (add-to-list 'sml/replacer-regexp-list '("^:DB:workspace" ":WS:")   t)
-  (add-to-list 'sml/replacer-regexp-list '("^:WS:/uplands"  ":UP:")   t)
-  (add-to-list 'sml/replacer-regexp-list '("^:WS:/autodesk" ":ADSK:") t)
   (customize-set-variable 'sml/col-number-format "%03c")
   (customize-set-variable 'sml/use-projectile-p 'before-prefixes))
 
