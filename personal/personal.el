@@ -362,7 +362,7 @@ abc |ghi        <-- point still after white space after calling this function."
    (?f . "~/.config/fish/config.fish")
    (?m . "~/Dropbox/sync-linux/mac_addrs.org")
    (?z . "~/.zshrc")
-   (?s . "~/Dropbox/workspace/sauron/sauron.rb")))
+   (?s . "~/Dropbox/workspace/bots/sauron/sauron.rb")))
 
 ;; ----------------------------------------------------------- [ shell / eshell ]
 
