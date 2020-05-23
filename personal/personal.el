@@ -796,6 +796,15 @@ be global."
     (interactive)
     (org-time-stamp nil t))
 
+  (defun jeff/yank-replace-src-block ()
+    "Yank into src block, replacing contents"
+    (interactive)
+    (org-edit-src-code)
+    (mark-whole-buffer)
+    (delete-region (point) (mark))
+    (yank)
+    (org-edit-src-exit))
+
   (defun org-check-misformatted-subtree ()
     "Check misformatted entries in the current buffer."
     (interactive)
