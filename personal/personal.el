@@ -1723,8 +1723,14 @@ Currently only mini buffer, echo areas, and helm are ignored."
 (defun jeff/organizer ()
   "Show schedule in fullscreen."
   (interactive)
-  (toggle-frame-fullscreen)
-  (run-with-idle-timer 1 nil (lambda () (org-agenda nil "z")))
+  (run-with-idle-timer 1 nil
+                       (lambda () (org-agenda nil "z")
+                         ;; move our window to second desktop (-t 1)
+                         (shell-command (format "wmctrl -t 1 -i -r %s"
+                                                (shell-command-to-string
+                                                 (format "wmctrl -l -x -p | fgrep %d | awk '{ printf \"%%s\", $1; }'" (emacs-pid)))))
+                         (toggle-frame-fullscreen)
+                         ))
   t)
 
 (add-hook 'emacs-startup-hook
