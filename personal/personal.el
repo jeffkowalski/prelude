@@ -204,15 +204,16 @@
 
 ;;(validate-setq disabled-command-function nil)   ; enable all commands
 
-(customize-set-variable 'user-mail-address "jeff.kowalski@gmail.com")
-(customize-set-variable 'auto-save-list-file-prefix nil)
 (customize-set-variable 'auto-save-default nil)
+(customize-set-variable 'auto-save-list-file-prefix nil)
+(customize-set-variable 'bookmark-save-flag nil)
+(customize-set-variable 'browse-url-mailto-function nil)
+(customize-set-variable 'enable-recursive-minibuffers t)
+(customize-set-variable 'help-window-select t)
 (customize-set-variable 'kill-whole-line t)
 (customize-set-variable 'make-backup-files nil)
-(customize-set-variable 'help-window-select t)
-(customize-set-variable 'enable-recursive-minibuffers t)
 (customize-set-variable 'password-cache-expiry 900)
-(customize-set-variable 'browse-url-mailto-function nil)
+(customize-set-variable 'user-mail-address "jeff.kowalski@gmail.com")
 
  ;; hide trailing whitespaces in some programming modes:
  (mapc (lambda (hook)
