@@ -837,7 +837,9 @@ be global."
 
 (req-package ox
   :require org
-  :config (validate-setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
+  :config
+  (validate-setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
+  (customize-set-variable 'org-html-validation-link nil)
 )
 
 ;; org habit

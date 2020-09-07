@@ -853,10 +853,12 @@ To jump to a register, use C-x r j followed by the letter of the register.
 #+END_SRC
 *** ox
 #+BEGIN_SRC emacs-lisp
-  (req-package ox
-    :require org
-    :config (validate-setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
-  )
+(req-package ox
+  :require org
+  :config
+  (validate-setq org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
+  (customize-set-variable 'org-html-validation-link nil)
+)
 #+END_SRC
 *** org habit
 #+BEGIN_SRC emacs-lisp
