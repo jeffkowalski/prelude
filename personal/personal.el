@@ -994,6 +994,8 @@ be global."
                                                      :habit t)
                                               (:name "michelle_bowen"
                                                      :tag "michelle_bowen")
+                                              (:name "@agendas"
+                                                     :tag "@agendas")
                                               (:name "@calls"
                                                      :tag "@calls")
                                               (:name "@errands"
