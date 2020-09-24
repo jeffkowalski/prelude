@@ -13,5 +13,7 @@
     (interactive)
     nil))
 
+(customize-set-variable 'prelude-minimalistic-ui t)
+
 (provide 'preload)
 ;;; preload.el ends here
