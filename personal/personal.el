@@ -50,11 +50,6 @@
                                  :description "Continuous syntax checking for Emacs"
                                  :type github
                                  :pkgname "jeffkowalski/emacs-flymake")
-                          (:name nyan-mode
-                                 :description "Nyan Cat for Emacs! Nyanyanyanyanyanyanyanyanyan!"
-                                 :type github
-                                 :pkgname "jeffkowalski/nyan-mode"
-                                 :features nyan-mode)
                           (:name org-cua-dwim
                                  :description "Org-mode and CUA-mode compatibility layer"
                                  :type github
@@ -1357,15 +1352,6 @@ GET header should contain a path in form '/todo/ID'."
   (customize-set-variable 'sml/col-number-format "%03c")
   (customize-set-variable 'sml/use-projectile-p 'before-prefixes))
 
-;; nyan mode
-
-(req-package nyan-mode
-  :el-get t
-  :config
-  (nyan-mode +1)
-  (customize-set-variable 'nyan-wavy-trail t)
-  (customize-set-variable 'nyan-animate-nyancat t))
-
 ;; projectile mode
 
 (req-package projectile
@@ -1379,7 +1365,6 @@ GET header should contain a path in form '/todo/ID'."
 ;;                     :height 100)
 (req-package powerline
   ;; :disabled t
-  :require nyan-mode
   :config
   (defadvice load-theme (after reset-powerline-cache activate) (pl/reset-cache))
   (defun powerline-jeff-theme ()
@@ -1409,22 +1394,8 @@ GET header should contain a path in form '/todo/ID'."
                                   (powerline-raw "%*" face2 'l)
                                   (powerline-buffer-size face2 'l)
                                   (powerline-buffer-id face2 'l)
-                                  (powerline-raw " " face2)
                                   (funcall separator-left mode-line face1)
-                                  (powerline-narrow face1 'l)
-                                  (powerline-vc face1)))
-                            (rhs (list
-                                  (when (bound-and-true-p nyan-mode)
-                                    (powerline-raw (list (nyan-create)) face1 'r))
-                                  (powerline-raw "%4l" face1 'r)
-                                  (powerline-raw ":" face1)
-                                  (powerline-raw "%3c" face1 'r)
-                                  (funcall separator-right face1 mode-line)
-                                  (powerline-raw " " face2)
-                                  (powerline-raw global-mode-string face2)
-                                  ;;(powerline-raw "%6p" nil 'r)
-                                  ;;(powerline-hud face2 face1)
-                                  ))
+                                  (powerline-raw "%4l : %3c %6p" face1)))
                             (ctr (list
                                   ;;(powerline-raw " " face1)
                                   (funcall separator-left face1 face2)
@@ -1432,15 +1403,23 @@ GET header should contain a path in form '/todo/ID'."
                                     (powerline-raw erc-modified-channels-object face2 'l))
                                   (powerline-major-mode face2 'l)
                                   (powerline-process face2)
-                                  (powerline-raw " :" face2)
-                                  (powerline-minor-modes face2 'l)
+                                  ;;(powerline-raw " :" face2)
+                                  ;;(powerline-minor-modes face2 'l)
                                   (powerline-raw " " face2)
-                                  (funcall separator-right face2 face1))))
+                                  (funcall separator-right face2 face1)))
+                            (rhs (list
+                                  (powerline-narrow face1)
+                                  (powerline-vc face1)
+                                  (powerline-raw " " face1)
+                                  (funcall separator-right face1 mode-line)
+                                  (powerline-raw " " face2)
+                                  (powerline-raw display-time-string face2 'r)
+                                  )))
 
                        (concat (powerline-render lhs)
                                (powerline-fill-center face1 (/ (powerline-width ctr) 2.0))
                                (powerline-render ctr)
-                               ;;(powerline-fill face1 (powerline-width rhs))
+                               (powerline-fill face1 (powerline-width rhs))
                                (powerline-render rhs)))))))
   (powerline-jeff-theme))
 
