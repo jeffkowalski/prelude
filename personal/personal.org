@@ -837,13 +837,13 @@ To jump to a register, use C-x r j followed by the letter of the register.
            (message "All subtrees checked."))))))
 )
 #+END_SRC
-*** org bullets, indent
+*** org superstar, indent
 #+BEGIN_SRC emacs-lisp
-    (req-package org-bullets
-      :diminish " Οβ"
-      :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+    (req-package org-superstar
+      :diminish " Ο*"
+      :init (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
     (req-package org-indent
-      :require org-bullets
+      :require org-superstar
       :diminish " Οι")
 #+END_SRC
 *** ox

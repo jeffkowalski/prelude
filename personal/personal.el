@@ -819,13 +819,13 @@ be global."
            (message "All subtrees checked."))))))
 )
 
-;; org bullets, indent
+;; org superstar, indent
 
-(req-package org-bullets
-  :diminish " Οβ"
-  :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+(req-package org-superstar
+  :diminish " Ο*"
+  :init (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
 (req-package org-indent
-  :require org-bullets
+  :require org-superstar
   :diminish " Οι")
 
 ;; ox
