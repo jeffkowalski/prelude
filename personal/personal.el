@@ -761,11 +761,13 @@ be global."
 
   (org-babel-do-load-languages
    'org-babel-load-languages '((shell . t)
+                               (python . t)
                                (ruby . t)
                                (dot . t)
                                (latex . t)
                                (gnuplot . t)
                                (emacs-lisp . t)))
+  (setq org-babel-python-command "python3")
 
   ;; Let's have pretty source code blocks
   (setq org-edit-src-content-indentation 0
