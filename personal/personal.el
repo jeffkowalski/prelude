@@ -1668,6 +1668,21 @@ GET header should contain a path in form '/todo/ID'."
   (exwm-enable)
 )
 
+;; organizer
+
+(defun jeff/organizer ()
+  "Show schedule in fullscreen on second desktop."
+  (interactive)
+  (run-with-idle-timer 1 nil
+                       (lambda () (org-agenda nil "z")
+                         ;; move our window to second desktop (-t 1)
+                         (shell-command (format "wmctrl -t 1 -i -r %s"
+                                                (shell-command-to-string
+                                                 (format "wmctrl -l -x -p | fgrep %d | awk '{ printf \"%%s\", $1; }'" (emacs-pid)))))
+                         (toggle-frame-fullscreen)
+                         ))
+  t)
+
 ;; finish
 
 (req-package-finish)
