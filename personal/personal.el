@@ -682,6 +682,8 @@ be global."
   (org-src-tab-acts-natively t)
   (org-src-fontify-natively t)
   (org-confirm-babel-evaluate nil)
+  (org-id-track-globally nil)
+  (org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
 
   :config
   (org-babel-do-load-languages
@@ -751,7 +753,6 @@ be global."
 (req-package ox
   :after org
   :custom
-  (org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
   (org-html-validation-link nil)
 )
 
