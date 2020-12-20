@@ -613,7 +613,7 @@ abc |ghi        <-- point still after white space after calling this function."
                    (mode . reftex-mode)))
       ("dired" (or (mode . dired-mode))))))
   :hook
-  (ibuffer-hook . (lambda () (ibuffer-switch-to-saved-filter-groups "default")))
+  (ibuffer . (lambda () (ibuffer-switch-to-saved-filter-groups "default")))
   :config
   (defadvice ibuffer-generate-filter-groups (after reverse-ibuffer-groups () activate)
     "Order ibuffer filter groups so the order is : [Default], [agenda], [Emacs]."
