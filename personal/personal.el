@@ -1232,7 +1232,7 @@ GET header should contain a path in form '/todo/ID'."
 (req-package atomic-chrome
   :custom
   (atomic-chrome-buffer-open-style 'frame)
-  (setq atomic-chrome-default-major-mode 'org-mode)
+  (atomic-chrome-default-major-mode 'org-mode)
   :config
   (atomic-chrome-start-server)
   ;;(define-key atomic-chrome-edit-mode-map (kbd "C-c C-c") nil)
