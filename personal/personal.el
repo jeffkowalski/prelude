@@ -400,7 +400,7 @@ abc |ghi        <-- point still after white space after calling this function."
   (font-lock-maximum-decoration (quote ((dired-mode) (t . t))))
   (dired-omit-files (concat dired-omit-files "\\."))
   :hook
-  (dired-mode . dired-omit-mode)
+  (dired . dired-omit)
   :bind (:map dired-mode-map
              ("<RET>" . dired-single-buffer)
              ("<down-mouse-1>" . dired-single-buffer-mouse)
@@ -446,7 +446,7 @@ abc |ghi        <-- point still after white space after calling this function."
   :config
   (eval-after-load 'company '(push 'company-robe company-backends))
   :hook
-  (ruby-mode . robe-mode)
+  (ruby . robe)
   ;; (add-hook 'robe-mode-hook 'ac-robe-setup)
   ;; (defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate) (rvm-activate-corresponding-ruby))
   )
@@ -488,24 +488,24 @@ abc |ghi        <-- point still after white space after calling this function."
 (req-package irony
   :config
   ;; Use irony's completion functions.
-  (add-hook 'irony-mode-hook
-            (lambda ()
-              (define-key irony-mode-map [remap completion-at-point]
-                'counsel-irony)
-              (define-key irony-mode-map [remap complete-symbol]
-                'counsel-irony)
+  :hook
+  (irony .
+         (lambda ()
+           (define-key irony-mode-map [remap completion-at-point]
+             'counsel-irony)
+           (define-key irony-mode-map [remap complete-symbol]
+             'counsel-irony)
               (irony-cdb-autosetup-compile-options))))
 
 (req-package flycheck-irony
   :after (flycheck irony)
-  :config
-  ;; Setup irony for flycheck.
-  (add-hook 'flycheck-mode-hook 'flycheck-irony-setup))
+  :hook
+  (flycheck . flycheck-irony-setup))
 
 (req-package irony-eldoc
   :after irony
-  :config
-  (add-hook 'irony-mode-hook #'irony-eldoc))
+  :hook
+  (irony . irony-eldoc))
 
 (req-package platformio-mode
   :config
@@ -685,6 +685,8 @@ be global."
   (org-id-track-globally nil)
   (org-id-locations-file "~/Dropbox/workspace/org/.org-id-locations")
 
+  :hook
+  (org . (lambda () (auto-revert-mode 1)))
   :config
   (org-babel-do-load-languages
    'org-babel-load-languages '((shell . t)
@@ -695,7 +697,6 @@ be global."
                                (gnuplot . t)
                                (emacs-lisp . t)))
 
-  (add-hook 'org-mode-hook (lambda () (auto-revert-mode 1)))
   (defun jeff/org-add-ids-to-headlines-in-file ()
     "Add ID properties to all headlines in the current file which do not already have one."
     (interactive)
@@ -744,8 +745,8 @@ be global."
 ;; org superstar, indent
 
 (req-package org-superstar
-  :config
-  (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
+  :hook
+  (org . (lambda () (org-superstar-mode 1))))
 (req-package org-indent)
 
 ;; ox
@@ -804,6 +805,12 @@ be global."
      (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000)
      "........" "----------------"))
 
+  :hook
+  ((org-finalize-agenda .
+    (lambda () (remove-text-properties
+                (point-min) (point-max) '(mouse-face t))))
+   (org-agenda .
+    (lambda () (whitespace-mode -1))))
   :config
   (defun my-org-cmp-tag (a b)
     "Compare the tags of A and B, in reverse order."
@@ -816,11 +823,6 @@ be global."
             ((string-lessp tb ta) +1)
             (t nil))))
 
-  (add-hook 'org-finalize-agenda-hook
-            (lambda () (remove-text-properties
-                        (point-min) (point-max) '(mouse-face t))))
-  (add-hook 'org-agenda-mode-hook
-            (lambda () (whitespace-mode -1)) t)
 
   (defun jeff/org-agenda-edit-headline ()
     "Go to the Org-mode file containing the item at point, then mark headline for overwriting."
@@ -975,13 +977,18 @@ be global."
               (org-entry-get-multivalued-property (point) "Effort"))))
         (unless (equal effort "")
           (org-set-property "Effort" effort)))))
-  (add-hook 'org-clock-in-prepare-hook 'jeff/org-mode-ask-effort))
+  :hook
+  (org-clock-in-prepare . jeff/org-mode-ask-effort))
 
 ;; org capture
 
 (req-package org-capture
   :after (org s)
   :bind (("C-c c" . org-capture))
+  :hook
+  ((org-capture-prepare-finalize . org-id-get-create)
+   (org-capture-prepare-finalize . org-expiry-insert-created)
+   (org-capture-after-finalize . my/save-all-agenda-buffers))
   :config
   (defun adjust-captured-headline (hl)
     "Fixup headlines for amazon orders"
@@ -993,8 +1000,6 @@ be global."
                     )
                 hl)))
 
-  (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create)
-  (add-hook 'org-capture-prepare-finalize-hook 'org-expiry-insert-created)
 
   ;; save all the agenda files after each capture
   (defun my/save-all-agenda-buffers ()
@@ -1006,7 +1011,6 @@ be global."
         (when (member (buffer-file-name)
                       (mapcar 'expand-file-name (org-agenda-files t)))
           (save-buffer)))))
-  (add-hook 'org-capture-after-finalize-hook 'my/save-all-agenda-buffers)
 
   :custom
   (org-capture-templates
@@ -1112,6 +1116,9 @@ be global."
 (req-package org-ehtml
   :el-get t
   :after (org web-server)
+  :hook
+  ((htmlize-before . pre-adjust-agenda-for-html)
+   (htmlize-after . post-adjust-agenda-for-html))
   :custom
   (org-ehtml-allow-agenda t)
   (org-ehtml-everything-editable t)
@@ -1134,7 +1141,6 @@ Adds a link overlay to be intercepted by post-adjust-agenda-for-html."
             (htmlize-make-link-overlay (match-beginning 0) (match-end 0) (concat "todo:" id)))
           ))
         (beginning-of-line 2))))
-  (add-hook 'htmlize-before-hook 'pre-adjust-agenda-for-html)
 
   (defun post-adjust-agenda-for-html nil
     "Adjust agenda buffer after htmlize.
@@ -1165,7 +1171,6 @@ convert to call to javascript function."
     (insert "    <span id=\"message\"></span>")
     (while (re-search-forward "<a href=\"todo:\\(.*\\)\">\\(.*\\)</a>" nil t)
       (replace-match "<a href='' onclick='todo(\"\\1\");'>\\2</a>")))
-  (add-hook 'htmlize-after-hook 'post-adjust-agenda-for-html)
 
   (defun jeff/capture-handler (request)
     "Handle REQUEST objects meant for 'org-capture'.
