@@ -530,6 +530,63 @@ abc |ghi        <-- point still after white space after calling this function."
             (irony-eldoc)
             (platformio-conditionally-enable)))
 
+;; lsp
+;; from https://emacs-lsp.github.io/lsp-mode/page/installation/#use-package
+
+(use-package lsp-mode
+  :init
+  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+  (setq lsp-keymap-prefix "C-c l")
+  :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+;         (XXX-mode . lsp)
+         ;; if you want which-key integration
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
+
+;; optionally
+(use-package lsp-ui :commands lsp-ui-mode)
+;; if you are helm user
+;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
+;; if you are ivy user
+(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+
+;; optionally if you want to use debugger
+;; (use-package dap-mode)
+;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+
+;; optional if you want which-key integration
+(use-package which-key
+    :config
+    (which-key-mode))
+
+
+
+
+;; from https://www.sandeepnambiar.com/setting-up-emacs-for-c++/
+
+
+;;(use-package lsp-mode :commands lsp :ensure t)
+;;(use-package lsp-ui :commands lsp-ui-mode :ensure t)
+;; (use-package company-lsp
+;;   :ensure t
+;;   :commands company-lsp
+;;   :config (push 'company-lsp company-backends)) ;; add company-lsp as a backend
+
+
+
+;; Then we can setup ccls. It uses flymake for its syntax checking. We can disable that to let flycheck do its thing.
+
+
+(use-package ccls
+  :ensure t
+  :config
+  (setq ccls-executable "ccls")
+  (setq lsp-prefer-flymake nil)
+  (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
+  :hook ((c-mode c++-mode objc-mode) .
+         (lambda () (require 'ccls) (lsp))))
+
 ;; tramp
 
 ;; disable version control checks
