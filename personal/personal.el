@@ -978,6 +978,8 @@ be global."
                               :tag "@quicken")
                        (:name "@waiting"
                               :tag "@waiting")
+                       (:name "@work"
+                              :tag "@work")
                        (:name "other" ; "Tasks"
                               :anything t)
                        ))))
