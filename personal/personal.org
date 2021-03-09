@@ -854,6 +854,7 @@ be global."
                           (concat org-directory "sauron.org")
                           (concat org-directory "jeff.org")
                           (concat org-directory "tempo.org")
+                          (concat org-directory "work.org")
                           (concat org-directory "michelle.org")))
   (org-agenda-tags-column -97)
   (org-agenda-block-separator
@@ -971,7 +972,18 @@ be global."
   (org-agenda-custom-commands
    '(
      ("z" "Zen View"
-      ((agenda ""  (
+      (
+       (alltodo "" (
+                     (org-agenda-overriding-header "")
+                     (org-super-agenda-groups
+                      `((:discard (:todo "DONE" :todo "CANCELED" :todo "SKIP"))
+                        (:name "malformed"
+                               :and (:file-path "work.org"
+                                     :not (:priority>= "C")))
+                        (:discard (:anything t))
+                        ))
+                     ))
+       (agenda ""  (
                     (org-agenda-span 3)
                     (org-agenda-start-on-weekday 0)
                     (org-agenda-skip-scheduled-if-deadline-is-shown t)
