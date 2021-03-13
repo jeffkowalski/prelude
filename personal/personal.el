@@ -1056,14 +1056,16 @@ be global."
   :bind (("C-c c" . org-capture))
   :config
   (defun adjust-captured-headline (hl)
-    "Fixup headlines for amazon orders"
-    (downcase (if (string-match "amazon\\.com order of \\(.+?\\)\\(\\.\\.\\.\\)?\\( has shipped!\\)? :" hl)
-                  (let ((item (match-string 1 hl)))
-                    (cond ((string-match ":@quicken:" hl) (concat "order of " item " :amazon_visa:@quicken:"))
-                          ((string-match ":@waiting:" hl) (concat "delivery of " item " :amazon:@waiting:"))
-                          (t hl))
-                    )
-                hl)))
+    "Fixup headlines for amazon orders and tempo work"
+    (downcase (cond ((string-match "amazon\\.com order of \\(.+?\\)\\(\\.\\.\\.\\)?\\( has shipped!\\)? :" hl)
+                     (let ((item (match-string 1 hl)))
+                       (cond ((string-match ":@quicken:" hl) (concat "order of " item " :amazon_visa:@quicken:"))
+                             ((string-match ":@waiting:" hl) (concat "delivery of " item " :amazon:@waiting:"))
+                             (t hl))))
+                    ((string-match "\\(.*\\) - jkowalski@tempoautomation.com - tempo automation inc. mail " hl)
+                     (let ((item (match-string 1 hl)))
+                       (concat item " :@work:")))
+                    (t hl))))
 
   (add-hook 'org-capture-prepare-finalize-hook 'org-id-get-create)
   (add-hook 'org-capture-prepare-finalize-hook 'org-expiry-insert-created)
